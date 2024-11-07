@@ -1,0 +1,38 @@
+.menuItem {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  transition: color 0.1s ease;
+
+  & svg {
+    margin-right: 8px;
+  }
+}
+
+.channelHeader {
+  &:hover {
+    color: gray;
+
+    & svg {
+      color: gray;
+    }
+  }
+}
+
+.channelItem {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: #898989;
+  }
+
+  & svg {
+    margin-right: 8px;
+  }
+}
