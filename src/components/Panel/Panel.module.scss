@@ -16,7 +16,8 @@
 }
 
 .screenShareButton,
-.disconnectButton {
+.disconnectButton,
+.muteButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,6 +45,11 @@
 
 .disconnectButton:hover {
   background-color: #ff5e5e;
+}
+
+.muteButton {
+  // Стили кнопки mute/unmute
+  background-color: #3b82f6; // Синий цвет для отличия
 }
 
 .panel {

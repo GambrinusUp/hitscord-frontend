@@ -1,0 +1,40 @@
+.mainContainer {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: linear-gradient(135deg, #4a90e2, #7b4397);
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.title {
+  font-size: 24px;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 20px;
+
+  button {
+    padding: 8px;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    opacity: 0.85;
+  }
+}
+
+.loginButton {
+  background-color: #1e88e5;
+}
+
+.registerButton {
+  background-color: #29b6f6;
+}

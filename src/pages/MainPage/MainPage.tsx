@@ -1,13 +1,15 @@
-import Chat from '../components/Chat/Chat';
-import MessageMenuItem from '../components/MessageMenuItem/MessageMenuItem';
-import Panel from '../components/Panel/Panel';
-import TextChannels from '../components/TextChannels/TextChannels';
-import VoiceChannels from '../components/VoiceChannels/VoiceChannels';
-import { useMediasoupConnection } from '../hooks/useMediasoupConnection';
-import styles from './MainPage.module.scss';
+import Chat from '../../components/Chat/Chat';
+import MessageMenuItem from '../../components/MessageMenuItem/MessageMenuItem';
+import Panel from '../../components/Panel/Panel';
+import TextChannels from '../../components/TextChannels/TextChannels';
+import VoiceChannels from '../../components/VoiceChannels/VoiceChannels';
+import { useAppSelector } from '../../hooks/redux';
+import { useMediasoupConnection } from '../../hooks/useMediasoupConnection';
+import styles from '../MainPage/MainPage.module.scss';
 
 function MainPage() {
-  const roomName = '11';
+  //const roomName = '11';
+  const { roomName, userName } = useAppSelector((state) => state.userStore);
   const {
     connect,
     disconnect,
@@ -16,7 +18,7 @@ function MainPage() {
     consumers,
     connected,
     users,
-  } = useMediasoupConnection(roomName);
+  } = useMediasoupConnection(roomName, userName);
 
   return (
     <>

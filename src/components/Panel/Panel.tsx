@@ -1,6 +1,7 @@
-import { ScreenShare, StopCircle } from 'lucide-react';
+import { Mic, MicOff, ScreenShare, StopCircle } from 'lucide-react';
 import { useState } from 'react';
 
+import { useAppSelector } from '../../hooks/redux';
 import styles from './Panel.module.scss';
 
 interface PanelProps {
@@ -16,7 +17,11 @@ function Panel({
   stopScreenSharing,
   onDisconnect,
 }: PanelProps) {
+  const { userName } = useAppSelector((state) => state.userStore);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+
+  const toggleMute = () => setIsMuted((value) => !value);
 
   const handleScreenShareClick = () => {
     if (isStreaming) {
@@ -46,6 +51,9 @@ function Panel({
               </>
             )}
           </button>
+          <button className={styles.muteButton} onClick={toggleMute}>
+            {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
+          </button>
           <button className={styles.disconnectButton} onClick={onDisconnect}>
             Отключиться
           </button>
@@ -53,7 +61,7 @@ function Panel({
       )}
       <div className={styles.panel}>
         <div className={styles.userInfo}>
-          <span className={styles.userName}>Пользователь</span>
+          <span className={styles.userName}>{userName}</span>
         </div>
       </div>
     </>

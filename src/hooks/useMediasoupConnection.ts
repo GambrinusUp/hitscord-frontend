@@ -16,7 +16,8 @@ interface UseMediasoupConnection {
 }
 
 export const useMediasoupConnection = (
-  roomName: string
+  roomName: string,
+  userName: string
 ): UseMediasoupConnection => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [device, setDevice] = useState<Device | null>(null);
@@ -115,7 +116,7 @@ export const useMediasoupConnection = (
   };
 
   const joinRoom = (audioTrack: MediaStreamTrack) => {
-    socket?.emit('joinRoom', { roomName }, (data: any) => {
+    socket?.emit('joinRoom', { roomName, userName }, (data: any) => {
       createDevice(audioTrack, data.rtpCapabilities);
     });
   };
