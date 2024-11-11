@@ -9,6 +9,8 @@ interface PanelProps {
   startScreenSharing: () => Promise<void>;
   stopScreenSharing: () => Promise<void>;
   onDisconnect: () => void;
+  toggleMute: () => void;
+  isMuted: boolean;
 }
 
 function Panel({
@@ -16,12 +18,14 @@ function Panel({
   startScreenSharing,
   stopScreenSharing,
   onDisconnect,
+  toggleMute,
+  isMuted,
 }: PanelProps) {
-  const { userName } = useAppSelector((state) => state.userStore);
+  const { user } = useAppSelector((state) => state.userStore);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  //const [isMuted, setIsMuted] = useState(false);
 
-  const toggleMute = () => setIsMuted((value) => !value);
+  //const toggleMute = () => setIsMuted((value) => !value);
 
   const handleScreenShareClick = () => {
     if (isStreaming) {
@@ -61,7 +65,7 @@ function Panel({
       )}
       <div className={styles.panel}>
         <div className={styles.userInfo}>
-          <span className={styles.userName}>{userName}</span>
+          <span className={styles.userName}>{user.fullName}</span>
         </div>
       </div>
     </>

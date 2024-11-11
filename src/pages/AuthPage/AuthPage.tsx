@@ -1,14 +1,18 @@
 //import styles from './AuthPage.module.scss';
 import { Button, Card, Group, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppDispatch } from '../../hooks/redux';
-import { setUserName } from '../../store/user/UserSlice';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
+import { useNotification } from '../../hooks/useNotification';
+import { loginUser } from '../../store/user/UserActionCreators';
 
 function AuthPage() {
+  const { error } = useAppSelector((state) => state.userStore);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { showError } = useNotification();
 
   const form = useForm({
     initialValues: {
@@ -23,11 +27,20 @@ function AuthPage() {
     },
   });
 
-  const handleSubmit = (values: typeof form.values) => {
+  const handleSubmit = async (values: typeof form.values) => {
     console.log('Account Data:', values);
-    dispatch(setUserName(values.email));
-    navigate('/main');
+    const result = await dispatch(loginUser(values));
+    if (result.meta.requestStatus === 'fulfilled') {
+      navigate('/main');
+    }
   };
+
+  useEffect(() => {
+    if (error) {
+      showError(error);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
   return (
     <>

@@ -11,7 +11,7 @@ import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 
 import { useAppDispatch } from '../../hooks/redux';
-import { setUserName } from '../../store/user/UserSlice';
+import { registerUser } from '../../store/user/UserActionCreators';
 
 const RegistrationPage = () => {
   const dispatch = useAppDispatch();
@@ -38,8 +38,9 @@ const RegistrationPage = () => {
 
   const handleSubmit = (values: typeof form.values) => {
     console.log('Account Data:', values);
-    dispatch(setUserName(values.email));
-    navigate('/main');
+    dispatch(registerUser(values));
+    /*dispatch(setUserName(values.email));
+    navigate('/main');*/
   };
 
   return (

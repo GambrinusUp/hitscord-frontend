@@ -13,6 +13,8 @@ interface UseMediasoupConnection {
   consumers: any[];
   connected: boolean;
   users: any[];
+  toggleMute: () => void;
+  isMuted: boolean;
 }
 
 export const useMediasoupConnection = (
@@ -24,11 +26,26 @@ export const useMediasoupConnection = (
   const [consumers, setConsumers] = useState<any[]>([]);
   const [producerTransports, setProducerTransports] = useState<any>(null);
   const videoProducerRef = useRef<any>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioProducerRef = useRef<any>(null);
   const [connected, setConnected] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
 
+  const toggleMute = () => {
+    if (audioProducerRef.current) {
+      if (isMuted) {
+        audioProducerRef.current.resume();
+      } else {
+        audioProducerRef.current.pause();
+      }
+      setIsMuted(!isMuted);
+    }
+  };
+
   useEffect(() => {
-    const newSocket = io('https://192.168.0.100:3000/mediasoup');
+    //const newSocket = io('https://192.168.0.100:3000/mediasoup'); 51.250.111.226:3000
+    const newSocket = io('https://51.250.111.226:3000/mediasoup');
+    //const newSocket = io('https://hitscord-backend.onrender.com/mediasoup');
     setSocket(newSocket);
 
     newSocket.on('connection-success', ({ socketId }: { socketId: string }) => {
@@ -166,7 +183,19 @@ export const useMediasoupConnection = (
           );
         });
 
-        await producerTransport.produce({ track: audioTrack });
+        // Создание и сохранение audioProducer
+        const audioProducer = await producerTransport.produce({
+          track: audioTrack,
+        });
+        audioProducerRef.current = audioProducer;
+
+        // Обработка окончания трека
+        audioProducer.on('trackended', () => {
+          console.log('Audio track ended');
+          audioProducerRef.current = null;
+        });
+
+        //await producerTransport.produce({ track: audioTrack });
       }
     );
   };
@@ -212,6 +241,7 @@ export const useMediasoupConnection = (
       },
       async ({ params }: any) => {
         const consumer = await consumerTransport.consume(params);
+        console.log(consumer);
         setConsumers((prev) => [...prev, consumer]);
         socket.emit('consumer-resume', {
           serverConsumerId: params.serverConsumerId,
@@ -249,5 +279,7 @@ export const useMediasoupConnection = (
     consumers,
     connected,
     users,
+    toggleMute,
+    isMuted,
   };
 };

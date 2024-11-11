@@ -9,7 +9,7 @@ import styles from '../MainPage/MainPage.module.scss';
 
 function MainPage() {
   //const roomName = '11';
-  const { roomName, userName } = useAppSelector((state) => state.userStore);
+  const { roomName, user } = useAppSelector((state) => state.userStore);
   const {
     connect,
     disconnect,
@@ -18,7 +18,9 @@ function MainPage() {
     consumers,
     connected,
     users,
-  } = useMediasoupConnection(roomName, userName);
+    toggleMute,
+    isMuted,
+  } = useMediasoupConnection(roomName, user.fullName);
 
   return (
     <>
@@ -40,6 +42,8 @@ function MainPage() {
               startScreenSharing={startScreenSharing}
               stopScreenSharing={stopScreenSharing}
               onDisconnect={disconnect}
+              toggleMute={toggleMute}
+              isMuted={isMuted}
             />
           </div>
           <div className={styles.chatContainer}>
