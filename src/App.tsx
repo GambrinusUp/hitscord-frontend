@@ -4,7 +4,7 @@ import './App.css';
 
 import { Flex, MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 
 import AuthPage from './pages/AuthPage/AuthPage';
 import LandingPage from './pages/LandingPage/LandingPage';

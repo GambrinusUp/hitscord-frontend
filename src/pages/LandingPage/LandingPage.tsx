@@ -9,7 +9,7 @@ function LandingPage() {
       <Flex gap="md" justify="center" align="center" direction="column">
         <span className={styles.title}>Добро пожаловать в Hitscord!</span>
         <div className={styles.buttonContainer}>
-          <Link to="/auth">
+          <Link to="/main">
             <button className={styles.loginButton}>Войти</button>
           </Link>
           <Link to="/register">

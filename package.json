@@ -3,13 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://GambrinusUp.github.io/hitscord-frontend",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "json-server --watch db.json --port 3001",
-    "start": "concurrently \"npm run server\" \"npm run dev\""
+    "start": "concurrently \"npm run server\" \"npm run dev\"",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "@mantine/core": "^7.13.4",
@@ -41,6 +43,7 @@
     "eslint": "^9.13.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.14",
+    "gh-pages": "6.2.0",
     "globals": "^15.11.0",
     "json-server": "^1.0.0-beta.3",
     "postcss": "^8.4.47",

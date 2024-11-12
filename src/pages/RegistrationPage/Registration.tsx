@@ -8,14 +8,14 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useNavigate } from 'react-router-dom';
 
+//import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../hooks/redux';
 import { registerUser } from '../../store/user/UserActionCreators';
 
 const RegistrationPage = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   const form = useForm({
     initialValues: {

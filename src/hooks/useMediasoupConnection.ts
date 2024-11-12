@@ -17,6 +17,8 @@ interface UseMediasoupConnection {
   isMuted: boolean;
 }
 
+//баги: отключение микрофона, закрытие окна стрима, двойной нажатие по комнате
+
 export const useMediasoupConnection = (
   roomName: string,
   userName: string
