@@ -1,7 +1,7 @@
 import { Divider, Drawer, Stack, Text } from '@mantine/core';
 
-import TextChannels from '../../../../components/TextChannels/TextChannels';
 import VoiceChannels from '../../../../components/VoiceChannels/VoiceChannels';
+import TextChannels from '../../../TextChannels/TextChannels';
 import Panel from '../Panel/Panel';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -15,6 +15,7 @@ interface SideBarMobileProps {
   users: any[];
   toggleMute: () => void;
   isMuted: boolean;
+  isStreaming: boolean;
   onClose: () => void;
   opened: boolean;
 }
@@ -29,6 +30,7 @@ const SideBarMobile = ({
   users,
   toggleMute,
   isMuted,
+  isStreaming,
   onClose,
   opened,
 }: SideBarMobileProps) => {
@@ -68,6 +70,7 @@ const SideBarMobile = ({
             onDisconnect={disconnect}
             toggleMute={toggleMute}
             isMuted={isMuted}
+            isStreaming={isStreaming}
           />
         </Stack>
       </Drawer>

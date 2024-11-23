@@ -15,9 +15,10 @@ interface UseMediasoupConnection {
   users: any[];
   toggleMute: () => void;
   isMuted: boolean;
+  isStreaming: boolean;
 }
 
-//баги: отключение микрофона, закрытие окна стрима, двойной нажатие по комнате
+//баги: закрытие окна стрима, при перерендере (изменить и сохранить изменения в коде и потом открыть страничку) пропадают users
 
 export const useMediasoupConnection = (
   roomName: string,
@@ -32,6 +33,7 @@ export const useMediasoupConnection = (
   const audioProducerRef = useRef<any>(null);
   const [connected, setConnected] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const toggleMute = () => {
     if (audioProducerRef.current) {
@@ -60,21 +62,20 @@ export const useMediasoupConnection = (
   }, []);
 
   const connect = () => {
-    //const newSocket = io('https://192.168.0.115:3000/mediasoup');
-    //setSocket(newSocket);
     if (socket?.connected) {
       setConnected(true);
       getLocalAudioStream();
+      console.log(socket.id);
     }
   };
 
   const disconnect = () => {
-    //socket?.disconnect();
     socket?.emit('leaveRoom');
     setConnected(false);
-    //setSocket(null);
     setDevice(null);
     setConsumers([]);
+    setIsMuted(false);
+    setIsStreaming(false);
     videoProducerRef.current = null;
   };
 
@@ -86,11 +87,6 @@ export const useMediasoupConnection = (
 
   useEffect(() => {
     if (!socket) return;
-
-    /*socket.on('connection-success', ({ socketId }: { socketId: string }) => {
-      console.log('Connected with socketId', socketId);
-      getLocalAudioStream();
-    });*/
 
     socket.on('producerClosed', ({ producerId }) => {
       setConsumers((prev) =>
@@ -113,14 +109,11 @@ export const useMediasoupConnection = (
     });
 
     socket.on('updateUsersList', ({ usersList }) => {
-      //console.log('users: ', usersList);
       setUsers(usersList);
     });
 
     return () => {
-      //socket.off('connection-success');
       socket.off('producerClosed');
-      //
       socket.off('producer-closed');
       socket.off('new-producer');
       socket.off('updateUsersList');
@@ -264,6 +257,7 @@ export const useMediasoupConnection = (
         track: screenTrack,
       });
       videoProducerRef.current.on('trackended', stopScreenSharing);
+      setIsStreaming(true);
     }
   };
 
@@ -272,6 +266,7 @@ export const useMediasoupConnection = (
       await videoProducerRef.current.close();
       socket?.emit('stopProducer', { producerId: videoProducerRef.current.id });
       videoProducerRef.current = null;
+      setIsStreaming(false);
     }
   };
 
@@ -285,5 +280,6 @@ export const useMediasoupConnection = (
     users,
     toggleMute,
     isMuted,
+    isStreaming,
   };
 };

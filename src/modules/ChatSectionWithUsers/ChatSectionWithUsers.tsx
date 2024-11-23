@@ -10,7 +10,13 @@ import {
   SimpleGrid,
   Text,
 } from '@mantine/core';
-import { ArrowLeftFromLine, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import {
+  ArrowLeftFromLine,
+  ChevronLeft,
+  ChevronRight,
+  Video,
+  X,
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { useAppDispatch } from '../../hooks/redux';
@@ -137,6 +143,23 @@ const ChatSectionWithUsers = ({
     }
   };
 
+  const handleUserClick = (socketId: string) => {
+    const isStreaming = userGroups[socketId].producerIds.length > 1;
+
+    if (isStreaming) {
+      const videoConsumer = consumers.find(
+        (consumer) =>
+          consumer.kind === 'video' &&
+          userGroups[socketId].producerIds.includes(consumer.producerId)
+      );
+
+      if (videoConsumer) {
+        const stream = new MediaStream([videoConsumer.track]);
+        handleOpenStream(stream);
+      }
+    }
+  };
+
   return (
     <Box
       style={{
@@ -191,37 +214,49 @@ const ChatSectionWithUsers = ({
             >
               <ChevronLeft size={20} />
             </Button>
-
             <ScrollArea viewportRef={scrollRef} style={{ width: '100%' }}>
               <Flex style={{ minWidth: '100%', gap: '8px', padding: '8px' }}>
-                {Object.entries(userGroups).map(([socketId, { userName }]) => (
-                  <Box
-                    key={socketId}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      flexDirection: 'column',
-                      gap: '8px',
-                      padding: '8px',
-                      borderRadius: '8px',
-                      backgroundColor: '#1A1B1E',
-                      textAlign: 'center',
-                      height: '100px',
-                      width: '100px',
-                    }}
-                  >
-                    <Avatar radius="xl" size="sm">
-                      {userName[0]}
-                    </Avatar>
-                    <Text c="white" size="xs">
-                      {userName}
-                    </Text>
-                  </Box>
-                ))}
+                {Object.entries(userGroups).map(
+                  ([socketId, { userName, producerIds }]) => {
+                    const isStreaming = producerIds.length > 1;
+                    return (
+                      <Box
+                        key={socketId}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          flexDirection: 'column',
+                          gap: '8px',
+                          padding: '8px',
+                          borderRadius: '8px',
+                          backgroundColor: '#1A1B1E',
+                          textAlign: 'center',
+                          height: '100px',
+                          width: '100px',
+                        }}
+                      >
+                        <Avatar radius="xl" size="sm">
+                          {userName[0]}
+                        </Avatar>
+                        <Text c="white" size="xs">
+                          {userName}
+                        </Text>
+                        {isStreaming && (
+                          <Button
+                            size="xs"
+                            variant="outline"
+                            onClick={() => handleUserClick(socketId)}
+                          >
+                            <Video />
+                          </Button>
+                        )}
+                      </Box>
+                    );
+                  }
+                )}
               </Flex>
             </ScrollArea>
-
             <Button
               variant="subtle"
               color="gray"

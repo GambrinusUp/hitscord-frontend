@@ -17,6 +17,5 @@ export const getUserGroups = (users: User[]): Record<string, UserGroup> => {
     acc[user.socketId].producerIds.push(user.producerId);
     return acc;
   }, {} as Record<string, UserGroup>);
-  console.log(usersGroup);
   return usersGroup;
 };

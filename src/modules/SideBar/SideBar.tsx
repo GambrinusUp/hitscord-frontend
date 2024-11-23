@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Divider, Stack, Text } from '@mantine/core';
 
-import TextChannels from '../../components/TextChannels/TextChannels';
 import VoiceChannels from '../../components/VoiceChannels/VoiceChannels';
+import TextChannels from '../TextChannels/TextChannels';
 import Panel from './Components/Panel/Panel';
 
 interface SideBarProps {
@@ -15,6 +15,7 @@ interface SideBarProps {
   users: any[];
   toggleMute: () => void;
   isMuted: boolean;
+  isStreaming: boolean;
   onClose: () => void;
 }
 
@@ -28,6 +29,7 @@ const SideBar = ({
   users,
   toggleMute,
   isMuted,
+  isStreaming,
   onClose,
 }: SideBarProps) => {
   return (
@@ -55,6 +57,7 @@ const SideBar = ({
         onDisconnect={disconnect}
         toggleMute={toggleMute}
         isMuted={isMuted}
+        isStreaming={isStreaming}
       />
     </Stack>
   );

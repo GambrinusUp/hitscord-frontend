@@ -1,8 +1,8 @@
 import { ActionIcon, Divider, Group, Stack, Text } from '@mantine/core';
 import { Mic, MicOff, MonitorUp, MonitorX, PhoneMissed } from 'lucide-react';
-import { useState } from 'react';
 
-import { useAppSelector } from '../../../../hooks/redux';
+import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { setUserStreamView } from '../../../../store/app/AppSettingsSlice';
 
 interface PanelProps {
   isConnected: boolean;
@@ -11,6 +11,7 @@ interface PanelProps {
   onDisconnect: () => void;
   toggleMute: () => void;
   isMuted: boolean;
+  isStreaming: boolean;
 }
 
 const Panel = ({
@@ -20,9 +21,10 @@ const Panel = ({
   onDisconnect,
   toggleMute,
   isMuted,
+  isStreaming,
 }: PanelProps) => {
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.userStore);
-  const [isStreaming, setIsStreaming] = useState(false);
 
   const handleScreenShareClick = () => {
     if (isStreaming) {
@@ -30,7 +32,6 @@ const Panel = ({
     } else {
       startScreenSharing();
     }
-    setIsStreaming((prev) => !prev);
   };
 
   return (
@@ -56,7 +57,10 @@ const Panel = ({
           <ActionIcon
             variant="transparent"
             aria-label="Settings"
-            onClick={onDisconnect}
+            onClick={() => {
+              onDisconnect();
+              dispatch(setUserStreamView(false));
+            }}
             c="#ffffff"
           >
             <PhoneMissed />

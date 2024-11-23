@@ -1,13 +1,17 @@
 import { Avatar, Box, Group, Text } from '@mantine/core';
 
-const Message = ({
+import { formatDateTime } from '../../helpers/formatDateTime';
+
+const MessageItem = ({
   isOwnMessage,
   userName,
   content,
+  time,
 }: {
   isOwnMessage: boolean;
   userName: string;
   content: string;
+  time: string;
 }) => {
   return (
     <Group
@@ -38,9 +42,19 @@ const Message = ({
         >
           {content}
         </Text>
+        <Text
+          style={{
+            marginTop: '4px',
+            fontSize: '12px',
+            color: isOwnMessage ? '#D1D5DB' : '#9CA3AF',
+            alignSelf: isOwnMessage ? 'flex-end' : 'flex-start',
+          }}
+        >
+          {formatDateTime(time)}
+        </Text>
       </Box>
     </Group>
   );
 };
 
-export default Message;
+export default MessageItem;

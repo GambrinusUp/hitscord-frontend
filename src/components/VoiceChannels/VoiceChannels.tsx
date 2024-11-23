@@ -22,6 +22,7 @@ import {
 import { useEffect, useState } from 'react';
 
 import { useAppDispatch } from '../../hooks/redux';
+import { getUserGroups } from '../../modules/ChatSectionWithUsers/utils/getUserGroups';
 import { toggleUserStreamView } from '../../store/app/AppSettingsSlice';
 
 interface VoiceChannelsProps {
@@ -45,13 +46,7 @@ function VoiceChannels({
   const [isModalOpen, setModalOpen] = useState(false);
   const [userVolumes, setUserVolumes] = useState<Record<string, number>>({});
 
-  const userGroups = users.reduce((acc, user) => {
-    if (!acc[user.socketId]) {
-      acc[user.socketId] = { userName: user.userName, producerIds: [] };
-    }
-    acc[user.socketId].producerIds.push(user.producerId);
-    return acc;
-  }, {} as Record<string, { userName: string; producerIds: string[] }>);
+  const userGroups = getUserGroups(users);
 
   useEffect(() => {
     console.log('users: ', users);

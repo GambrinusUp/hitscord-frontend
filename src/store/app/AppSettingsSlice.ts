@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AppSettingsState {
   isUserStreamView: boolean;
@@ -17,6 +17,9 @@ const AppSettingsSlice = createSlice({
     toggleUserStreamView(state) {
       state.isUserStreamView = !state.isUserStreamView;
     },
+    setUserStreamView(state, action: PayloadAction<boolean>) {
+      state.isUserStreamView = action.payload;
+    },
     // toggleDarkMode(state) {
     //   state.isDarkMode = !state.isDarkMode;
     // },
@@ -26,6 +29,7 @@ const AppSettingsSlice = createSlice({
   },
 });
 
-export const { toggleUserStreamView } = AppSettingsSlice.actions;
+export const { toggleUserStreamView, setUserStreamView } =
+  AppSettingsSlice.actions;
 
 export default AppSettingsSlice.reducer;

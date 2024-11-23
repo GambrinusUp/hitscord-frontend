@@ -30,6 +30,7 @@ const initialState: UserState = {
     course: '',
     group: '',
     password: '',
+    isAdmin: false,
   },
   roomName: '11',
   isLoggedIn: false,

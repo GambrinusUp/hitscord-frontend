@@ -1,22 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+import { Message, Server } from '../../utils/types';
+
 interface ServerState {
   servers: {
-    [serverId: string]: {
-      name: string;
-      textChannels: {
-        [channelId: string]: {
-          name: string;
-          messages: {
-            id: string;
-            content: string;
-            userId: string;
-            userName: string;
-            timestamp: string;
-          }[];
-        };
-      };
-    };
+    [serverId: string]: Server;
   };
   currentServerId: string | null;
   currentChannelId: string | null;
@@ -36,6 +24,7 @@ const initialState: ServerState = {
               userId: 'user1',
               userName: 'Alice',
               timestamp: new Date().toISOString(),
+              isOwnMessage: false,
             },
           ],
         },
@@ -48,6 +37,7 @@ const initialState: ServerState = {
               userId: 'user2',
               userName: 'Bob',
               timestamp: new Date().toISOString(),
+              isOwnMessage: false,
             },
           ],
         },
@@ -85,9 +75,38 @@ const serverSlice = createSlice({
       }
     },
 
+    editTextChannel: (
+      state,
+      action: PayloadAction<{
+        serverId: string;
+        channelId: string;
+        name: string;
+      }>
+    ) => {
+      const { serverId, channelId, name } = action.payload;
+      const server = state.servers[serverId];
+      if (server) {
+        server.textChannels[channelId].name = name;
+      }
+    },
+
+    deleteTextChannel: (
+      state,
+      action: PayloadAction<{
+        serverId: string;
+        channelId: string;
+      }>
+    ) => {
+      const { serverId, channelId } = action.payload;
+      const server = state.servers[serverId];
+      if (server) {
+        delete server.textChannels[channelId];
+      }
+    },
+
     setCurrentServer: (state, action: PayloadAction<string>) => {
       state.currentServerId = action.payload;
-      state.currentChannelId = null;
+      state.currentChannelId = 'channel1';
     },
 
     setCurrentChannel: (state, action: PayloadAction<string>) => {
@@ -99,13 +118,7 @@ const serverSlice = createSlice({
       action: PayloadAction<{
         serverId: string;
         channelId: string;
-        message: {
-          id: string;
-          content: string;
-          userId: string;
-          userName: string;
-          timestamp: string;
-        };
+        message: Message;
       }>
     ) => {
       const { serverId, channelId, message } = action.payload;
@@ -120,9 +133,11 @@ const serverSlice = createSlice({
 export const {
   addServer,
   addTextChannel,
+  editTextChannel,
   setCurrentServer,
   setCurrentChannel,
   addMessage,
+  deleteTextChannel,
 } = serverSlice.actions;
 
 export default serverSlice.reducer;

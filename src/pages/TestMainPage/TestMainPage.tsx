@@ -24,6 +24,7 @@ const TestMainPage = () => {
     users,
     toggleMute,
     isMuted,
+    isStreaming,
   } = useMediasoupConnection(roomName, user.fullName);
   const [sidebarOpened, { open, close }] = useDisclosure(false);
   const [
@@ -44,6 +45,7 @@ const TestMainPage = () => {
         users={users}
         toggleMute={toggleMute}
         isMuted={isMuted}
+        isStreaming={isStreaming}
         onClose={close}
       />
       {!isUserStreamView ? (
@@ -63,6 +65,7 @@ const TestMainPage = () => {
         users={users}
         toggleMute={toggleMute}
         isMuted={isMuted}
+        isStreaming={isStreaming}
         onClose={close}
         opened={sidebarOpened}
       />
