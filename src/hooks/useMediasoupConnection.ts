@@ -45,9 +45,9 @@ export const useMediasoupConnection = (
   };
 
   useEffect(() => {
-    //const newSocket = io('https://192.168.0.100:3000/mediasoup'); 51.250.111.226:3000
-    const newSocket = io('https://51.250.111.226:3000/mediasoup');
-    //const newSocket = io('https://hitscord-backend.onrender.com/mediasoup');
+    //const newSocket = io('https://hitscord-backend.ru/mediasoup');
+    //const newSocket = io('https://51.250.111.226:3000/mediasoup');
+    const newSocket = io('https://192.168.0.101:3000/mediasoup');
     setSocket(newSocket);
 
     newSocket.on('connection-success', ({ socketId }: { socketId: string }) => {
@@ -62,8 +62,10 @@ export const useMediasoupConnection = (
   const connect = () => {
     //const newSocket = io('https://192.168.0.115:3000/mediasoup');
     //setSocket(newSocket);
-    setConnected(true);
-    getLocalAudioStream();
+    if (socket?.connected) {
+      setConnected(true);
+      getLocalAudioStream();
+    }
   };
 
   const disconnect = () => {

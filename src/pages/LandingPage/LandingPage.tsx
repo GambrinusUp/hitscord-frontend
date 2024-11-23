@@ -1,34 +1,33 @@
-import { Flex } from '@mantine/core';
+import { Button, Flex, Group, Title } from '@mantine/core';
 import { Link } from 'react-router-dom';
-
-import styles from './LandingPage.module.scss';
 
 function LandingPage() {
   return (
     <>
-      <Flex gap="md" justify="center" align="center" direction="column">
-        <span className={styles.title}>Добро пожаловать в Hitscord!</span>
-        <div className={styles.buttonContainer}>
-          <Link to="/main">
-            <button className={styles.loginButton}>Войти</button>
+      <Flex
+        w="100vw"
+        h="100vh"
+        gap="md"
+        justify="center"
+        align="center"
+        direction="column"
+        bg="linear-gradient(135deg, #4a90e2, #7b4397)"
+      >
+        <Title order={3}>Добро пожаловать в Hitscord!</Title>
+        <Group gap="20px">
+          <Link to="/login">
+            <Button variant="filled" radius="md">
+              Войти
+            </Button>
           </Link>
-          <Link to="/register">
+          {/*<Link to="/register">
             <button className={styles.registerButton}>
               Зарегистрироваться
             </button>
-          </Link>
-        </div>
+          </Link>*/}
+        </Group>
       </Flex>
     </>
-    /*<div className={styles.mainContainer}>
-      <span className={styles.title}>Добро пожаловать в Hitscord!</span>
-      <div className={styles.buttonContainer}>
-        <Link to="/login">
-          <button className={styles.loginButton}>Войти</button>
-        </Link>
-        <button className={styles.registerButton}>Зарегистрироваться</button>
-      </div>
-    </div>*/
   );
 }
 

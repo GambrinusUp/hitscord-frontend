@@ -26,7 +26,7 @@ const initialState: UserState = {
   user: {
     id: '',
     email: '',
-    fullName: '',
+    fullName: 'Anonymous',
     course: '',
     group: '',
     password: '',
@@ -40,7 +40,11 @@ const initialState: UserState = {
 export const UserSlice = createSlice({
   name: 'user',
   initialState,
-  reducers: {},
+  reducers: {
+    setUserName(state, action: PayloadAction<string>) {
+      state.user.fullName = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(registerUser.pending, (state) => {
@@ -66,6 +70,6 @@ export const UserSlice = createSlice({
   },
 });
 
-//export const {  } = UserSlice.actions;
+export const { setUserName } = UserSlice.actions;
 
 export default UserSlice.reducer;

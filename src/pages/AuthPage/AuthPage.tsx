@@ -64,7 +64,6 @@ function AuthPage() {
               {...form.getInputProps('email')}
               required
             />
-
             <TextInput
               label="Пароль"
               placeholder="Введите пароль"
