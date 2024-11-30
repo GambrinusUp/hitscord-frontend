@@ -25,6 +25,7 @@ const TestMainPage = () => {
     toggleMute,
     isMuted,
     isStreaming,
+    activeUsers,
   } = useMediasoupConnection(roomName, user.fullName);
   const [sidebarOpened, { open, close }] = useDisclosure(false);
   const [
@@ -47,13 +48,13 @@ const TestMainPage = () => {
         isMuted={isMuted}
         isStreaming={isStreaming}
         onClose={close}
+        activeUsers={activeUsers}
       />
       {!isUserStreamView ? (
         <ChatSection openSidebar={open} openDetailsPanel={openDetailsPanel} />
       ) : (
         <ChatSectionWithUsers users={users} consumers={consumers} />
       )}
-
       <DetailsPanel />
       <SideBarMobile
         connect={connect}
@@ -68,6 +69,7 @@ const TestMainPage = () => {
         isStreaming={isStreaming}
         onClose={close}
         opened={sidebarOpened}
+        activeUsers={activeUsers}
       />
       <DetailsPanelMobile
         onClose={closeDetailsPanel}

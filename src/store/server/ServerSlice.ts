@@ -99,6 +99,9 @@ const serverSlice = createSlice({
     ) => {
       const { serverId, channelId } = action.payload;
       const server = state.servers[serverId];
+      if (state.currentChannelId === channelId) {
+        state.currentChannelId = 'channel1';
+      }
       if (server) {
         delete server.textChannels[channelId];
       }

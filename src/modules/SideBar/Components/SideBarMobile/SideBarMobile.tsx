@@ -1,6 +1,7 @@
 import { Divider, Drawer, Stack, Text } from '@mantine/core';
 
 import VoiceChannels from '../../../../components/VoiceChannels/VoiceChannels';
+import { ActiveUser } from '../../../../utils/types';
 import TextChannels from '../../../TextChannels/TextChannels';
 import Panel from '../Panel/Panel';
 
@@ -18,6 +19,7 @@ interface SideBarMobileProps {
   isStreaming: boolean;
   onClose: () => void;
   opened: boolean;
+  activeUsers: ActiveUser[];
 }
 
 const SideBarMobile = ({
@@ -33,6 +35,7 @@ const SideBarMobile = ({
   isStreaming,
   onClose,
   opened,
+  activeUsers,
 }: SideBarMobileProps) => {
   return (
     <>
@@ -62,6 +65,7 @@ const SideBarMobile = ({
             connected={connected}
             consumers={consumers}
             users={users}
+            activeUsers={activeUsers}
           />
           <Panel
             isConnected={connected}

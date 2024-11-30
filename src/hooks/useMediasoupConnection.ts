@@ -5,6 +5,8 @@ import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+import { ActiveUser } from '../utils/types';
+
 interface UseMediasoupConnection {
   connect: () => void;
   disconnect: () => void;
@@ -16,6 +18,7 @@ interface UseMediasoupConnection {
   toggleMute: () => void;
   isMuted: boolean;
   isStreaming: boolean;
+  activeUsers: { producerId: string; volume: number }[];
 }
 
 //баги: закрытие окна стрима, при перерендере (изменить и сохранить изменения в коде и потом открыть страничку) пропадают users
@@ -34,6 +37,7 @@ export const useMediasoupConnection = (
   const [connected, setConnected] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
 
   const toggleMute = () => {
     if (audioProducerRef.current) {
@@ -86,7 +90,7 @@ export const useMediasoupConnection = (
   }, [device]);
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) return; //?? возможно нарушает порядок хуков
 
     socket.on('producerClosed', ({ producerId }) => {
       setConsumers((prev) =>
@@ -112,17 +116,30 @@ export const useMediasoupConnection = (
       setUsers(usersList);
     });
 
+    socket.on('active-speakers', ({ activeSpeakers }) => {
+      //console.log('Active speakers:', activeSpeakers);
+      setActiveUsers(activeSpeakers);
+      // Обновите UI, чтобы показать, кто говорит
+    });
+
     return () => {
       socket.off('producerClosed');
       socket.off('producer-closed');
       socket.off('new-producer');
       socket.off('updateUsersList');
+      socket.off('audio-level-updated');
     };
   }, [socket, device]);
 
   const getLocalAudioStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          noiseSuppression: true,
+          echoCancellation: false,
+          autoGainControl: false,
+        },
+      });
       joinRoom(stream.getAudioTracks()[0]);
     } catch (error) {
       console.error('Error getting local audio stream:', error);
@@ -174,6 +191,7 @@ export const useMediasoupConnection = (
               rtpParameters: parameters.rtpParameters,
             },
             ({ id }: { id: string }) => {
+              console.log(id);
               callback({ id });
               getProducers();
             }
@@ -191,8 +209,6 @@ export const useMediasoupConnection = (
           console.log('Audio track ended');
           audioProducerRef.current = null;
         });
-
-        //await producerTransport.produce({ track: audioTrack });
       }
     );
   };
@@ -281,5 +297,6 @@ export const useMediasoupConnection = (
     toggleMute,
     isMuted,
     isStreaming,
+    activeUsers,
   };
 };

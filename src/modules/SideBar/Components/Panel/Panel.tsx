@@ -40,23 +40,16 @@ const Panel = ({
         <Group gap="xs" justify="space-between">
           <ActionIcon
             variant="transparent"
-            aria-label="Settings"
             onClick={handleScreenShareClick}
             c="#ffffff"
           >
             {isStreaming ? <MonitorX /> : <MonitorUp />}
           </ActionIcon>
-          <ActionIcon
-            variant="transparent"
-            aria-label="Settings"
-            onClick={toggleMute}
-            c="#ffffff"
-          >
+          <ActionIcon variant="transparent" onClick={toggleMute} c="#ffffff">
             {isMuted ? <MicOff /> : <Mic />}
           </ActionIcon>
           <ActionIcon
             variant="transparent"
-            aria-label="Settings"
             onClick={() => {
               onDisconnect();
               dispatch(setUserStreamView(false));

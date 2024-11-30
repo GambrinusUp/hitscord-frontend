@@ -2,6 +2,7 @@
 import { Divider, Stack, Text } from '@mantine/core';
 
 import VoiceChannels from '../../components/VoiceChannels/VoiceChannels';
+import { ActiveUser } from '../../utils/types';
 import TextChannels from '../TextChannels/TextChannels';
 import Panel from './Components/Panel/Panel';
 
@@ -17,6 +18,7 @@ interface SideBarProps {
   isMuted: boolean;
   isStreaming: boolean;
   onClose: () => void;
+  activeUsers: ActiveUser[];
 }
 
 const SideBar = ({
@@ -31,6 +33,7 @@ const SideBar = ({
   isMuted,
   isStreaming,
   onClose,
+  activeUsers,
 }: SideBarProps) => {
   return (
     <Stack
@@ -49,6 +52,7 @@ const SideBar = ({
         connected={connected}
         consumers={consumers}
         users={users}
+        activeUsers={activeUsers}
       />
       <Panel
         isConnected={connected}

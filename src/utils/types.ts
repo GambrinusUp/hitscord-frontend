@@ -37,3 +37,8 @@ export interface EditModal {
   initialData: string;
   channelId: string;
 }
+
+export interface ActiveUser {
+  producerId: string;
+  volume: number;
+}

@@ -24,12 +24,14 @@ import { useEffect, useState } from 'react';
 import { useAppDispatch } from '../../hooks/redux';
 import { getUserGroups } from '../../modules/ChatSectionWithUsers/utils/getUserGroups';
 import { toggleUserStreamView } from '../../store/app/AppSettingsSlice';
+import { ActiveUser } from '../../utils/types';
 
 interface VoiceChannelsProps {
   connect: () => void;
   connected: boolean;
   consumers: any[];
   users: { socketId: string; producerId: string; userName: string }[];
+  activeUsers: ActiveUser[];
 }
 
 function VoiceChannels({
@@ -37,6 +39,7 @@ function VoiceChannels({
   connected,
   consumers,
   users,
+  activeUsers,
 }: VoiceChannelsProps) {
   const dispatch = useAppDispatch();
   const [opened, { toggle }] = useDisclosure(true);
@@ -74,8 +77,11 @@ function VoiceChannels({
           userGroups[socketId].producerIds.includes(consumer.producerId)
       );
 
+      console.log(videoConsumer);
+
       if (videoConsumer) {
         const stream = new MediaStream([videoConsumer.track]);
+        console.log(stream);
         setSelectedStream(stream);
         setModalOpen(true);
       }
@@ -142,46 +148,59 @@ function VoiceChannels({
             Голосовой канал 1
           </Button>
           <Stack gap="xs">
-            {Object.entries(userGroups).map(([socketId, { producerIds }]) => (
-              <Menu key={socketId} shadow="md" width={200}>
-                <Menu.Target>
-                  <Group style={{ cursor: 'pointer' }} wrap="nowrap">
-                    <User />
-                    <Text truncate>{socketId}</Text>
-                    {producerIds.length > 1 && (
-                      <Video color="#43b581" style={{ marginLeft: 'auto' }} />
-                    )}
-                  </Group>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Item>
-                    <Slider
-                      label="Громкость"
-                      value={
-                        (userVolumes[
-                          producerIds.find((id) =>
-                            consumers.some(
-                              (c) => c.producerId === id && c.kind === 'audio'
-                            )
-                          ) || ''
-                        ] || 1) * 100
-                      }
-                      onChange={(value) => handleVolumeChange(socketId, value)}
-                      min={0}
-                      max={100}
-                    />
-                  </Menu.Item>
-                  {producerIds.length > 1 && (
-                    <Menu.Item
-                      leftSection={<Video />}
-                      onClick={() => handleUserClick(socketId)}
-                    >
-                      Открыть стрим
+            {Object.entries(userGroups).map(([socketId, { producerIds }]) => {
+              const isSpeaking = producerIds.some((id) =>
+                activeUsers.some((user) => user.producerId === id)
+              );
+
+              return (
+                <Menu
+                  key={socketId}
+                  shadow="md"
+                  width={200}
+                  closeOnItemClick={false}
+                >
+                  <Menu.Target>
+                    <Group style={{ cursor: 'pointer' }} wrap="nowrap">
+                      <User color={isSpeaking ? '#43b581' : undefined} />
+                      <Text truncate>{socketId}</Text>
+                      {producerIds.length > 1 && (
+                        <Video color="#43b581" style={{ marginLeft: 'auto' }} />
+                      )}
+                    </Group>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item leftSection={<Volume2 />}>
+                      <Slider
+                        label="Громкость"
+                        value={
+                          (userVolumes[
+                            producerIds.find((id) =>
+                              consumers.some(
+                                (c) => c.producerId === id && c.kind === 'audio'
+                              )
+                            ) || ''
+                          ] || 1) * 100
+                        }
+                        onChange={(value) =>
+                          handleVolumeChange(socketId, value)
+                        }
+                        min={1}
+                        max={100}
+                      />
                     </Menu.Item>
-                  )}
-                </Menu.Dropdown>
-              </Menu>
-            ))}
+                    {producerIds.length > 1 && (
+                      <Menu.Item
+                        leftSection={<Video />}
+                        onClick={() => handleUserClick(socketId)}
+                      >
+                        Открыть стрим
+                      </Menu.Item>
+                    )}
+                  </Menu.Dropdown>
+                </Menu>
+              );
+            })}
           </Stack>
         </Collapse>
         {consumers.map(
