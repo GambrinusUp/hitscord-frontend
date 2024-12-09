@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ActionIcon,
   Button,
   Collapse,
   Group,
   Menu,
-  Modal,
+  //Modal,
   Slider,
   Stack,
   Text,
@@ -19,55 +18,41 @@ import {
   Video,
   Volume2,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { useAppDispatch } from '../../hooks/redux';
-import { getUserGroups } from '../../modules/ChatSectionWithUsers/utils/getUserGroups';
-import { toggleUserStreamView } from '../../store/app/AppSettingsSlice';
-import { ActiveUser } from '../../utils/types';
+import { useMediaContext } from '../../context/MediaContext/useMediaContext';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
+import { useConnect } from '../../hooks/useConnect';
+import {
+  setUserStreamView,
+  toggleUserStreamView,
+} from '../../store/app/AppSettingsSlice';
+import { getUserGroups } from '../ChatSectionWithUsers/utils/getUserGroups';
+import { useActiveUsers } from './VoiceChannels.hooks';
 
-interface VoiceChannelsProps {
-  connect: () => void;
-  connected: boolean;
-  consumers: any[];
-  users: { socketId: string; producerId: string; userName: string }[];
-  activeUsers: ActiveUser[];
-}
-
-function VoiceChannels({
-  connect,
-  connected,
-  consumers,
-  users,
-  activeUsers,
-}: VoiceChannelsProps) {
+function VoiceChannels() {
+  const connect = useConnect();
+  const { isConnected, consumers, users, setSelectedUserId } =
+    useMediaContext();
+  const { user, roomName } = useAppSelector((state) => state.userStore);
   const dispatch = useAppDispatch();
   const [opened, { toggle }] = useDisclosure(true);
-  const [selectedStream, setSelectedStream] = useState<MediaStream | null>(
-    null
-  );
-  const [isModalOpen, setModalOpen] = useState(false);
+  //const [selectedStream, setSelectedStream] = useState<MediaStream | null>(null);
+  //const [isModalOpen, setModalOpen] = useState(false);
   const [userVolumes, setUserVolumes] = useState<Record<string, number>>({});
-
+  const activeUsers = useActiveUsers();
   const userGroups = getUserGroups(users);
-
-  useEffect(() => {
-    console.log('users: ', users);
-  }, [users]);
-
-  useEffect(() => {
-    console.log('consumers: ', consumers);
-  }, [consumers]);
+  const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
 
   const handleConnect = () => {
-    if (!connected) {
-      connect();
+    if (!isConnected) {
+      connect(roomName, user.fullName);
     } else {
       dispatch(toggleUserStreamView());
     }
   };
 
-  const handleUserClick = (socketId: string) => {
+  /*const handleUserClick = (socketId: string) => {
     const isStreaming = userGroups[socketId].producerIds.length > 1;
 
     if (isStreaming) {
@@ -86,7 +71,7 @@ function VoiceChannels({
         setModalOpen(true);
       }
     }
-  };
+  };*/
 
   const handleVolumeChange = (socketId: string, value: number) => {
     const audioProducerId = userGroups[socketId].producerIds.find(
@@ -105,6 +90,41 @@ function VoiceChannels({
       }));
     }
   };
+
+  useEffect(() => {
+    consumers.forEach((consumer) => {
+      if (consumer.kind === 'audio') {
+        const { producerId, track } = consumer;
+
+        if (!audioRefs.current.has(producerId)) {
+          const audio = document.createElement('audio');
+          audio.srcObject = new MediaStream([track]);
+          audio.autoplay = true;
+          audio.volume = userVolumes[producerId] ?? 1;
+          audioRefs.current.set(producerId, audio);
+          document.body.appendChild(audio);
+        }
+      }
+    });
+
+    const activeProducers = consumers.map((c) => c.producerId);
+    audioRefs.current.forEach((audio, producerId) => {
+      if (!activeProducers.includes(producerId)) {
+        audio.pause();
+        audio.remove();
+        audioRefs.current.delete(producerId);
+      }
+    });
+
+    return () => {
+      audioRefs.current.forEach((audio) => {
+        audio.pause();
+        audio.remove();
+      });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      audioRefs.current.clear();
+    };
+  }, [consumers, userVolumes]);
 
   return (
     <>
@@ -158,7 +178,7 @@ function VoiceChannels({
                   key={socketId}
                   shadow="md"
                   width={200}
-                  closeOnItemClick={false}
+                  closeOnItemClick={true}
                 >
                   <Menu.Target>
                     <Group style={{ cursor: 'pointer' }} wrap="nowrap">
@@ -192,7 +212,10 @@ function VoiceChannels({
                     {producerIds.length > 1 && (
                       <Menu.Item
                         leftSection={<Video />}
-                        onClick={() => handleUserClick(socketId)}
+                        onClick={() => {
+                          setSelectedUserId(socketId);
+                          dispatch(setUserStreamView(true));
+                        }}
                       >
                         Открыть стрим
                       </Menu.Item>
@@ -203,23 +226,8 @@ function VoiceChannels({
             })}
           </Stack>
         </Collapse>
-        {consumers.map(
-          (consumer, index) =>
-            consumer.kind === 'audio' && (
-              <audio
-                key={index}
-                autoPlay
-                ref={(el) => {
-                  if (el) {
-                    el.srcObject = new MediaStream([consumer.track]);
-                    el.volume = userVolumes[consumer.producerId] ?? 1;
-                  }
-                }}
-              />
-            )
-        )}
       </Stack>
-      <Modal
+      {/*<Modal
         opened={isModalOpen}
         onClose={() => {
           setModalOpen(false);
@@ -239,7 +247,7 @@ function VoiceChannels({
             }}
           />
         )}
-      </Modal>
+      </Modal>*/}
     </>
   );
 }

@@ -1,134 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  ActionIcon,
-  Avatar,
-  Box,
-  Button,
-  Flex,
-  Group,
-  ScrollArea,
-  SimpleGrid,
-  Text,
-} from '@mantine/core';
-import {
-  ArrowLeftFromLine,
-  ChevronLeft,
-  ChevronRight,
-  Video,
-  X,
-} from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Avatar, Box, Button, Flex, ScrollArea, Text } from '@mantine/core';
+import { ChevronLeft, ChevronRight, Video, X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
-import { useAppDispatch } from '../../hooks/redux';
-import { toggleUserStreamView } from '../../store/app/AppSettingsSlice';
+import socket from '../../api/socket';
+import { useMediaContext } from '../../context/MediaContext/useMediaContext';
+import UsersCards from './components/UsersCards/UsersCards';
 import { getUserGroups } from './utils/getUserGroups';
 
-interface User {
-  socketId: string;
-  producerId: string;
-  userName: string;
-}
-
-interface UserStreamProps {
-  users: User[];
-  consumers: any[];
-  onOpenStream: (stream: MediaStream) => void;
-}
-
-const UserStream = ({ users, consumers, onOpenStream }: UserStreamProps) => {
-  const dispatch = useAppDispatch();
+const ChatSectionWithUsers = () => {
+  const { consumers, users, selectedUserId, setSelectedUserId } =
+    useMediaContext();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const selectedStreamRef = useRef<MediaStream | null>(null);
+  //const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const userGroups = getUserGroups(users);
-
-  const handleUserClick = (socketId: string) => {
-    const isStreaming = userGroups[socketId].producerIds.length > 1;
-
-    if (isStreaming) {
-      const videoConsumer = consumers.find(
-        (consumer) =>
-          consumer.kind === 'video' &&
-          userGroups[socketId].producerIds.includes(consumer.producerId)
-      );
-
-      if (videoConsumer) {
-        const stream = new MediaStream([videoConsumer.track]);
-        onOpenStream(stream);
-      }
-    }
-  };
-
-  return (
-    <ScrollArea style={{ flex: 1, maxHeight: '100%' }}>
-      <Group justify="flex-end">
-        <ActionIcon
-          variant="transparent"
-          onClick={() => dispatch(toggleUserStreamView())}
-        >
-          <ArrowLeftFromLine />
-        </ActionIcon>
-      </Group>
-      <SimpleGrid cols={{ base: 2, lg: 3 }} spacing="sm">
-        {Object.entries(userGroups).map(
-          ([socketId, { userName, producerIds }]) => {
-            const isStreaming = producerIds.length > 1;
-            return (
-              <Box
-                key={socketId}
-                style={{
-                  padding: '16px',
-                  borderRadius: '12px',
-                  backgroundColor: '#1A1B1E',
-                  textAlign: 'center',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <Avatar radius="xl" size="lg" color="blue">
-                  {userName[0]}
-                </Avatar>
-                <Text c="white">{userName}</Text>
-                {isStreaming && (
-                  <Button
-                    size="xs"
-                    variant="outline"
-                    onClick={() => handleUserClick(socketId)}
-                  >
-                    Открыть стрим
-                  </Button>
-                )}
-              </Box>
-            );
-          }
-        )}
-      </SimpleGrid>
-    </ScrollArea>
-  );
-};
-
-interface ChatSectionWithUsersProps {
-  users: User[];
-  consumers: any[];
-}
-
-const ChatSectionWithUsers = ({
-  users,
-  consumers,
-}: ChatSectionWithUsersProps) => {
-  const [selectedStream, setSelectedStream] = useState<MediaStream | null>(
-    null
-  );
-
-  const handleOpenStream = (stream: MediaStream) => {
-    setSelectedStream(stream);
-  };
-
-  const handleCloseStream = () => {
-    setSelectedStream(null);
-  };
-
-  const userGroups = getUserGroups(users);
-
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollLeft = () => {
@@ -144,21 +29,72 @@ const ChatSectionWithUsers = ({
   };
 
   const handleUserClick = (socketId: string) => {
-    const isStreaming = userGroups[socketId].producerIds.length > 1;
+    setSelectedUserId(socketId);
+  };
 
-    if (isStreaming) {
+  const handleCloseStream = () => {
+    setSelectedUserId(null);
+    if (videoRef.current) {
+      selectedStreamRef.current = null;
+      videoRef.current.srcObject = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const onProducerClosed = ({ producerId }: { producerId: string }) => {
+      const isStreamSelected = consumers.some(
+        (consumer) =>
+          consumer.kind === 'video' &&
+          consumer.producerId === producerId &&
+          selectedUserId &&
+          userGroups[selectedUserId].producerIds.includes(producerId)
+      );
+
+      if (isStreamSelected) {
+        handleCloseStream();
+      }
+    };
+
+    socket.on('producerClosed', onProducerClosed);
+
+    return () => {
+      socket.off('producerClosed', onProducerClosed);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [consumers, selectedUserId, userGroups, users]);
+
+  useEffect(() => {
+    console.log(selectedUserId);
+    if (selectedUserId) {
       const videoConsumer = consumers.find(
         (consumer) =>
           consumer.kind === 'video' &&
-          userGroups[socketId].producerIds.includes(consumer.producerId)
+          userGroups[selectedUserId]?.producerIds.includes(consumer.producerId)
       );
-
+      console.log(consumers);
       if (videoConsumer) {
-        const stream = new MediaStream([videoConsumer.track]);
-        handleOpenStream(stream);
+        const newTrack = videoConsumer.track;
+        if (
+          !selectedStreamRef.current ||
+          selectedStreamRef.current.getVideoTracks()[0]?.id !== newTrack.id
+        ) {
+          const newStream = new MediaStream([newTrack]);
+          selectedStreamRef.current = newStream;
+
+          if (videoRef.current) {
+            videoRef.current.srcObject = newStream;
+            videoRef.current
+              .play()
+              .catch((err) =>
+                console.error('Ошибка воспроизведения видео:', err)
+              );
+          }
+        }
       }
     }
-  };
+  }, [selectedUserId, consumers, userGroups]);
 
   return (
     <Box
@@ -170,17 +106,16 @@ const ChatSectionWithUsers = ({
         backgroundColor: '#2C2E33',
       }}
     >
-      {selectedStream ? (
+      {selectedUserId ? (
         <Box style={{ position: 'relative', flex: 1 }}>
           <video
+            ref={videoRef}
             autoPlay
+            playsInline
             style={{
               width: '100%',
               height: 'calc(100% - 80px)',
               borderRadius: '8px',
-            }}
-            ref={(el) => {
-              if (el) el.srcObject = selectedStream;
             }}
           />
           <Button
@@ -268,10 +203,10 @@ const ChatSectionWithUsers = ({
           </Box>
         </Box>
       ) : (
-        <UserStream
+        <UsersCards
           users={users}
-          consumers={consumers}
-          onOpenStream={handleOpenStream}
+          //consumers={consumers}
+          onOpenStream={handleUserClick}
         />
       )}
     </Box>

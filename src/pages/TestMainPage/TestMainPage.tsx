@@ -2,7 +2,6 @@ import { Box } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
 import { useAppSelector } from '../../hooks/redux';
-import { useMediasoupConnection } from '../../hooks/useMediasoupConnection';
 import ChatSection from '../../modules/ChatSection/ChatSection';
 import ChatSectionWithUsers from '../../modules/ChatSectionWithUsers/ChatSectionWithUsers';
 import DetailsPanel from '../../modules/DetailsPanel/DetailsPanel';
@@ -13,20 +12,6 @@ import SideBar from '../../modules/SideBar/SideBar';
 
 const TestMainPage = () => {
   const { isUserStreamView } = useAppSelector((state) => state.appStore);
-  const { roomName, user } = useAppSelector((state) => state.userStore);
-  const {
-    connect,
-    disconnect,
-    startScreenSharing,
-    stopScreenSharing,
-    consumers,
-    connected,
-    users,
-    toggleMute,
-    isMuted,
-    isStreaming,
-    activeUsers,
-  } = useMediasoupConnection(roomName, user.fullName);
   const [sidebarOpened, { open, close }] = useDisclosure(false);
   const [
     detailsPanelOpened,
@@ -36,41 +21,14 @@ const TestMainPage = () => {
   return (
     <Box style={{ display: 'flex', height: '100dvh' }}>
       <ServerPanel />
-      <SideBar
-        connect={connect}
-        disconnect={disconnect}
-        startScreenSharing={startScreenSharing}
-        stopScreenSharing={stopScreenSharing}
-        consumers={consumers}
-        connected={connected}
-        users={users}
-        toggleMute={toggleMute}
-        isMuted={isMuted}
-        isStreaming={isStreaming}
-        onClose={close}
-        activeUsers={activeUsers}
-      />
+      <SideBar onClose={close} />
       {!isUserStreamView ? (
         <ChatSection openSidebar={open} openDetailsPanel={openDetailsPanel} />
       ) : (
-        <ChatSectionWithUsers users={users} consumers={consumers} />
+        <ChatSectionWithUsers />
       )}
       <DetailsPanel />
-      <SideBarMobile
-        connect={connect}
-        disconnect={disconnect}
-        startScreenSharing={startScreenSharing}
-        stopScreenSharing={stopScreenSharing}
-        consumers={consumers}
-        connected={connected}
-        users={users}
-        toggleMute={toggleMute}
-        isMuted={isMuted}
-        isStreaming={isStreaming}
-        onClose={close}
-        opened={sidebarOpened}
-        activeUsers={activeUsers}
-      />
+      <SideBarMobile onClose={close} opened={sidebarOpened} />
       <DetailsPanelMobile
         onClose={closeDetailsPanel}
         opened={detailsPanelOpened}

@@ -1,16 +1,11 @@
 import { ActionIcon, Divider, Flex, Stack } from '@mantine/core';
 import { CirclePlus, Home } from 'lucide-react';
-import { useEffect } from 'react';
 
 import { useAppSelector } from '../../hooks/redux';
 import ServerItem from './Components/ServerItem/ServerItem';
 
 const ServerPanel = () => {
   const { servers } = useAppSelector((state) => state.serverStore);
-
-  useEffect(() => {
-    console.log(servers);
-  }, [servers]);
 
   return (
     <Flex w={50} bg="#0E0E10" align="center" direction="column" p="10px 0">

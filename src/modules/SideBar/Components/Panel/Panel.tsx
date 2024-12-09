@@ -1,28 +1,17 @@
 import { ActionIcon, Divider, Group, Stack, Text } from '@mantine/core';
 import { Mic, MicOff, MonitorUp, MonitorX, PhoneMissed } from 'lucide-react';
 
+import { useMediaContext } from '../../../../context/MediaContext/useMediaContext';
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { useDisconnect } from '../../../../hooks/useDisconnect';
+import { useScreenSharing } from '../../../../hooks/useScreenSharing';
 import { setUserStreamView } from '../../../../store/app/AppSettingsSlice';
 
-interface PanelProps {
-  isConnected: boolean;
-  startScreenSharing: () => Promise<void>;
-  stopScreenSharing: () => Promise<void>;
-  onDisconnect: () => void;
-  toggleMute: () => void;
-  isMuted: boolean;
-  isStreaming: boolean;
-}
+const Panel = () => {
+  const { isConnected, toggleMute, isMuted, isStreaming } = useMediaContext();
+  const disconnect = useDisconnect();
+  const { startScreenSharing, stopScreenSharing } = useScreenSharing();
 
-const Panel = ({
-  isConnected,
-  startScreenSharing,
-  stopScreenSharing,
-  onDisconnect,
-  toggleMute,
-  isMuted,
-  isStreaming,
-}: PanelProps) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.userStore);
 
@@ -51,7 +40,7 @@ const Panel = ({
           <ActionIcon
             variant="transparent"
             onClick={() => {
-              onDisconnect();
+              disconnect();
               dispatch(setUserStreamView(false));
             }}
             c="#ffffff"

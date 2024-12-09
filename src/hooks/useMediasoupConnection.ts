@@ -116,18 +116,18 @@ export const useMediasoupConnection = (
       setUsers(usersList);
     });
 
-    socket.on('active-speakers', ({ activeSpeakers }) => {
+    /*socket.on('active-speakers', ({ activeSpeakers }) => {
       //console.log('Active speakers:', activeSpeakers);
       setActiveUsers(activeSpeakers);
       // Обновите UI, чтобы показать, кто говорит
-    });
+    });*/
 
     return () => {
       socket.off('producerClosed');
       socket.off('producer-closed');
       socket.off('new-producer');
       socket.off('updateUsersList');
-      socket.off('audio-level-updated');
+      //socket.off('audio-level-updated');
     };
   }, [socket, device]);
 
@@ -198,13 +198,11 @@ export const useMediasoupConnection = (
           );
         });
 
-        // Создание и сохранение audioProducer
         const audioProducer = await producerTransport.produce({
           track: audioTrack,
         });
         audioProducerRef.current = audioProducer;
 
-        // Обработка окончания трека
         audioProducer.on('trackended', () => {
           console.log('Audio track ended');
           audioProducerRef.current = null;

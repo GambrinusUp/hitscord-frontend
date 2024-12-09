@@ -42,3 +42,9 @@ export interface ActiveUser {
   producerId: string;
   volume: number;
 }
+
+export interface UserInList {
+  socketId: string;
+  producerId: string;
+  userName: string;
+}

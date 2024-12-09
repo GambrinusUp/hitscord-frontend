@@ -1,42 +1,15 @@
 import { Divider, Drawer, Stack, Text } from '@mantine/core';
 
-import VoiceChannels from '../../../../components/VoiceChannels/VoiceChannels';
-import { ActiveUser } from '../../../../utils/types';
 import TextChannels from '../../../TextChannels/TextChannels';
+import VoiceChannels from '../../../VoiceChannels/VoiceChannels';
 import Panel from '../Panel/Panel';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 interface SideBarMobileProps {
-  connect: () => void;
-  disconnect: () => void;
-  startScreenSharing: () => Promise<void>;
-  stopScreenSharing: () => Promise<void>;
-  consumers: any[];
-  connected: boolean;
-  users: any[];
-  toggleMute: () => void;
-  isMuted: boolean;
-  isStreaming: boolean;
   onClose: () => void;
   opened: boolean;
-  activeUsers: ActiveUser[];
 }
 
-const SideBarMobile = ({
-  connect,
-  disconnect,
-  startScreenSharing,
-  stopScreenSharing,
-  consumers,
-  connected,
-  users,
-  toggleMute,
-  isMuted,
-  isStreaming,
-  onClose,
-  opened,
-  activeUsers,
-}: SideBarMobileProps) => {
+const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
   return (
     <>
       <Drawer
@@ -60,22 +33,8 @@ const SideBarMobile = ({
           <Text>Сервер #1</Text>
           <Divider />
           <TextChannels onClose={onClose} />
-          <VoiceChannels
-            connect={connect}
-            connected={connected}
-            consumers={consumers}
-            users={users}
-            activeUsers={activeUsers}
-          />
-          <Panel
-            isConnected={connected}
-            startScreenSharing={startScreenSharing}
-            stopScreenSharing={stopScreenSharing}
-            onDisconnect={disconnect}
-            toggleMute={toggleMute}
-            isMuted={isMuted}
-            isStreaming={isStreaming}
-          />
+          <VoiceChannels />
+          <Panel />
         </Stack>
       </Drawer>
     </>

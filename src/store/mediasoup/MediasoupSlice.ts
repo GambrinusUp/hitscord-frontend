@@ -1,50 +1,36 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ActiveUser, UserInList } from '../../utils/types';
+
 interface MediasoupState {
-  consumers: any[];
-  connected: boolean;
-  users: any[];
-  isMuted: boolean;
-  isStreaming: boolean;
+  isConnected: boolean;
+  users: UserInList[];
+  activeUsers: ActiveUser[];
 }
 
 const initialState: MediasoupState = {
-  consumers: [],
-  connected: false,
+  isConnected: false,
   users: [],
-  isMuted: false,
-  isStreaming: false,
+  activeUsers: [],
 };
 
 const MediasoupSlice = createSlice({
   name: 'mediasoup',
   initialState,
   reducers: {
-    setConsumers(state, action: PayloadAction<any[]>) {
-      state.consumers = action.payload;
-    },
     setConnected(state, action: PayloadAction<boolean>) {
-      state.connected = action.payload;
+      state.isConnected = action.payload;
     },
-    setUsers(state, action: PayloadAction<any[]>) {
+    setUsers(state, action: PayloadAction<UserInList[]>) {
       state.users = action.payload;
     },
-    setIsMuted(state, action: PayloadAction<boolean>) {
-      state.isMuted = action.payload;
-    },
-    setIsStreaming(state, action: PayloadAction<boolean>) {
-      state.isStreaming = action.payload;
+    setActiveUsers(state, action: PayloadAction<ActiveUser[]>) {
+      state.activeUsers = [...action.payload];
     },
   },
 });
 
-export const {
-  setConsumers,
-  setConnected,
-  setUsers,
-  setIsMuted,
-  setIsStreaming,
-} = MediasoupSlice.actions;
+export const { setConnected, setUsers, setActiveUsers } =
+  MediasoupSlice.actions;
 
 export default MediasoupSlice.reducer;
