@@ -1,30 +1,99 @@
-import axios from 'axios';
-
 import { API_URL } from '../utils/constants';
-import { LoginCredentials, User } from '../utils/types';
+import {
+  LoginCredentials,
+  LoginResponse,
+  RegisterCredentials,
+  User,
+} from '../utils/types';
 
-const registerUser = async (userData: Partial<User>): Promise<User> => {
+const registerUser = async (
+  registerData: RegisterCredentials
+): Promise<LoginResponse> => {
   try {
-    const response = await axios.post(API_URL + '/users', userData);
-    console.log('User registered:', response.data);
-    return response.data;
+    const response = await fetch(`${API_URL}/auth/registration`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(registerData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+
+    return data;
   } catch (error) {
     console.error('Error registering user:', error);
     throw error;
   }
 };
 
-const loginUser = async (loginData: LoginCredentials): Promise<User> => {
+const loginUser = async (
+  loginData: LoginCredentials
+): Promise<LoginResponse> => {
   try {
-    const response = await axios.get(
-      API_URL + '/users?email=' + loginData.email
-    );
-    console.log('Login:', response.data);
-    if (response.data.length < 1)
-      throw new Error('Пароль или почта не правильные');
-    return response.data[0];
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(loginData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+
+    return data;
   } catch (error) {
-    console.error('Error registering user:', error);
+    console.error('Error login user:', error);
+    throw error;
+  }
+};
+
+const getProfile = async (accessToken: string): Promise<User> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error get profile user:', error);
+    throw error;
+  }
+};
+
+const logout = async (accessToken: string) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/logout`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error logout user:', error);
     throw error;
   }
 };
@@ -32,4 +101,6 @@ const loginUser = async (loginData: LoginCredentials): Promise<User> => {
 export const authAPI = {
   registerUser: registerUser,
   loginUser: loginUser,
+  getProfile: getProfile,
+  logout: logout,
 };

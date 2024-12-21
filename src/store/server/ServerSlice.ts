@@ -12,7 +12,7 @@ interface ServerState {
 
 const initialState: ServerState = {
   servers: {
-    server1: {
+    channel1: {
       name: 'test',
       textChannels: {
         channel1: {
@@ -44,7 +44,7 @@ const initialState: ServerState = {
       },
     },
   },
-  currentServerId: 'server1',
+  currentServerId: 'a062fcbd-05c6-4c85-9183-68a8d3466fa2',
   currentChannelId: 'channel1',
 };
 

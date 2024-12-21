@@ -38,8 +38,8 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
           message: {
             id: newGuid,
             content: newMessage,
-            userId: user.fullName,
-            userName: user.fullName,
+            userId: user.name,
+            userName: user.name,
             timestamp: new Date().toISOString(),
             isOwnMessage: true,
           },
@@ -81,7 +81,7 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
       <Divider my="md" />
       <ScrollArea style={{ flex: 1 }}>
         <Stack gap="sm">
-          {servers[currentServerId || 'channel1'].textChannels[
+          {servers['channel1'].textChannels[
             currentChannelId || 'General'
           ].messages.map((message) => (
             <MessageItem

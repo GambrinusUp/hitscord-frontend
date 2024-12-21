@@ -2,12 +2,14 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AppSettingsState {
   isUserStreamView: boolean;
+  isOpenHome: boolean;
   // isDarkMode: boolean;
   // language: string;
 }
 
 const initialState: AppSettingsState = {
   isUserStreamView: false,
+  isOpenHome: true,
 };
 
 const AppSettingsSlice = createSlice({
@@ -20,6 +22,9 @@ const AppSettingsSlice = createSlice({
     setUserStreamView(state, action: PayloadAction<boolean>) {
       state.isUserStreamView = action.payload;
     },
+    setOpenHome(state, action: PayloadAction<boolean>) {
+      state.isOpenHome = action.payload;
+    },
     // toggleDarkMode(state) {
     //   state.isDarkMode = !state.isDarkMode;
     // },
@@ -29,7 +34,7 @@ const AppSettingsSlice = createSlice({
   },
 });
 
-export const { toggleUserStreamView, setUserStreamView } =
+export const { toggleUserStreamView, setUserStreamView, setOpenHome } =
   AppSettingsSlice.actions;
 
 export default AppSettingsSlice.reducer;

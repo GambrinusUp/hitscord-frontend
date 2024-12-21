@@ -5,7 +5,7 @@ import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-import { ActiveUser } from '../utils/types';
+//import { ActiveUser } from '../utils/types';
 
 interface UseMediasoupConnection {
   connect: () => void;
@@ -18,7 +18,7 @@ interface UseMediasoupConnection {
   toggleMute: () => void;
   isMuted: boolean;
   isStreaming: boolean;
-  activeUsers: { producerId: string; volume: number }[];
+  //activeUsers: { producerId: string; volume: number }[];
 }
 
 //баги: закрытие окна стрима, при перерендере (изменить и сохранить изменения в коде и потом открыть страничку) пропадают users
@@ -37,7 +37,7 @@ export const useMediasoupConnection = (
   const [connected, setConnected] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
+  //const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
 
   const toggleMute = () => {
     if (audioProducerRef.current) {
@@ -295,6 +295,6 @@ export const useMediasoupConnection = (
     toggleMute,
     isMuted,
     isStreaming,
-    activeUsers,
+    //activeUsers,
   };
 };

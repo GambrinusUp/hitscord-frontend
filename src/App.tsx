@@ -7,10 +7,10 @@ import { Notifications } from '@mantine/notifications';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 
 import { MediaProvider } from './context/MediaContext/MediaProvider';
-//import AuthPage from './pages/AuthPage/AuthPage';
+import AuthPage from './pages/AuthPage/AuthPage';
 import LandingPage from './pages/LandingPage/LandingPage';
 import RegistrationPage from './pages/RegistrationPage/Registration';
-import TestEntryPage from './pages/TestEntryPage/TestEntryPage';
+//import TestEntryPage from './pages/TestEntryPage/TestEntryPage';
 import TestMainPage from './pages/TestMainPage/TestMainPage';
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/main" element={<TestMainPage />} />
-            <Route path="/login" element={<TestEntryPage />} />
+            <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<RegistrationPage />} />
           </Routes>
         </MantineProvider>

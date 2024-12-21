@@ -29,6 +29,8 @@ function TextChannels({ onClose }: TextChannelsProps) {
     initialData: '',
     channelId: '',
   });
+  const { serverData } = useAppSelector((state) => state.testServerStore);
+  const isAdmin = serverData.userRole === 'Admin' ? true : false;
 
   return (
     <>
@@ -49,70 +51,37 @@ function TextChannels({ onClose }: TextChannelsProps) {
           >
             Текстовые каналы
           </Button>
-          <ActionIcon
-            variant="transparent"
-            onClick={() => {
-              setIsEditing({ isEdit: false, initialData: '', channelId: '' });
-              openChannelModal();
-            }}
-          >
-            <Plus color="#ffffff" />
-          </ActionIcon>
+          {isAdmin && (
+            <ActionIcon
+              variant="transparent"
+              onClick={() => {
+                setIsEditing({ isEdit: false, initialData: '', channelId: '' });
+                openChannelModal();
+              }}
+            >
+              <Plus color="#ffffff" />
+            </ActionIcon>
+          )}
         </Group>
         <Collapse in={opened} w="100%">
           <Stack gap="xs">
-            {Object.entries(
-              servers[currentServerId || 'channel1'].textChannels
-            ).map(([channelId, channel]) => (
-              <Box
-                key={channelId}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-                onMouseEnter={() => setIsHovered(channelId)}
-                onMouseLeave={() => setIsHovered('')}
-              >
-                <Button
-                  leftSection={<Hash />}
-                  variant="subtle"
-                  p={0}
-                  color="#ffffff"
-                  justify="flex-start"
-                  styles={{
-                    root: {
-                      backgroundColor:
-                        currentChannelId === channelId
-                          ? '#999999'
-                          : 'transparent',
-                      '--button-hover-color': '#4f4f4f',
-                      transition: 'color 0.3s ease',
-                      borderTopRightRadius:
-                        isHovered === channelId
-                          ? 0
-                          : 'var(--mantine-radius-default)',
-                      borderBottomRightRadius:
-                        isHovered === channelId
-                          ? 0
-                          : 'var(--mantine-radius-default)',
-                    },
+            {Object.entries(servers['channel1'].textChannels).map(
+              ([channelId, channel]) => (
+                <Box
+                  key={channelId}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
                   }}
-                  fullWidth
-                  onClick={() => {
-                    dispatch(setCurrentChannel(channelId));
-                    dispatch(setUserStreamView(false));
-                    onClose();
-                  }}
+                  onMouseEnter={() => setIsHovered(channelId)}
+                  onMouseLeave={() => setIsHovered('')}
                 >
-                  {channel.name}
-                </Button>
-                {isHovered === channelId && (
                   <Button
+                    leftSection={<Hash />}
                     variant="subtle"
                     p={0}
                     color="#ffffff"
                     justify="flex-start"
-                    w="20px"
                     styles={{
                       root: {
                         backgroundColor:
@@ -121,24 +90,59 @@ function TextChannels({ onClose }: TextChannelsProps) {
                             : 'transparent',
                         '--button-hover-color': '#4f4f4f',
                         transition: 'color 0.3s ease',
-                        borderTopLeftRadius: 0,
-                        borderBottomLeftRadius: 0,
+                        borderTopRightRadius:
+                          isHovered === channelId
+                            ? 0
+                            : 'var(--mantine-radius-default)',
+                        borderBottomRightRadius:
+                          isHovered === channelId
+                            ? 0
+                            : 'var(--mantine-radius-default)',
                       },
                     }}
+                    fullWidth
                     onClick={() => {
-                      setIsEditing({
-                        isEdit: true,
-                        initialData: channel.name,
-                        channelId: channelId,
-                      });
-                      openChannelModal();
+                      dispatch(setCurrentChannel(channelId));
+                      dispatch(setUserStreamView(false));
+                      onClose();
                     }}
                   >
-                    <Settings size={16} />
+                    {channel.name}
                   </Button>
-                )}
-              </Box>
-            ))}
+                  {isAdmin && isHovered === channelId && (
+                    <Button
+                      variant="subtle"
+                      p={0}
+                      color="#ffffff"
+                      justify="flex-start"
+                      w="20px"
+                      styles={{
+                        root: {
+                          backgroundColor:
+                            currentChannelId === channelId
+                              ? '#999999'
+                              : 'transparent',
+                          '--button-hover-color': '#4f4f4f',
+                          transition: 'color 0.3s ease',
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                        },
+                      }}
+                      onClick={() => {
+                        setIsEditing({
+                          isEdit: true,
+                          initialData: channel.name,
+                          channelId: channelId,
+                        });
+                        openChannelModal();
+                      }}
+                    >
+                      <Settings size={16} />
+                    </Button>
+                  )}
+                </Box>
+              )
+            )}
           </Stack>
         </Collapse>
       </Stack>

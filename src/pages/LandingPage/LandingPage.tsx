@@ -20,11 +20,11 @@ function LandingPage() {
               Войти
             </Button>
           </Link>
-          {/*<Link to="/register">
-            <button className={styles.registerButton}>
+          <Link to="/register">
+            <Button variant="filled" radius="md">
               Зарегистрироваться
-            </button>
-          </Link>*/}
+            </Button>
+          </Link>
         </Group>
       </Flex>
     </>

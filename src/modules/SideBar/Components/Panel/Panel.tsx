@@ -50,7 +50,7 @@ const Panel = () => {
         </Group>
       )}
       <Divider />
-      <Text truncate>{user.fullName}</Text>
+      <Text truncate>{user.name}</Text>
     </Stack>
   );
 };

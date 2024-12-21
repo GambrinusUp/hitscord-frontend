@@ -4,7 +4,6 @@ import {
   Collapse,
   Group,
   Menu,
-  //Modal,
   Slider,
   Stack,
   Text,
@@ -35,43 +34,22 @@ function VoiceChannels() {
   const { isConnected, consumers, users, setSelectedUserId } =
     useMediaContext();
   const { user, roomName } = useAppSelector((state) => state.userStore);
+  const { serverData } = useAppSelector((state) => state.testServerStore);
   const dispatch = useAppDispatch();
   const [opened, { toggle }] = useDisclosure(true);
-  //const [selectedStream, setSelectedStream] = useState<MediaStream | null>(null);
-  //const [isModalOpen, setModalOpen] = useState(false);
   const [userVolumes, setUserVolumes] = useState<Record<string, number>>({});
   const activeUsers = useActiveUsers();
   const userGroups = getUserGroups(users);
   const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const isAdmin = serverData.userRole === 'Admin' ? true : false;
 
   const handleConnect = () => {
     if (!isConnected) {
-      connect(roomName, user.fullName);
+      connect(roomName, user.name);
     } else {
       dispatch(toggleUserStreamView());
     }
   };
-
-  /*const handleUserClick = (socketId: string) => {
-    const isStreaming = userGroups[socketId].producerIds.length > 1;
-
-    if (isStreaming) {
-      const videoConsumer = consumers.find(
-        (consumer) =>
-          consumer.kind === 'video' &&
-          userGroups[socketId].producerIds.includes(consumer.producerId)
-      );
-
-      console.log(videoConsumer);
-
-      if (videoConsumer) {
-        const stream = new MediaStream([videoConsumer.track]);
-        console.log(stream);
-        setSelectedStream(stream);
-        setModalOpen(true);
-      }
-    }
-  };*/
 
   const handleVolumeChange = (socketId: string, value: number) => {
     const audioProducerId = userGroups[socketId].producerIds.find(
@@ -145,9 +123,11 @@ function VoiceChannels() {
           >
             Голосовые каналы
           </Button>
-          <ActionIcon variant="transparent">
-            <Plus color="#ffffff" />
-          </ActionIcon>
+          {isAdmin && (
+            <ActionIcon variant="transparent">
+              <Plus color="#ffffff" />
+            </ActionIcon>
+          )}
         </Group>
         <Collapse in={opened} w="100%">
           <Button
@@ -227,27 +207,6 @@ function VoiceChannels() {
           </Stack>
         </Collapse>
       </Stack>
-      {/*<Modal
-        opened={isModalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setSelectedStream(null);
-        }}
-        title="Просмотр стрима"
-        centered
-        size="auto"
-        style={{ width: '100%' }}
-      >
-        {selectedStream && (
-          <video
-            style={{ width: '100%', height: 'auto', maxHeight: '700px' }}
-            autoPlay
-            ref={(el) => {
-              if (el) el.srcObject = selectedStream;
-            }}
-          />
-        )}
-      </Modal>*/}
     </>
   );
 }

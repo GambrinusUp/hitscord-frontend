@@ -1,5 +1,12 @@
-//import styles from './AuthPage.module.scss';
-import { Button, Card, Group, Stack, Text, TextInput } from '@mantine/core';
+import {
+  Button,
+  Card,
+  Flex,
+  Group,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -16,19 +23,21 @@ function AuthPage() {
 
   const form = useForm({
     initialValues: {
-      email: '',
+      mail: '',
       password: '',
     },
 
     validate: {
-      email: (value) =>
+      mail: (value) =>
         /^\S+@\S+$/.test(value) ? null : 'Неверный формат email',
-      password: (value) => (value.trim().length > 0 ? null : 'Введите пароль'),
+      password: (value) =>
+        value.trim().length > 5
+          ? null
+          : 'Введите пароль (пароль должен содержать больше 6 символов',
     },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
-    console.log('Account Data:', values);
     const result = await dispatch(loginUser(values));
     if (result.meta.requestStatus === 'fulfilled') {
       navigate('/main');
@@ -44,38 +53,48 @@ function AuthPage() {
 
   return (
     <>
-      <Card
-        shadow="sm"
-        padding="lg"
-        radius="md"
-        bg="#1c1c1c"
-        c="white"
-        w="30vw"
-        miw="300px"
+      <Flex
+        w="100vw"
+        h="100vh"
+        gap="md"
+        justify="center"
+        align="center"
+        direction="column"
+        bg="linear-gradient(135deg, #4a90e2, #7b4397)"
       >
-        <Text fw={500} mb="md">
-          Создать учётную запись
-        </Text>
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="md">
-            <TextInput
-              label="Email"
-              placeholder="Введите email"
-              {...form.getInputProps('email')}
-              required
-            />
-            <TextInput
-              label="Пароль"
-              placeholder="Введите пароль"
-              {...form.getInputProps('password')}
-              required
-            />
-            <Group justify="center" mt="md">
-              <Button type="submit">Войти</Button>
-            </Group>
-          </Stack>
-        </form>
-      </Card>
+        <Card
+          shadow="sm"
+          padding="lg"
+          radius="md"
+          bg="#1c1c1c"
+          c="white"
+          w="30vw"
+          miw="300px"
+        >
+          <Text fw={500} mb="md">
+            Войти в учётную запись
+          </Text>
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Stack gap="md">
+              <TextInput
+                label="Email"
+                placeholder="Введите email"
+                {...form.getInputProps('mail')}
+                required
+              />
+              <TextInput
+                label="Пароль"
+                placeholder="Введите пароль"
+                {...form.getInputProps('password')}
+                required
+              />
+              <Group justify="center" mt="md">
+                <Button type="submit">Войти</Button>
+              </Group>
+            </Stack>
+          </form>
+        </Card>
+      </Flex>
     </>
   );
 }

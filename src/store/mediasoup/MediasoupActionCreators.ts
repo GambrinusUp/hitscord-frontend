@@ -1,4 +1,4 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
+/*import { createAsyncThunk } from '@reduxjs/toolkit';
 import { Device } from 'mediasoup-client';
 import { Consumer } from 'mediasoup-client/lib/Consumer';
 import { Producer } from 'mediasoup-client/lib/Producer';
@@ -66,3 +66,4 @@ export const connectThunk = createAsyncThunk<
     }
   }
 );
+*/
