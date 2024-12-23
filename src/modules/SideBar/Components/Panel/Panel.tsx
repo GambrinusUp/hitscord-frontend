@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { useDisconnect } from '../../../../hooks/useDisconnect';
 import { useScreenSharing } from '../../../../hooks/useScreenSharing';
 import { setUserStreamView } from '../../../../store/app/AppSettingsSlice';
+import { setCurrentVoiceChannelId } from '../../../../store/server/TestServerSlice';
 
 const Panel = () => {
   const { isConnected, toggleMute, isMuted, isStreaming } = useMediaContext();
@@ -23,6 +24,12 @@ const Panel = () => {
     }
   };
 
+  const handleClick = () => {
+    disconnect();
+    dispatch(setUserStreamView(false));
+    dispatch(setCurrentVoiceChannelId(null));
+  };
+
   return (
     <Stack mt="auto">
       {isConnected && (
@@ -37,14 +44,7 @@ const Panel = () => {
           <ActionIcon variant="transparent" onClick={toggleMute} c="#ffffff">
             {isMuted ? <MicOff /> : <Mic />}
           </ActionIcon>
-          <ActionIcon
-            variant="transparent"
-            onClick={() => {
-              disconnect();
-              dispatch(setUserStreamView(false));
-            }}
-            c="#ffffff"
-          >
+          <ActionIcon variant="transparent" onClick={handleClick} c="#ffffff">
             <PhoneMissed />
           </ActionIcon>
         </Group>

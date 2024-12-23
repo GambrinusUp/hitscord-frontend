@@ -11,7 +11,6 @@ export const useActiveUsers = () => {
     socket.on(
       'active-speakers',
       ({ activeSpeakers }: { activeSpeakers: ActiveUser[] }) => {
-        //console.log(activeSpeakers);
         setActiveUsers(activeSpeakers);
       }
     );

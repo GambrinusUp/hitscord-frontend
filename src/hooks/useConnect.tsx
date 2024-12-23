@@ -16,7 +16,11 @@ export const useConnect = () => {
     addConsumer,
   } = useMediaContext();
 
-  const connect = async (roomName: string, userName: string) => {
+  const connect = async (
+    roomName: string,
+    userName: string,
+    serverId: string
+  ) => {
     try {
       if (!socket.connected) {
         throw new Error('Socket is not connected');
@@ -24,7 +28,7 @@ export const useConnect = () => {
 
       const audioTrack = await getLocalAudioStream();
 
-      const roomData = await joinRoom(roomName, userName);
+      const roomData = await joinRoom(roomName, userName, serverId);
 
       const device = await createDevice(roomData);
       setDevice(device);

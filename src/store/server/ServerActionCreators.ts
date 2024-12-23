@@ -1,7 +1,14 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 
+import { channelsAPI } from '../../api/channelsAPI';
+import { messagesAPI } from '../../api/messagesAPI';
 import { serverAPI } from '../../api/serverAPI';
-import { ServerData, ServerItem } from '../../utils/types';
+import {
+  ChannelMessage,
+  ChannelType,
+  ServerData,
+  ServerItem,
+} from '../../utils/types';
 
 export const getUserServers = createAsyncThunk<
   ServerItem[],
@@ -99,6 +106,141 @@ export const subscribeToServer = createAsyncThunk<
   async ({ accessToken, serverId, userName }, { rejectWithValue }) => {
     try {
       await serverAPI.subscribeToServer(accessToken, serverId, userName);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка'
+      );
+    }
+  }
+);
+
+export const getChannelMessages = createAsyncThunk<
+  ChannelMessage[],
+  {
+    accessToken: string;
+    channelId: string;
+    numberOfMessages: number;
+    fromStart: number;
+  },
+  { rejectValue: string }
+>(
+  'testServerSlice/getChannelMessages',
+  async (
+    { accessToken, channelId, numberOfMessages, fromStart },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await channelsAPI.getChannelsMessages(
+        accessToken,
+        channelId,
+        numberOfMessages,
+        fromStart
+      );
+      return response;
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка'
+      );
+    }
+  }
+);
+
+export const createMessage = createAsyncThunk<
+  void,
+  {
+    accessToken: string;
+    channelId: string;
+    text: string;
+  },
+  { rejectValue: string }
+>(
+  'testServerSlice/createMessage',
+  async ({ accessToken, channelId, text }, { rejectWithValue }) => {
+    try {
+      await messagesAPI.createMessage(accessToken, channelId, text);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка'
+      );
+    }
+  }
+);
+
+export const deleteMessage = createAsyncThunk<
+  void,
+  {
+    accessToken: string;
+    messageId: string;
+  },
+  { rejectValue: string }
+>(
+  'testServerSlice/deleteMessage',
+  async ({ accessToken, messageId }, { rejectWithValue }) => {
+    try {
+      await messagesAPI.deleteMessage(accessToken, messageId);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка'
+      );
+    }
+  }
+);
+
+export const editMessage = createAsyncThunk<
+  void,
+  {
+    accessToken: string;
+    messageId: string;
+    text: string;
+  },
+  { rejectValue: string }
+>(
+  'testServerSlice/editMessage',
+  async ({ accessToken, messageId, text }, { rejectWithValue }) => {
+    try {
+      await messagesAPI.editMessage(accessToken, messageId, text);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка'
+      );
+    }
+  }
+);
+
+export const createChannel = createAsyncThunk<
+  void,
+  {
+    accessToken: string;
+    serverId: string;
+    name: string;
+    channelType: ChannelType;
+  },
+  { rejectValue: string }
+>(
+  'testServerSlice/createChannel',
+  async ({ accessToken, serverId, name, channelType }, { rejectWithValue }) => {
+    try {
+      await channelsAPI.createChannel(accessToken, serverId, name, channelType);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка'
+      );
+    }
+  }
+);
+
+export const deleteChannel = createAsyncThunk<
+  void,
+  {
+    accessToken: string;
+    channelId: string;
+  },
+  { rejectValue: string }
+>(
+  'testServerSlice/deleteChannel',
+  async ({ accessToken, channelId }, { rejectWithValue }) => {
+    try {
+      await channelsAPI.deleteChannel(accessToken, channelId);
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка'

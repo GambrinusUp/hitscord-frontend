@@ -5,7 +5,7 @@ import { Transport } from 'mediasoup-client/lib/Transport';
 import { AppData } from 'mediasoup-client/lib/types';
 import React, { createContext } from 'react';
 
-import { UserInList } from '../../utils/types';
+import { Room } from '../../utils/types';
 
 export const MediaContext = createContext<{
   isConnected: boolean;
@@ -23,7 +23,7 @@ export const MediaContext = createContext<{
   producerTransport: Transport | null;
   setProducerTransport: React.Dispatch<React.SetStateAction<Transport | null>>;
   consumers: Consumer[];
-  users: UserInList[];
+  users: Room[];
   addConsumer: (consumer: Consumer) => void;
   setConsumers: React.Dispatch<React.SetStateAction<Consumer<AppData>[]>>;
   toggleMute: () => void;

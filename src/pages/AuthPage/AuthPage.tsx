@@ -16,7 +16,7 @@ import { useNotification } from '../../hooks/useNotification';
 import { loginUser } from '../../store/user/UserActionCreators';
 
 function AuthPage() {
-  const { error } = useAppSelector((state) => state.userStore);
+  const { accessToken, error } = useAppSelector((state) => state.userStore);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { showError } = useNotification();
@@ -43,6 +43,12 @@ function AuthPage() {
       navigate('/main');
     }
   };
+
+  useEffect(() => {
+    if (accessToken) {
+      navigate('/main');
+    }
+  }, [accessToken, navigate]);
 
   useEffect(() => {
     if (error) {

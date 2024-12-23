@@ -18,11 +18,15 @@ export const getLocalAudioStream = async () => {
   return stream.getAudioTracks()[0];
 };
 
-export const joinRoom = async (roomName: string, userName: string) => {
+export const joinRoom = async (
+  roomName: string,
+  userName: string,
+  serverId: string
+) => {
   return new Promise<RtpCapabilities>((resolve, reject) => {
     socket.emit(
       'joinRoom',
-      { roomName, userName },
+      { roomName, userName, serverId },
       (response: { rtpCapabilities: RtpCapabilities; error?: string }) => {
         if (response.error) {
           reject(response.error);

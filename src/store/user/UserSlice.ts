@@ -30,6 +30,7 @@ export interface UserState {
 
 const initialState: UserState = {
   user: {
+    id: '',
     name: '',
     tag: '',
     mail: '',

@@ -4,16 +4,25 @@ import {
   Divider,
   Group,
   ScrollArea,
+  Skeleton,
   Stack,
   TextInput,
 } from '@mantine/core';
 import { Menu, Paperclip, Search, Send, Users } from 'lucide-react';
-import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useEffect, useState } from 'react';
 
 import MessageItem from '../../components/MessageItem/MessageItem';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { addMessage } from '../../store/server/ServerSlice';
+import {
+  createMessage,
+  getChannelMessages,
+} from '../../store/server/ServerActionCreators';
+import {
+  addMessage,
+  deleteMessageWs,
+  editMessageWs,
+} from '../../store/server/TestServerSlice';
+import { formatMessage } from './ChatSection.utils';
 
 interface ChatSectionProps {
   openSidebar: () => void;
@@ -22,27 +31,18 @@ interface ChatSectionProps {
 
 const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
   const dispatch = useAppDispatch();
-  const { servers, currentChannelId, currentServerId } = useAppSelector(
-    (state) => state.serverStore
-  );
-  const { user } = useAppSelector((state) => state.userStore);
+  const { user, accessToken } = useAppSelector((state) => state.userStore);
+  const { currentServerId, currentChannelId, messages, isLoading } =
+    useAppSelector((state) => state.testServerStore);
   const [newMessage, setNewMessage] = useState('');
 
   const handleSendMessage = () => {
     if (newMessage.trim() && currentServerId && currentChannelId) {
-      const newGuid = uuidv4();
       dispatch(
-        addMessage({
-          serverId: currentServerId,
+        createMessage({
+          accessToken: accessToken,
           channelId: currentChannelId,
-          message: {
-            id: newGuid,
-            content: newMessage,
-            userId: user.name,
-            userName: user.name,
-            timestamp: new Date().toISOString(),
-            isOwnMessage: true,
-          },
+          text: newMessage.trim(),
         })
       );
       setNewMessage('');
@@ -54,6 +54,67 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
       handleSendMessage();
     }
   };
+
+  useEffect(() => {
+    if (accessToken) {
+      const ws = new WebSocket(
+        `wss://hitscord-backend.online/ws?accessToken=${accessToken}`
+      );
+
+      ws.onopen = () => {
+        console.log('WebSocket connection established');
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.MessageType === 'New message') {
+          const formattedMessage = formatMessage(data.Payload);
+          if (formattedMessage.id && formattedMessage.text) {
+            dispatch(addMessage(formattedMessage));
+          }
+        }
+
+        if (data.MessageType === 'Deleted message') {
+          dispatch(
+            deleteMessageWs({
+              channelId: data.Payload.ChannelId,
+              messageId: data.Payload.MessageId,
+            })
+          );
+        }
+
+        if (data.MessageType === 'Updated message') {
+          const formattedMessage = formatMessage(data.Payload);
+          dispatch(editMessageWs(formattedMessage));
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+
+      return () => {
+        ws.close();
+      };
+    }
+  }, [accessToken, currentChannelId, dispatch]);
+
+  useEffect(() => {
+    if (currentChannelId && accessToken)
+      dispatch(
+        getChannelMessages({
+          accessToken,
+          channelId: currentChannelId,
+          numberOfMessages: 100,
+          fromStart: 0,
+        })
+      );
+  }, [accessToken, currentChannelId, dispatch]);
 
   return (
     <Box
@@ -81,15 +142,26 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
       <Divider my="md" />
       <ScrollArea style={{ flex: 1 }}>
         <Stack gap="sm">
-          {servers['channel1'].textChannels[
-            currentChannelId || 'General'
-          ].messages.map((message) => (
+          {isLoading &&
+            messages.length < 1 &&
+            Array.from({ length: 5 }).map((_, index) => (
+              <Group align="flex-start" gap="xs" key={index}>
+                <Skeleton height={40} width={40} circle />
+                <Box style={{ flex: 1 }}>
+                  <Skeleton height={12} width="60%" radius="md" />
+                  <Skeleton height={10} width="40%" mt={8} radius="md" />
+                </Box>
+              </Group>
+            ))}
+          {messages.map((message) => (
             <MessageItem
               key={message.id}
-              userName={message.userName}
-              content={message.content}
-              isOwnMessage={message.isOwnMessage}
-              time={message.timestamp}
+              messageId={message.id}
+              userName={message.authorName}
+              content={message.text}
+              isOwnMessage={user.id === message.authorId}
+              time={message.createdAt}
+              modifiedAt={message.modifiedAt}
             />
           ))}
         </Stack>

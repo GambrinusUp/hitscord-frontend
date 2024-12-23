@@ -7,7 +7,7 @@ import {
 import { useEffect, useState } from 'react';
 
 import socket from '../../api/socket';
-import { UserInList } from '../../utils/types';
+import { Room } from '../../utils/types';
 import { signalNewConsumerTransport } from '../utils/mediaHelpers';
 import { MediaContext } from './MediaContext';
 
@@ -17,7 +17,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [consumers, setConsumers] = useState<Consumer[]>([]);
-  const [users, setUsers] = useState<UserInList[]>([]);
+  const [users, setUsers] = useState<Room[]>([]);
   const [device, setDevice] = useState<Device | null>(null);
   const [audioProducer, setAudioProducer] = useState<Producer | null>(null);
   const [videoProducer, setVideoProducer] = useState<Producer | null>(null);
@@ -64,8 +64,9 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
       }
     });
 
-    socket.on('updateUsersList', ({ usersList }) => {
-      setUsers(usersList);
+    socket.on('updateUsersList', ({ rooms }) => {
+      // console.log(rooms);
+      setUsers(rooms);
     });
 
     return () => {

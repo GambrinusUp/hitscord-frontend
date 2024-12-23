@@ -1,10 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { ServerData, ServerItem } from '../../utils/types';
+import { ChannelMessage, ServerData, ServerItem } from '../../utils/types';
 import {
   changeRole,
+  createChannel,
+  createMessage,
   createServer,
+  deleteChannel,
+  deleteMessage,
   deleteServer,
+  editMessage,
+  getChannelMessages,
   getServerData,
   getUserServers,
   subscribeToServer,
@@ -14,6 +20,9 @@ interface ServerState {
   serversList: ServerItem[];
   serverData: ServerData;
   currentServerId: string | null;
+  currentChannelId: string | null;
+  currentVoiceChannelId: string | null;
+  messages: ChannelMessage[];
   isLoading: boolean;
   error: string;
 }
@@ -34,6 +43,9 @@ const initialState: ServerState = {
     },
   },
   currentServerId: null,
+  currentChannelId: null,
+  currentVoiceChannelId: null,
+  messages: [],
   isLoading: false,
   error: '',
 };
@@ -44,6 +56,31 @@ const testServerSlice = createSlice({
   reducers: {
     setCurrentServerId: (state, action: PayloadAction<string>) => {
       state.currentServerId = action.payload;
+    },
+    setCurrentChannelId: (state, action: PayloadAction<string | null>) => {
+      state.currentChannelId = action.payload;
+    },
+    setCurrentVoiceChannelId: (state, action: PayloadAction<string | null>) => {
+      state.currentVoiceChannelId = action.payload;
+    },
+    addMessage: (state, action: PayloadAction<ChannelMessage>) => {
+      state.messages.push(action.payload);
+    },
+    deleteMessageWs: (
+      state,
+      action: PayloadAction<{ channelId: string; messageId: string }>
+    ) => {
+      state.messages = state.messages.filter(
+        (message) => message.id !== action.payload.messageId
+      );
+    },
+    editMessageWs: (state, action: PayloadAction<ChannelMessage>) => {
+      const index = state.messages.findIndex(
+        (message) => message.id === action.payload.id
+      );
+      if (index !== -1) {
+        state.messages[index] = action.payload;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -67,12 +104,29 @@ const testServerSlice = createSlice({
       })
       .addCase(getServerData.pending, (state) => {
         state.isLoading = true;
+        state.serverData = {
+          serverId: '',
+          serverName: '',
+          roles: [],
+          userRoleId: '',
+          userRole: '',
+          users: [],
+          channels: {
+            textChannels: [],
+            voiceChannels: [],
+            announcementChannels: [],
+          },
+        };
         state.error = '';
       })
       .addCase(
         getServerData.fulfilled,
         (state, action: PayloadAction<ServerData>) => {
           state.serverData = action.payload;
+          state.currentChannelId =
+            action.payload.channels.textChannels.length > 0
+              ? action.payload.channels.textChannels[0].channelId
+              : null;
           state.isLoading = false;
           state.error = '';
         }
@@ -116,10 +170,78 @@ const testServerSlice = createSlice({
       })
       .addCase(subscribeToServer.rejected, (state, action) => {
         state.error = action.payload as string;
+      })
+      .addCase(getChannelMessages.pending, (state) => {
+        state.isLoading = true;
+        state.error = '';
+      })
+      .addCase(
+        getChannelMessages.fulfilled,
+        (state, action: PayloadAction<ChannelMessage[]>) => {
+          state.messages = action.payload;
+          state.isLoading = false;
+          state.error = '';
+        }
+      )
+      .addCase(getChannelMessages.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(createMessage.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(createMessage.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(createMessage.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(deleteMessage.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(deleteMessage.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(deleteMessage.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(editMessage.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(editMessage.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(editMessage.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(createChannel.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(createChannel.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(createChannel.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(deleteChannel.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(deleteChannel.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(deleteChannel.rejected, (state, action) => {
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { setCurrentServerId } = testServerSlice.actions;
+export const {
+  setCurrentServerId,
+  setCurrentChannelId,
+  setCurrentVoiceChannelId,
+  addMessage,
+  deleteMessageWs,
+  editMessageWs,
+} = testServerSlice.actions;
 
 export default testServerSlice.reducer;

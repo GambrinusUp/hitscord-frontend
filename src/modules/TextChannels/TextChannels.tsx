@@ -3,11 +3,12 @@ import { useDisclosure } from '@mantine/hooks';
 import { ChevronDown, ChevronRight, Hash, Plus, Settings } from 'lucide-react';
 import { useState } from 'react';
 
+import CreateChannelModal from '../../components/CreateChannelModal/CreateChannelModal';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { setUserStreamView } from '../../store/app/AppSettingsSlice';
 import { setCurrentChannel } from '../../store/server/ServerSlice';
-import { EditModal } from '../../utils/types';
-import CreateChannelModal from './components/CreateChannelModal/CreateChannelModal';
+import { ChannelType, EditModal } from '../../utils/types';
+import { styles } from './TextChannels.const';
 
 interface TextChannelsProps {
   onClose: () => void;
@@ -20,16 +21,15 @@ function TextChannels({ onClose }: TextChannelsProps) {
     channelModalOpened,
     { open: openChannelModal, close: closeChannelModal },
   ] = useDisclosure(false);
-  const { servers, currentServerId, currentChannelId } = useAppSelector(
-    (state) => state.serverStore
-  );
   const [isHovered, setIsHovered] = useState('');
   const [isEditing, setIsEditing] = useState<EditModal>({
     isEdit: false,
     initialData: '',
     channelId: '',
   });
-  const { serverData } = useAppSelector((state) => state.testServerStore);
+  const { serverData, currentServerId, currentChannelId } = useAppSelector(
+    (state) => state.testServerStore
+  );
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
 
   return (
@@ -65,8 +65,8 @@ function TextChannels({ onClose }: TextChannelsProps) {
         </Group>
         <Collapse in={opened} w="100%">
           <Stack gap="xs">
-            {Object.entries(servers['channel1'].textChannels).map(
-              ([channelId, channel]) => (
+            {serverData.channels.textChannels.map(
+              ({ channelId, channelName }) => (
                 <Box
                   key={channelId}
                   style={{
@@ -83,22 +83,10 @@ function TextChannels({ onClose }: TextChannelsProps) {
                     color="#ffffff"
                     justify="flex-start"
                     styles={{
-                      root: {
-                        backgroundColor:
-                          currentChannelId === channelId
-                            ? '#999999'
-                            : 'transparent',
-                        '--button-hover-color': '#4f4f4f',
-                        transition: 'color 0.3s ease',
-                        borderTopRightRadius:
-                          isHovered === channelId
-                            ? 0
-                            : 'var(--mantine-radius-default)',
-                        borderBottomRightRadius:
-                          isHovered === channelId
-                            ? 0
-                            : 'var(--mantine-radius-default)',
-                      },
+                      root: styles.buttonRoot(
+                        isHovered === channelId,
+                        currentChannelId === channelId
+                      ),
                     }}
                     fullWidth
                     onClick={() => {
@@ -107,7 +95,7 @@ function TextChannels({ onClose }: TextChannelsProps) {
                       onClose();
                     }}
                   >
-                    {channel.name}
+                    {channelName}
                   </Button>
                   {isAdmin && isHovered === channelId && (
                     <Button
@@ -117,21 +105,14 @@ function TextChannels({ onClose }: TextChannelsProps) {
                       justify="flex-start"
                       w="20px"
                       styles={{
-                        root: {
-                          backgroundColor:
-                            currentChannelId === channelId
-                              ? '#999999'
-                              : 'transparent',
-                          '--button-hover-color': '#4f4f4f',
-                          transition: 'color 0.3s ease',
-                          borderTopLeftRadius: 0,
-                          borderBottomLeftRadius: 0,
-                        },
+                        root: styles.buttonSettings(
+                          currentChannelId === channelId
+                        ),
                       }}
                       onClick={() => {
                         setIsEditing({
                           isEdit: true,
-                          initialData: channel.name,
+                          initialData: channelName,
                           channelId: channelId,
                         });
                         openChannelModal();
@@ -152,6 +133,7 @@ function TextChannels({ onClose }: TextChannelsProps) {
           onClose={closeChannelModal}
           isEdit={isEditing}
           serverId={currentServerId}
+          channelType={ChannelType.TEXT_CHANNEL}
         />
       )}
     </>

@@ -1,4 +1,4 @@
-import { Divider, Group, Menu, Stack, Text } from '@mantine/core';
+import { Divider, Group, Menu, Skeleton, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ChevronDown, Copy, Settings } from 'lucide-react';
 
@@ -14,7 +14,9 @@ interface SideBarProps {
 
 const SideBar = ({ onClose }: SideBarProps) => {
   const [opened, { open, close }] = useDisclosure(false);
-  const { serverData } = useAppSelector((state) => state.testServerStore);
+  const { serverData, isLoading } = useAppSelector(
+    (state) => state.testServerStore
+  );
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
 
   const copyToClipboard = (text: string) => {
@@ -34,7 +36,13 @@ const SideBar = ({ onClose }: SideBarProps) => {
         <Menu shadow="md" width={200}>
           <Menu.Target>
             <Group justify="space-between" style={{ cursor: 'pointer' }}>
-              <Text>{serverData.serverName}</Text>
+              {isLoading ? (
+                <>
+                  <Skeleton height={10} width="40%" radius="md" />
+                </>
+              ) : (
+                <Text>{serverData.serverName}</Text>
+              )}
               <ChevronDown />
             </Group>
           </Menu.Target>

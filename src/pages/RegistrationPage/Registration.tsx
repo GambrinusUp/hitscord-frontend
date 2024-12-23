@@ -19,7 +19,7 @@ const RegistrationPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { showError } = useNotification();
-  const { error } = useAppSelector((state) => state.userStore);
+  const { accessToken, error } = useAppSelector((state) => state.userStore);
 
   const form = useForm({
     initialValues: {
@@ -51,6 +51,12 @@ const RegistrationPage = () => {
       navigate('/main');
     }
   };
+
+  useEffect(() => {
+    if (accessToken) {
+      navigate('/main');
+    }
+  }, [accessToken, navigate]);
 
   useEffect(() => {
     if (error !== '') showError(error);

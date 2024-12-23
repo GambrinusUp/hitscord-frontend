@@ -1,4 +1,5 @@
 export interface User {
+  id: string;
   name: string;
   tag: string;
   mail: string;
@@ -57,6 +58,11 @@ export interface UserInList {
   userName: string;
 }
 
+export interface Room {
+  roomName: string;
+  users: UserInList[];
+}
+
 export interface ServerItem {
   serverId: string;
   serverName: string;
@@ -113,6 +119,20 @@ export interface ServerData {
   channels: {
     textChannels: TextChannel[];
     voiceChannels: VoiceChannel[];
-    announcementChannels: AnnouncementChannel[];
+    announcementChannels?: AnnouncementChannel[];
   };
+}
+
+export interface ChannelMessage {
+  id: string;
+  text: string;
+  authorId: string;
+  authorName: string;
+  createdAt: string;
+  modifiedAt: string | null;
+}
+
+export enum ChannelType {
+  TEXT_CHANNEL = 0,
+  VOICE_CHANNEL = 1,
 }
