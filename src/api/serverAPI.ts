@@ -153,6 +153,28 @@ const subscribeToServer = async (
   }
 };
 
+const unsubscribeFromServer = async (accessToken: string, serverId: string) => {
+  try {
+    const response = await fetch(`${API_URL}/user/unsubscribetest`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        serverId: serverId,
+      }),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error unsubscribe from server:', error);
+    throw error;
+  }
+};
+
 export const serverAPI = {
   getServers: getServers,
   getServerData: getServerData,
@@ -160,4 +182,5 @@ export const serverAPI = {
   deleteServer: deleteServer,
   changeRole: changeRole,
   subscribeToServer: subscribeToServer,
+  unsubscribeFromServer: unsubscribeFromServer,
 };

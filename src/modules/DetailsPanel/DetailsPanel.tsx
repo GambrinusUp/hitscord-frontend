@@ -45,9 +45,10 @@ const DetailsPanel = () => {
                   </Avatar>
                   <Text c="white">{user.userName}</Text>
                   <Badge
+                    fullWidth
                     color="green"
                     radius="sm"
-                    style={{ marginLeft: 'auto' }}
+                    style={{ marginLeft: 'auto', maxWidth: 100 }}
                   >
                     {user.roleName}
                   </Badge>

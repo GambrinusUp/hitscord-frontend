@@ -124,12 +124,16 @@ export interface ServerData {
 }
 
 export interface ChannelMessage {
+  serverId: string;
+  channelId: string;
   id: string;
   text: string;
   authorId: string;
   authorName: string;
   createdAt: string;
   modifiedAt: string | null;
+  nestedChannelId: boolean | null;
+  replyToMessage: string | null;
 }
 
 export enum ChannelType {

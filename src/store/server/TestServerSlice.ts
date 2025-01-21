@@ -1,6 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { ChannelMessage, ServerData, ServerItem } from '../../utils/types';
+import {
+  ChannelMessage,
+  ServerData,
+  ServerItem,
+  UserOnServer,
+} from '../../utils/types';
 import {
   changeRole,
   createChannel,
@@ -14,6 +19,7 @@ import {
   getServerData,
   getUserServers,
   subscribeToServer,
+  unsubscribeFromServer,
 } from './ServerActionCreators';
 
 interface ServerState {
@@ -64,7 +70,10 @@ const testServerSlice = createSlice({
       state.currentVoiceChannelId = action.payload;
     },
     addMessage: (state, action: PayloadAction<ChannelMessage>) => {
-      state.messages.push(action.payload);
+      const { channelId } = action.payload;
+      if (channelId === state.currentChannelId) {
+        state.messages.push(action.payload);
+      }
     },
     deleteMessageWs: (
       state,
@@ -80,6 +89,19 @@ const testServerSlice = createSlice({
       );
       if (index !== -1) {
         state.messages[index] = action.payload;
+      }
+    },
+    addUserWs: (state, action: PayloadAction<UserOnServer>) => {
+      state.serverData.users.push(action.payload);
+    },
+    deleteUserWs: (
+      state,
+      action: PayloadAction<{ UserId: string; ServerId: string }>
+    ) => {
+      if (action.payload.ServerId === state.currentServerId) {
+        state.serverData.users = state.serverData.users.filter(
+          (user) => user.userId !== action.payload.UserId
+        );
       }
     },
   },
@@ -104,6 +126,8 @@ const testServerSlice = createSlice({
       })
       .addCase(getServerData.pending, (state) => {
         state.isLoading = true;
+        state.messages = [];
+        state.currentChannelId = null;
         state.serverData = {
           serverId: '',
           serverName: '',
@@ -231,6 +255,15 @@ const testServerSlice = createSlice({
       })
       .addCase(deleteChannel.rejected, (state, action) => {
         state.error = action.payload as string;
+      })
+      .addCase(unsubscribeFromServer.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(unsubscribeFromServer.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(unsubscribeFromServer.rejected, (state, action) => {
+        state.error = action.payload as string;
       });
   },
 });
@@ -242,6 +275,8 @@ export const {
   addMessage,
   deleteMessageWs,
   editMessageWs,
+  addUserWs,
+  deleteUserWs,
 } = testServerSlice.actions;
 
 export default testServerSlice.reducer;

@@ -114,6 +114,23 @@ export const subscribeToServer = createAsyncThunk<
   }
 );
 
+export const unsubscribeFromServer = createAsyncThunk<
+  void,
+  { accessToken: string; serverId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/unsubscribeFromServer',
+  async ({ accessToken, serverId }, { rejectWithValue }) => {
+    try {
+      await serverAPI.unsubscribeFromServer(accessToken, serverId);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка'
+      );
+    }
+  }
+);
+
 export const getChannelMessages = createAsyncThunk<
   ChannelMessage[],
   {
@@ -151,13 +168,22 @@ export const createMessage = createAsyncThunk<
     accessToken: string;
     channelId: string;
     text: string;
+    nestedChannel: boolean;
   },
   { rejectValue: string }
 >(
   'testServerSlice/createMessage',
-  async ({ accessToken, channelId, text }, { rejectWithValue }) => {
+  async (
+    { accessToken, channelId, text, nestedChannel },
+    { rejectWithValue }
+  ) => {
     try {
-      await messagesAPI.createMessage(accessToken, channelId, text);
+      await messagesAPI.createMessage(
+        accessToken,
+        channelId,
+        text,
+        nestedChannel
+      );
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка'

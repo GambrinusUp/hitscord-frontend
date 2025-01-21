@@ -3,7 +3,8 @@ import { API_URL } from '../utils/constants';
 const createMessage = async (
   accessToken: string,
   channelId: string,
-  text: string
+  text: string,
+  nestedChannel: boolean
 ) => {
   try {
     const response = await fetch(`${API_URL}/message/createmessage`, {
@@ -15,6 +16,7 @@ const createMessage = async (
       body: JSON.stringify({
         channelId: channelId,
         text: text,
+        nestedChannel: nestedChannel,
       }),
     });
     if (!response.ok) {

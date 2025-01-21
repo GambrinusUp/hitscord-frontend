@@ -6,23 +6,15 @@ import {
   ScrollArea,
   Skeleton,
   Stack,
+  Textarea,
   TextInput,
 } from '@mantine/core';
 import { Menu, Paperclip, Search, Send, Users } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import MessageItem from '../../components/MessageItem/MessageItem';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import {
-  createMessage,
-  getChannelMessages,
-} from '../../store/server/ServerActionCreators';
-import {
-  addMessage,
-  deleteMessageWs,
-  editMessageWs,
-} from '../../store/server/TestServerSlice';
-import { formatMessage } from './ChatSection.utils';
+import { createMessage } from '../../store/server/ServerActionCreators';
 
 interface ChatSectionProps {
   openSidebar: () => void;
@@ -43,78 +35,18 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
           accessToken: accessToken,
           channelId: currentChannelId,
           text: newMessage.trim(),
+          nestedChannel: false,
         })
       );
       setNewMessage('');
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
       handleSendMessage();
     }
   };
-
-  useEffect(() => {
-    if (accessToken) {
-      const ws = new WebSocket(
-        `wss://hitscord-backend.online/ws?accessToken=${accessToken}`
-      );
-
-      ws.onopen = () => {
-        console.log('WebSocket connection established');
-      };
-
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-
-        if (data.MessageType === 'New message') {
-          const formattedMessage = formatMessage(data.Payload);
-          if (formattedMessage.id && formattedMessage.text) {
-            dispatch(addMessage(formattedMessage));
-          }
-        }
-
-        if (data.MessageType === 'Deleted message') {
-          dispatch(
-            deleteMessageWs({
-              channelId: data.Payload.ChannelId,
-              messageId: data.Payload.MessageId,
-            })
-          );
-        }
-
-        if (data.MessageType === 'Updated message') {
-          const formattedMessage = formatMessage(data.Payload);
-          dispatch(editMessageWs(formattedMessage));
-        }
-      };
-
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-
-      ws.onclose = () => {
-        console.log('WebSocket connection closed');
-      };
-
-      return () => {
-        ws.close();
-      };
-    }
-  }, [accessToken, currentChannelId, dispatch]);
-
-  useEffect(() => {
-    if (currentChannelId && accessToken)
-      dispatch(
-        getChannelMessages({
-          accessToken,
-          channelId: currentChannelId,
-          numberOfMessages: 100,
-          fromStart: 0,
-        })
-      );
-  }, [accessToken, currentChannelId, dispatch]);
 
   return (
     <Box
@@ -170,12 +102,15 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
         <ActionIcon size="xl" variant="transparent">
           <Paperclip size={20} />
         </ActionIcon>
-        <TextInput
+        <Textarea
           w="100%"
           placeholder="Написать..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDownCapture={handleKeyDown}
+          autosize
+          minRows={1}
+          maxRows={3}
         />
         <ActionIcon size="xl" variant="transparent" onClick={handleSendMessage}>
           <Send size={20} />

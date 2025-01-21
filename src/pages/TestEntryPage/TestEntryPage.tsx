@@ -2,11 +2,11 @@ import { Button, Flex, Paper, Stack, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppDispatch } from '../../hooks/redux';
-import { setUserName } from '../../store/user/UserSlice';
+//import { useAppDispatch } from '../../hooks/redux';
+//import { setUserName } from '../../store/user/UserSlice';
 
 const TestEntryPage = () => {
-  const dispatch = useAppDispatch();
+  //const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const form = useForm({
@@ -21,7 +21,8 @@ const TestEntryPage = () => {
   });
 
   const handleSubmit = async (values: typeof form.values) => {
-    dispatch(setUserName(values.name));
+    alert(values.name);
+    //dispatch(setUserName(values.name));
     navigate('/main');
   };
 

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import CreateChannelModal from '../../components/CreateChannelModal/CreateChannelModal';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { setUserStreamView } from '../../store/app/AppSettingsSlice';
-import { setCurrentChannel } from '../../store/server/ServerSlice';
+import { setCurrentChannelId } from '../../store/server/TestServerSlice';
 import { ChannelType, EditModal } from '../../utils/types';
 import { styles } from './TextChannels.const';
 
@@ -90,7 +90,7 @@ function TextChannels({ onClose }: TextChannelsProps) {
                     }}
                     fullWidth
                     onClick={() => {
-                      dispatch(setCurrentChannel(channelId));
+                      dispatch(setCurrentChannelId(channelId));
                       dispatch(setUserStreamView(false));
                       onClose();
                     }}

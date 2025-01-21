@@ -11,14 +11,7 @@ interface Thread {
 }
 
 const threads: Thread[] = [
-  { id: '1', name: 'Alice', lastMessage: 'Hello!', date: '14.12.2024' },
-  {
-    id: '2',
-    name: 'Charlie',
-    lastMessage: 'See you tomorrow!',
-    date: '3.12.2024',
-  },
-  { id: '3', name: 'Bob', lastMessage: 'What’s up?', date: '24.11.2024' },
+  { id: '1', name: 'Сообщений', lastMessage: 'пока нет(', date: '14.12.2024' },
 ];
 
 const ProfileThreadsPanel = () => {

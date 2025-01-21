@@ -12,8 +12,12 @@ import Profile from '../../modules/Profile/Profile';
 import ServerPanel from '../../modules/ServerPanel/ServerPanel';
 import SideBarMobile from '../../modules/SideBar/Components/SideBarMobile/SideBarMobile';
 import SideBar from '../../modules/SideBar/SideBar';
-import { getServerData } from '../../store/server/ServerActionCreators';
+import {
+  getChannelMessages,
+  getServerData,
+} from '../../store/server/ServerActionCreators';
 import { getUserProfile } from '../../store/user/UserActionCreators';
+import useWebSocketHandler from './TestMainPage.hooks';
 
 const TestMainPage = () => {
   const navigate = useNavigate();
@@ -24,12 +28,19 @@ const TestMainPage = () => {
   const { accessToken, isLoggedIn } = useAppSelector(
     (state) => state.userStore
   );
-  const { currentServerId } = useAppSelector((state) => state.testServerStore);
+  const { currentServerId, currentChannelId, currentVoiceChannelId } =
+    useAppSelector((state) => state.testServerStore);
   const [sidebarOpened, { open, close }] = useDisclosure(false);
   const [
     detailsPanelOpened,
     { open: openDetailsPanel, close: closeDetailsPanel },
   ] = useDisclosure(false);
+  useWebSocketHandler({
+    accessToken,
+    dispatch,
+    serverId: currentServerId,
+    currentVoiceChannelId,
+  });
 
   useEffect(() => {
     if (!isLoggedIn) navigate('/');
@@ -43,6 +54,18 @@ const TestMainPage = () => {
     if (currentServerId && accessToken)
       dispatch(getServerData({ accessToken, serverId: currentServerId }));
   }, [accessToken, currentServerId, dispatch]);
+
+  useEffect(() => {
+    if (currentChannelId && accessToken)
+      dispatch(
+        getChannelMessages({
+          accessToken,
+          channelId: currentChannelId,
+          numberOfMessages: 100,
+          fromStart: 0,
+        })
+      );
+  }, [accessToken, currentChannelId, dispatch]);
 
   return (
     <Box style={{ display: 'flex', height: '100dvh' }}>

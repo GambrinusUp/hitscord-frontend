@@ -1,7 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 
-//const socket: Socket = io('https://hitscord-backend.ru/mediasoup');
-const socket: Socket = io('https://192.168.0.101:3000/mediasoup');
+import { WEBSOCKET_MEDIA_URL } from '../utils/constants';
+
+const socket: Socket = io(WEBSOCKET_MEDIA_URL);
 
 socket.on('connection-success', ({ socketId }: { socketId: string }) => {
   console.log('Connected with socketId', socketId);

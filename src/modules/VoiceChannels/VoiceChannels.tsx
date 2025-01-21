@@ -22,6 +22,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import React from 'react';
 
+import socket from '../../api/socket';
 import CreateChannelModal from '../../components/CreateChannelModal/CreateChannelModal';
 import { useMediaContext } from '../../context/MediaContext/useMediaContext';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
@@ -109,6 +110,21 @@ function VoiceChannels() {
     openChannelModal();
   };
 
+  const handleKickUser = (socketId: string) => {
+    console.log(socketId);
+    socket.emit(
+      'kickUser',
+      { targetSocketId: socketId },
+      (response: { success: boolean; message: string }) => {
+        if (response.success) {
+          console.log('Пользователь успешно кикнут:', response.message);
+        } else {
+          console.error('Ошибка кикания пользователя:', response.message);
+        }
+      }
+    );
+  };
+
   useEffect(() => {
     consumers.forEach((consumer) => {
       if (consumer.kind === 'audio') {
@@ -143,6 +159,20 @@ function VoiceChannels() {
       audioRefs.current.clear();
     };
   }, [consumers, userVolumes]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('kickedUser', () => {
+      disconnect();
+      dispatch(setUserStreamView(false));
+      dispatch(setCurrentVoiceChannelId(null));
+    });
+
+    return () => {
+      socket.off('producerClosed');
+    };
+  }, [disconnect, dispatch]);
 
   return (
     <>
@@ -291,6 +321,16 @@ function VoiceChannels() {
                                       }}
                                     >
                                       Открыть стрим
+                                    </Menu.Item>
+                                  )}
+                                  {isAdmin && (
+                                    <Menu.Item
+                                      leftSection={<Video />}
+                                      onClick={() => {
+                                        handleKickUser(socketId);
+                                      }}
+                                    >
+                                      Отключить пользователя
                                     </Menu.Item>
                                   )}
                                 </Menu.Dropdown>

@@ -1,8 +1,14 @@
 import { Divider, Group, Menu, Skeleton, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ChevronDown, Copy, Settings } from 'lucide-react';
+import { ChevronDown, Copy, DoorOpen, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-import { useAppSelector } from '../../hooks/redux';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux';
+import { setOpenHome } from '../../store/app/AppSettingsSlice';
+import {
+  getUserServers,
+  unsubscribeFromServer,
+} from '../../store/server/ServerActionCreators';
 import TextChannels from '../TextChannels/TextChannels';
 import VoiceChannels from '../VoiceChannels/VoiceChannels';
 import Panel from './Components/Panel/Panel';
@@ -13,14 +19,28 @@ interface SideBarProps {
 }
 
 const SideBar = ({ onClose }: SideBarProps) => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [opened, { open, close }] = useDisclosure(false);
   const { serverData, isLoading } = useAppSelector(
     (state) => state.testServerStore
   );
+  const { accessToken } = useAppSelector((state) => state.userStore);
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+  };
+
+  const handleUnsubscribe = async () => {
+    const result = await dispatch(
+      unsubscribeFromServer({ accessToken, serverId: serverData.serverId })
+    );
+    if (result.meta.requestStatus === 'fulfilled') {
+      dispatch(getUserServers({ accessToken }));
+      dispatch(setOpenHome(true));
+      navigate('/main');
+    }
   };
 
   return (
@@ -58,6 +78,14 @@ const SideBar = ({ onClose }: SideBarProps) => {
             >
               Копировать ID сервера
             </Menu.Item>
+            {!isAdmin && (
+              <Menu.Item
+                onClick={handleUnsubscribe}
+                leftSection={<DoorOpen size={16} />}
+              >
+                Отписаться от сервера
+              </Menu.Item>
+            )}
           </Menu.Dropdown>
         </Menu>
         <Divider />

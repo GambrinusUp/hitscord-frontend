@@ -103,6 +103,10 @@ export const UserSlice = createSlice({
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.error = action.payload as string;
+        state.accessToken = '';
+        state.refreshToken = '';
+        localStorage.setItem('accessToken', '');
+        state.isLoggedIn = false;
       });
   },
 });
