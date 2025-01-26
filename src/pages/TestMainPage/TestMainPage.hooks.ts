@@ -62,16 +62,22 @@ const useWebSocketHandler = ({
 
         if (data.MessageType === 'New user on server') {
           const formattedUser = formatUser(data.Payload);
-          dispatch(addUserWs(formattedUser));
+          const { ServerId } = data.Payload;
+          if (serverId === ServerId) {
+            dispatch(addUserWs(formattedUser));
+          }
         }
 
         if (data.MessageType === 'User unsubscribe') {
           const { UserId, ServerId } = data.Payload;
-          dispatch(deleteUserWs({ UserId, ServerId }));
+          if (serverId === ServerId) {
+            dispatch(deleteUserWs({ UserId, ServerId }));
+          }
         }
 
         if (data.MessageType === 'Role changed') {
-          if (accessToken && serverId) {
+          const { ServerId } = data.Payload;
+          if (accessToken && serverId && serverId === ServerId) {
             dispatch(getServerData({ accessToken, serverId }));
           }
         }
@@ -87,7 +93,9 @@ const useWebSocketHandler = ({
             ) {
               disconnect();
             }
-            dispatch(getServerData({ accessToken, serverId }));
+            if (serverId === data.Payload.ServerId) {
+              dispatch(getServerData({ accessToken, serverId }));
+            }
           }
         }
       };
@@ -102,7 +110,7 @@ const useWebSocketHandler = ({
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, currentVoiceChannelId, dispatch]);
+  }, [accessToken, serverId, currentVoiceChannelId, dispatch]);
 };
 
 export default useWebSocketHandler;

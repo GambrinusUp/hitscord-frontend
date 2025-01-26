@@ -91,7 +91,10 @@ const testServerSlice = createSlice({
         state.messages[index] = action.payload;
       }
     },
+    // Проверку на добавление на конкретном сервере
     addUserWs: (state, action: PayloadAction<UserOnServer>) => {
+      console.log(state.currentServerId);
+      console.log(state.serverData.users);
       state.serverData.users.push(action.payload);
     },
     deleteUserWs: (
@@ -103,6 +106,24 @@ const testServerSlice = createSlice({
           (user) => user.userId !== action.payload.UserId
         );
       }
+    },
+    clearServerData: (state) => {
+      state.messages = [];
+      state.currentServerId = null;
+      state.currentChannelId = null;
+      state.serverData = {
+        serverId: '',
+        serverName: '',
+        roles: [],
+        userRoleId: '',
+        userRole: '',
+        users: [],
+        channels: {
+          textChannels: [],
+          voiceChannels: [],
+          announcementChannels: [],
+        },
+      };
     },
   },
   extraReducers: (builder) => {
@@ -277,6 +298,7 @@ export const {
   editMessageWs,
   addUserWs,
   deleteUserWs,
+  clearServerData,
 } = testServerSlice.actions;
 
 export default testServerSlice.reducer;

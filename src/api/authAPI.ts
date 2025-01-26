@@ -69,7 +69,10 @@ const getProfile = async (accessToken: string): Promise<User> => {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || `Error: ${response.status}`);
+      throw {
+        message: data.message || 'Unknown error',
+        status: response.status,
+      };
     }
 
     return data;
@@ -98,9 +101,33 @@ const logout = async (accessToken: string) => {
   }
 };
 
+const refreshToken = async (refreshToken: string): Promise<LoginResponse> => {
+  try {
+    const response = await fetch(`${API_URL}/auth/refreshTokens`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error refresh tokens:', error);
+    throw error;
+  }
+};
+
 export const authAPI = {
   registerUser: registerUser,
   loginUser: loginUser,
   getProfile: getProfile,
   logout: logout,
+  refreshToken: refreshToken,
 };

@@ -10,7 +10,7 @@ import {
   TextInput,
 } from '@mantine/core';
 import { Menu, Paperclip, Search, Send, Users } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import MessageItem from '../../components/MessageItem/MessageItem';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
@@ -23,6 +23,7 @@ interface ChatSectionProps {
 
 const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
   const dispatch = useAppDispatch();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const { user, accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId, currentChannelId, messages, isLoading } =
     useAppSelector((state) => state.testServerStore);
@@ -44,9 +45,25 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
       handleSendMessage();
     }
   };
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [messages]);
 
   return (
     <Box
@@ -72,7 +89,7 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
         </ActionIcon>
       </Group>
       <Divider my="md" />
-      <ScrollArea style={{ flex: 1 }}>
+      <ScrollArea viewportRef={scrollRef} style={{ flex: 1, padding: 10 }}>
         <Stack gap="sm">
           {isLoading &&
             messages.length < 1 &&

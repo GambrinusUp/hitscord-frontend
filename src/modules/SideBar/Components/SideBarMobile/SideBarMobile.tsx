@@ -1,8 +1,19 @@
-import { Divider, Drawer, Stack, Text } from '@mantine/core';
+import { Divider, Drawer, Group, Menu, Skeleton, Text } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { ChevronDown, Copy, DoorOpen, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
+import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
+import { setOpenHome } from '../../../../store/app/AppSettingsSlice';
+import {
+  getUserServers,
+  unsubscribeFromServer,
+} from '../../../../store/server/ServerActionCreators';
+import { clearServerData } from '../../../../store/server/TestServerSlice';
 import TextChannels from '../../../TextChannels/TextChannels';
 import VoiceChannels from '../../../VoiceChannels/VoiceChannels';
 import Panel from '../Panel/Panel';
+import ServerSettingsModal from '../ServerSettingsModal/ServerSettingsModal';
 
 interface SideBarMobileProps {
   onClose: () => void;
@@ -10,6 +21,31 @@ interface SideBarMobileProps {
 }
 
 const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [openedModal, { open, close }] = useDisclosure(false);
+  const { serverData, isLoading } = useAppSelector(
+    (state) => state.testServerStore
+  );
+  const { accessToken } = useAppSelector((state) => state.userStore);
+  const isAdmin = serverData.userRole === 'Admin' ? true : false;
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const handleUnsubscribe = async () => {
+    const result = await dispatch(
+      unsubscribeFromServer({ accessToken, serverId: serverData.serverId })
+    );
+    if (result.meta.requestStatus === 'fulfilled') {
+      dispatch(getUserServers({ accessToken }));
+      dispatch(setOpenHome(true));
+      dispatch(clearServerData());
+      navigate('/main');
+    }
+  };
+
   return (
     <>
       <Drawer
@@ -29,14 +65,47 @@ const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
           },
         }}
       >
-        <Stack gap="xs" bg="#1A1B1E" p={10} h="100%">
-          <Text>Сервер #1</Text>
-          <Divider />
-          <TextChannels onClose={onClose} />
-          <VoiceChannels />
-          <Panel />
-        </Stack>
+        <Menu shadow="md" width={200}>
+          <Menu.Target>
+            <Group justify="space-between" style={{ cursor: 'pointer' }}>
+              {isLoading ? (
+                <>
+                  <Skeleton height={10} width="40%" radius="md" />
+                </>
+              ) : (
+                <Text>{serverData.serverName}</Text>
+              )}
+              <ChevronDown />
+            </Group>
+          </Menu.Target>
+          <Menu.Dropdown>
+            {isAdmin && (
+              <Menu.Item leftSection={<Settings size={16} />} onClick={open}>
+                Настройки сервера
+              </Menu.Item>
+            )}
+            <Menu.Item
+              onClick={() => copyToClipboard(serverData.serverId)}
+              leftSection={<Copy size={16} />}
+            >
+              Копировать ID сервера
+            </Menu.Item>
+            {!isAdmin && (
+              <Menu.Item
+                onClick={handleUnsubscribe}
+                leftSection={<DoorOpen size={16} />}
+              >
+                Отписаться от сервера
+              </Menu.Item>
+            )}
+          </Menu.Dropdown>
+        </Menu>
+        <Divider />
+        <TextChannels onClose={onClose} />
+        <VoiceChannels />
+        <Panel />
       </Drawer>
+      <ServerSettingsModal opened={openedModal} onClose={close} />
     </>
   );
 };

@@ -280,12 +280,18 @@ function VoiceChannels() {
                                   >
                                     <User
                                       color={isSpeaking ? '#43b581' : undefined}
+                                      style={{
+                                        flexShrink: 0,
+                                      }}
                                     />
-                                    <Text truncate>{userName}</Text>
+                                    <Text truncate="end">{userName}</Text>
                                     {producerIds.length > 1 && (
                                       <Video
                                         color="#43b581"
-                                        style={{ marginLeft: 'auto' }}
+                                        style={{
+                                          marginLeft: 'auto',
+                                          flexShrink: 0,
+                                        }}
                                       />
                                     )}
                                   </Group>

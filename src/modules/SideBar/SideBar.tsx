@@ -9,6 +9,7 @@ import {
   getUserServers,
   unsubscribeFromServer,
 } from '../../store/server/ServerActionCreators';
+import { clearServerData } from '../../store/server/TestServerSlice';
 import TextChannels from '../TextChannels/TextChannels';
 import VoiceChannels from '../VoiceChannels/VoiceChannels';
 import Panel from './Components/Panel/Panel';
@@ -39,6 +40,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
     if (result.meta.requestStatus === 'fulfilled') {
       dispatch(getUserServers({ accessToken }));
       dispatch(setOpenHome(true));
+      dispatch(clearServerData());
       navigate('/main');
     }
   };

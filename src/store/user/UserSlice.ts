@@ -5,13 +5,19 @@ import {
   getUserProfile,
   loginUser,
   logoutUser,
+  refreshTokens,
   registerUser,
 } from './UserActionCreators';
 
-const loadTokenFromLocalStorage = () => {
+enum TokenType {
+  ACCESS = 'accessToken',
+  REFRESH = 'refreshToken',
+}
+
+const loadTokenFromLocalStorage = (type: TokenType): string => {
   try {
-    const token = localStorage.getItem('accessToken');
-    return token ? token : '';
+    const token = localStorage.getItem(type);
+    return token || '';
   } catch (err) {
     console.error('Could not load token', err);
     return '';
@@ -37,9 +43,9 @@ const initialState: UserState = {
     accontCreateDate: '',
   },
   roomName: '11',
-  accessToken: loadTokenFromLocalStorage(),
-  refreshToken: '',
-  isLoggedIn: !!loadTokenFromLocalStorage(),
+  accessToken: loadTokenFromLocalStorage(TokenType.ACCESS),
+  refreshToken: loadTokenFromLocalStorage(TokenType.REFRESH),
+  isLoggedIn: !!loadTokenFromLocalStorage(TokenType.ACCESS),
   error: '',
   isLoading: false,
 };
@@ -56,6 +62,7 @@ export const UserSlice = createSlice({
       .addCase(
         registerUser.fulfilled,
         (state, action: PayloadAction<LoginResponse>) => {
+          state.error = '';
           state.accessToken = action.payload.accessToken;
           state.refreshToken = action.payload.refreshToken;
           localStorage.setItem('accessToken', action.payload.accessToken);
@@ -71,6 +78,7 @@ export const UserSlice = createSlice({
       .addCase(
         loginUser.fulfilled,
         (state, action: PayloadAction<LoginResponse>) => {
+          state.error = '';
           state.accessToken = action.payload.accessToken;
           state.refreshToken = action.payload.refreshToken;
           localStorage.setItem('accessToken', action.payload.accessToken);
@@ -86,6 +94,7 @@ export const UserSlice = createSlice({
       .addCase(
         getUserProfile.fulfilled,
         (state, action: PayloadAction<User>) => {
+          state.error = '';
           state.user = action.payload;
         }
       )
@@ -96,6 +105,7 @@ export const UserSlice = createSlice({
         state.error = '';
       })
       .addCase(logoutUser.fulfilled, (state) => {
+        state.error = '';
         state.accessToken = '';
         state.refreshToken = '';
         localStorage.setItem('accessToken', '');
@@ -107,6 +117,27 @@ export const UserSlice = createSlice({
         state.refreshToken = '';
         localStorage.setItem('accessToken', '');
         state.isLoggedIn = false;
+      })
+      .addCase(refreshTokens.pending, (state) => {
+        state.error = '';
+        state.accessToken = '';
+        state.refreshToken = '';
+        state.isLoading = true;
+      })
+      .addCase(
+        refreshTokens.fulfilled,
+        (state, action: PayloadAction<LoginResponse>) => {
+          state.error = '';
+          state.isLoading = false;
+          state.accessToken = action.payload.accessToken;
+          state.refreshToken = action.payload.refreshToken;
+          localStorage.setItem('accessToken', action.payload.accessToken);
+          localStorage.setItem('refreshToken', action.payload.refreshToken);
+        }
+      )
+      .addCase(refreshTokens.rejected, (state, action) => {
+        state.error = action.payload as string;
+        state.isLoading = false;
       });
   },
 });

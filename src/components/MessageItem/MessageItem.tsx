@@ -66,6 +66,7 @@ const MessageItem = ({
           maxWidth: '75%',
           display: 'flex',
           flexDirection: 'column',
+          width: isEditing ? '100%' : 'auto',
         }}
       >
         {isEditing ? (
@@ -74,7 +75,12 @@ const MessageItem = ({
             onChange={(e) => setEditedContent(e.currentTarget.value)}
             autosize
             minRows={1}
-            style={{ marginBottom: '4px' }}
+            style={{
+              marginBottom: '4px',
+              width: '100%',
+              flexGrow: 1,
+              boxSizing: 'border-box',
+            }}
           />
         ) : (
           <Text
@@ -87,57 +93,47 @@ const MessageItem = ({
             {content}
           </Text>
         )}
-        <Text
-          style={{
-            marginTop: '4px',
-            fontSize: '12px',
-            color: isOwnMessage ? '#D1D5DB' : '#9CA3AF',
-            alignSelf: isOwnMessage ? 'flex-end' : 'flex-start',
-          }}
-        >
-          {formatDateTime(time)}
-          {modifiedAt && (
-            <span style={{ marginLeft: '8px', fontStyle: 'italic' }}>
-              (Отредактировано: {formatDateTime(modifiedAt)})
-            </span>
-          )}
-        </Text>
-
-        {isOwnMessage && isHovered && (
-          <Group
-            justify="flex-end"
-            gap="xs"
-            p={4}
+        <Group justify="space-between">
+          <Text
             style={{
-              position: 'absolute',
-              top: '64px',
-              right: '0px',
-              backgroundColor: 'rgba(0, 0, 0, 0.6)',
-              borderRadius: '4px',
-              zIndex: 10,
+              marginTop: '4px',
+              fontSize: '12px',
+              color: isOwnMessage ? '#D1D5DB' : '#9CA3AF',
+              alignSelf: 'flex-start',
             }}
           >
-            {isEditing ? (
-              <>
-                <ActionIcon color="green" onClick={handleEdit}>
-                  <Check size={16} />
-                </ActionIcon>
-                <ActionIcon color="red" onClick={() => setIsEditing(false)}>
-                  <X size={16} />
-                </ActionIcon>
-              </>
-            ) : (
-              <>
-                <ActionIcon color="blue" onClick={() => setIsEditing(true)}>
-                  <Edit2 size={16} />
-                </ActionIcon>
-                <ActionIcon color="red" onClick={handleDelete}>
-                  <Trash2 size={16} />
-                </ActionIcon>
-              </>
+            {formatDateTime(time)}
+            {modifiedAt && (
+              <span style={{ marginLeft: '8px', fontStyle: 'italic' }}>
+                {/*  (Отредактировано: {formatDateTime(modifiedAt)})*/}
+                Изменено
+              </span>
             )}
-          </Group>
-        )}
+          </Text>
+          {isOwnMessage && (isHovered || isEditing) && (
+            <Group justify="flex-end" gap="xs" p={4}>
+              {isEditing ? (
+                <>
+                  <ActionIcon color="green" onClick={handleEdit}>
+                    <Check size={16} />
+                  </ActionIcon>
+                  <ActionIcon color="red" onClick={() => setIsEditing(false)}>
+                    <X size={16} />
+                  </ActionIcon>
+                </>
+              ) : (
+                <>
+                  <ActionIcon color="blue" onClick={() => setIsEditing(true)}>
+                    <Edit2 size={16} />
+                  </ActionIcon>
+                  <ActionIcon color="red" onClick={handleDelete}>
+                    <Trash2 size={16} />
+                  </ActionIcon>
+                </>
+              )}
+            </Group>
+          )}
+        </Group>
       </Box>
     </Group>
   );
