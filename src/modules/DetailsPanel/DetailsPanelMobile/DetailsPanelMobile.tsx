@@ -5,7 +5,7 @@ import {
   Divider,
   Drawer,
   Group,
-  Skeleton,
+  ScrollArea,
   Stack,
   Text,
 } from '@mantine/core';
@@ -18,9 +18,7 @@ interface DetailsPanelMobileProps {
 }
 
 const DetailsPanelMobile = ({ onClose, opened }: DetailsPanelMobileProps) => {
-  const { serverData, isLoading } = useAppSelector(
-    (state) => state.testServerStore
-  );
+  const { serverData } = useAppSelector((state) => state.testServerStore);
 
   return (
     <>
@@ -42,40 +40,30 @@ const DetailsPanelMobile = ({ onClose, opened }: DetailsPanelMobileProps) => {
           },
         }}
       >
-        <Box style={{ padding: '10px', backgroundColor: '#1A1B1E' }}>
-          <Stack gap="md">
+        <Box style={{ padding: '10px', backgroundColor: '#1A1B1E' }} h="100%">
+          <Stack gap="md" h="100%">
             <Text c="white">Пользователи</Text>
             <Divider color="gray" />
-            <Stack>
-              {isLoading
-                ? Array.from({ length: 5 }).map((_, index) => (
-                    <Group key={index} gap="sm" align="center">
-                      <Skeleton circle height={40} width={40} />
-                      <Skeleton height={16} width="30%" />
-                      <Skeleton
-                        height={16}
-                        width="20%"
-                        style={{ marginLeft: 'auto' }}
-                      />
-                    </Group>
-                  ))
-                : serverData.users.map((user) => (
-                    <Group key={user.userId} wrap="nowrap">
-                      <Avatar size="md" color="blue">
-                        {user.userName}
-                      </Avatar>
-                      <Text c="white">{user.userName}</Text>
-                      <Badge
-                        fullWidth
-                        color="green"
-                        radius="sm"
-                        style={{ marginLeft: 'auto', maxWidth: 100 }}
-                      >
-                        {user.roleName}
-                      </Badge>
-                    </Group>
-                  ))}
-            </Stack>
+            <ScrollArea.Autosize mah="100%" maw="100%">
+              <Stack gap="xs">
+                {serverData.users.map((user) => (
+                  <Group key={user.userId} wrap="nowrap">
+                    <Avatar size="md" color="blue">
+                      {user.userName}
+                    </Avatar>
+                    <Text c="white">{user.userName}</Text>
+                    <Badge
+                      fullWidth
+                      color="green"
+                      radius="sm"
+                      style={{ marginLeft: 'auto', maxWidth: 100 }}
+                    >
+                      {user.roleName}
+                    </Badge>
+                  </Group>
+                ))}
+              </Stack>
+            </ScrollArea.Autosize>
           </Stack>
         </Box>
       </Drawer>

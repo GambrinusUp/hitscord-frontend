@@ -1,14 +1,14 @@
-import { ActionIcon, Box, Button, Collapse, Group, Stack } from '@mantine/core';
+import { ActionIcon, Button, Collapse, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ChevronDown, ChevronRight, Hash, Plus, Settings } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import CreateChannelModal from '../../components/CreateChannelModal/CreateChannelModal';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { setUserStreamView } from '../../store/app/AppSettingsSlice';
 import { setCurrentChannelId } from '../../store/server/TestServerSlice';
 import { ChannelType, EditModal } from '../../utils/types';
-import { styles } from './TextChannels.const';
+import { ChannelItem } from './components/ChannelItem';
 
 interface TextChannelsProps {
   onClose: () => void;
@@ -21,7 +21,6 @@ function TextChannels({ onClose }: TextChannelsProps) {
     channelModalOpened,
     { open: openChannelModal, close: closeChannelModal },
   ] = useDisclosure(false);
-  const [isHovered, setIsHovered] = useState('');
   const [isEditing, setIsEditing] = useState<EditModal>({
     isEdit: false,
     initialData: '',
@@ -31,6 +30,25 @@ function TextChannels({ onClose }: TextChannelsProps) {
     (state) => state.testServerStore
   );
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
+
+  const handleOpenChannel = (channelId: string) => {
+    dispatch(setCurrentChannelId(channelId));
+    dispatch(setUserStreamView(false));
+    onClose();
+  };
+
+  const handleEditChannel = (channelName: string, channelId: string) => {
+    setIsEditing({
+      isEdit: true,
+      initialData: channelName,
+      channelId: channelId,
+    });
+    openChannelModal();
+  };
+
+  useEffect(() => {
+    console.log(currentChannelId);
+  }, [currentChannelId]);
 
   return (
     <>
@@ -67,61 +85,16 @@ function TextChannels({ onClose }: TextChannelsProps) {
           <Stack gap="xs">
             {serverData.channels.textChannels.map(
               ({ channelId, channelName }) => (
-                <Box
-                  key={channelId}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                  onMouseEnter={() => setIsHovered(channelId)}
-                  onMouseLeave={() => setIsHovered('')}
-                >
-                  <Button
-                    leftSection={<Hash />}
-                    variant="subtle"
-                    p={0}
-                    color="#ffffff"
-                    justify="flex-start"
-                    styles={{
-                      root: styles.buttonRoot(
-                        isHovered === channelId,
-                        currentChannelId === channelId
-                      ),
-                    }}
-                    fullWidth
-                    onClick={() => {
-                      dispatch(setCurrentChannelId(channelId));
-                      dispatch(setUserStreamView(false));
-                      onClose();
-                    }}
-                  >
-                    {channelName}
-                  </Button>
-                  {isAdmin && isHovered === channelId && (
-                    <Button
-                      variant="subtle"
-                      p={0}
-                      color="#ffffff"
-                      justify="flex-start"
-                      w="20px"
-                      styles={{
-                        root: styles.buttonSettings(
-                          currentChannelId === channelId
-                        ),
-                      }}
-                      onClick={() => {
-                        setIsEditing({
-                          isEdit: true,
-                          initialData: channelName,
-                          channelId: channelId,
-                        });
-                        openChannelModal();
-                      }}
-                    >
-                      <Settings size={16} />
-                    </Button>
-                  )}
-                </Box>
+                <ChannelItem
+                  channelId={channelId}
+                  currentChannelId={currentChannelId}
+                  channelName={channelName}
+                  isAdmin={isAdmin}
+                  handleOpenChannel={() => handleOpenChannel(channelId)}
+                  handleEditChannel={() =>
+                    handleEditChannel(channelName, channelId)
+                  }
+                />
               )
             )}
           </Stack>

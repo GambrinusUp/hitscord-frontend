@@ -61,7 +61,7 @@ const TestMainPage = () => {
         getChannelMessages({
           accessToken,
           channelId: currentChannelId,
-          numberOfMessages: 100,
+          numberOfMessages: 50,
           fromStart: 0,
         })
       );

@@ -1,19 +1,11 @@
-import {
-  ActionIcon,
-  Avatar,
-  Box,
-  Button,
-  Group,
-  ScrollArea,
-  SimpleGrid,
-  Text,
-} from '@mantine/core';
+import { ActionIcon, Group, ScrollArea, SimpleGrid } from '@mantine/core';
 import { ArrowLeftFromLine } from 'lucide-react';
 
 import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
 import { toggleUserStreamView } from '../../../../store/app/AppSettingsSlice';
 import { Room } from '../../../../utils/types';
 import { getUserGroups } from '../../utils/getUserGroups';
+import { UserCard } from '../UserCard';
 
 interface UserCardsProps {
   users: Room[];
@@ -47,34 +39,14 @@ const UsersCards = ({ users, onOpenStream }: UserCardsProps) => {
           Object.entries(currentRoom.users).map(
             ([socketId, { userName, producerIds }]) => {
               const isStreaming = producerIds.length > 1;
+
               return (
-                <Box
-                  key={socketId}
-                  style={{
-                    padding: '16px',
-                    borderRadius: '12px',
-                    backgroundColor: '#1A1B1E',
-                    textAlign: 'center',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <Avatar radius="xl" size="lg" color="blue">
-                    {userName[0]}
-                  </Avatar>
-                  <Text c="white">{userName}</Text>
-                  {isStreaming && (
-                    <Button
-                      size="xs"
-                      variant="outline"
-                      onClick={() => onOpenStream(socketId)}
-                    >
-                      Открыть стрим
-                    </Button>
-                  )}
-                </Box>
+                <UserCard
+                  socketId={socketId}
+                  userName={userName}
+                  isStreaming={isStreaming}
+                  onOpenStream={onOpenStream}
+                />
               );
             }
           )}

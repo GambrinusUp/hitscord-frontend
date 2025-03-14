@@ -162,6 +162,37 @@ export const getChannelMessages = createAsyncThunk<
   }
 );
 
+export const getMoreMessages = createAsyncThunk<
+  ChannelMessage[],
+  {
+    accessToken: string;
+    channelId: string;
+    numberOfMessages: number;
+    fromStart: number;
+  },
+  { rejectValue: string }
+>(
+  'testServerSlice/getMoreMessages',
+  async (
+    { accessToken, channelId, numberOfMessages, fromStart },
+    { rejectWithValue }
+  ) => {
+    try {
+      const response = await channelsAPI.getChannelsMessages(
+        accessToken,
+        channelId,
+        numberOfMessages,
+        fromStart
+      );
+      return response;
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка'
+      );
+    }
+  }
+);
+
 export const createMessage = createAsyncThunk<
   void,
   {

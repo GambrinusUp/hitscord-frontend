@@ -16,6 +16,7 @@ import {
   deleteServer,
   editMessage,
   getChannelMessages,
+  getMoreMessages,
   getServerData,
   getUserServers,
   subscribeToServer,
@@ -62,6 +63,7 @@ const testServerSlice = createSlice({
   reducers: {
     setCurrentServerId: (state, action: PayloadAction<string>) => {
       state.currentServerId = action.payload;
+      state.error = '';
     },
     setCurrentChannelId: (state, action: PayloadAction<string | null>) => {
       state.currentChannelId = action.payload;
@@ -147,8 +149,8 @@ const testServerSlice = createSlice({
       })
       .addCase(getServerData.pending, (state) => {
         state.isLoading = true;
-        state.messages = [];
-        state.currentChannelId = null;
+        //state.messages = [];
+        //state.currentChannelId = null;
         state.serverData = {
           serverId: '',
           serverName: '',
@@ -168,10 +170,20 @@ const testServerSlice = createSlice({
         getServerData.fulfilled,
         (state, action: PayloadAction<ServerData>) => {
           state.serverData = action.payload;
-          state.currentChannelId =
-            action.payload.channels.textChannels.length > 0
-              ? action.payload.channels.textChannels[0].channelId
-              : null;
+
+          const newChannels = action.payload.channels.textChannels;
+          let newCurrentChannelId = state.currentChannelId;
+
+          const currentChannel = newChannels.find(
+            (channel) => channel.channelId === newCurrentChannelId
+          );
+
+          if (!currentChannel) {
+            newCurrentChannelId =
+              newChannels.length > 0 ? newChannels[0].channelId : null;
+            state.messages = [];
+          }
+
           state.isLoading = false;
           state.error = '';
         }
@@ -229,6 +241,22 @@ const testServerSlice = createSlice({
         }
       )
       .addCase(getChannelMessages.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(getMoreMessages.pending, (state) => {
+        state.isLoading = true;
+        state.error = '';
+      })
+      .addCase(
+        getMoreMessages.fulfilled,
+        (state, action: PayloadAction<ChannelMessage[]>) => {
+          state.messages = [...action.payload, ...state.messages];
+          state.isLoading = false;
+          state.error = '';
+        }
+      )
+      .addCase(getMoreMessages.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })

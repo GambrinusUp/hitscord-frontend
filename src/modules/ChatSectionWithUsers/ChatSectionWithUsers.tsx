@@ -1,10 +1,11 @@
-import { Avatar, Box, Button, Flex, ScrollArea, Text } from '@mantine/core';
-import { ChevronLeft, ChevronRight, Video, X } from 'lucide-react';
+import { Box, Button, Flex, ScrollArea } from '@mantine/core';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
 import socket from '../../api/socket';
 import { useMediaContext } from '../../context/MediaContext/useMediaContext';
 import { useAppSelector } from '../../hooks/redux';
+import { UserItem } from './components/UserItem';
 import UsersCards from './components/UsersCards/UsersCards';
 import { getUserGroups } from './utils/getUserGroups';
 
@@ -13,7 +14,6 @@ const ChatSectionWithUsers = () => {
     useMediaContext();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const selectedStreamRef = useRef<MediaStream | null>(null);
-  //const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const { currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore
   );
@@ -162,39 +162,14 @@ const ChatSectionWithUsers = () => {
                   Object.entries(currentRoom.users).map(
                     ([socketId, { userName, producerIds }]) => {
                       const isStreaming = producerIds.length > 1;
+
                       return (
-                        <Box
-                          key={socketId}
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            flexDirection: 'column',
-                            gap: '8px',
-                            padding: '8px',
-                            borderRadius: '8px',
-                            backgroundColor: '#1A1B1E',
-                            textAlign: 'center',
-                            height: '100px',
-                            width: '100px',
-                          }}
-                        >
-                          <Avatar radius="xl" size="sm">
-                            {userName[0]}
-                          </Avatar>
-                          <Text c="white" size="xs">
-                            {userName}
-                          </Text>
-                          {isStreaming && (
-                            <Button
-                              size="xs"
-                              variant="outline"
-                              onClick={() => handleUserClick(socketId)}
-                            >
-                              <Video />
-                            </Button>
-                          )}
-                        </Box>
+                        <UserItem
+                          socketId={socketId}
+                          userName={userName}
+                          isStreaming={isStreaming}
+                          handleUserClick={handleUserClick}
+                        />
                       );
                     }
                   )}
@@ -211,11 +186,7 @@ const ChatSectionWithUsers = () => {
           </Box>
         </Box>
       ) : (
-        <UsersCards
-          users={users}
-          //consumers={consumers}
-          onOpenStream={handleUserClick}
-        />
+        <UsersCards users={users} onOpenStream={handleUserClick} />
       )}
     </Box>
   );

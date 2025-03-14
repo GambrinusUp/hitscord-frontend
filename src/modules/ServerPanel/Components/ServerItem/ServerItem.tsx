@@ -6,7 +6,6 @@ import {
   setOpenHome,
   setUserStreamView,
 } from '../../../../store/app/AppSettingsSlice';
-import { setCurrentServer } from '../../../../store/server/ServerSlice';
 import { setCurrentServerId } from '../../../../store/server/TestServerSlice';
 
 interface ServerItemProps {
@@ -19,7 +18,6 @@ const ServerItem = ({ serverId, serverName }: ServerItemProps) => {
   const { user } = useAppSelector((state) => state.userStore);
 
   const handleClick = () => {
-    dispatch(setCurrentServer(serverId));
     dispatch(setCurrentServerId(serverId));
     dispatch(setUserStreamView(false));
     dispatch(setOpenHome(false));

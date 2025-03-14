@@ -1,24 +1,5 @@
-import {
-  ActionIcon,
-  Box,
-  Button,
-  Collapse,
-  Group,
-  Menu,
-  Slider,
-  Stack,
-  Text,
-} from '@mantine/core';
+import { Collapse, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import {
-  ChevronDown,
-  ChevronRight,
-  Plus,
-  Settings,
-  User,
-  Video,
-  Volume2,
-} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import React from 'react';
 
@@ -35,7 +16,9 @@ import {
 import { setCurrentVoiceChannelId } from '../../store/server/TestServerSlice';
 import { ChannelType, EditModal } from '../../utils/types';
 import { getUserGroups } from '../ChatSectionWithUsers/utils/getUserGroups';
-import { styles } from './VoiceChannels.const';
+import { ChannelItem } from './components/ChannelItem';
+import { CollapseButton } from './components/CollapseButton';
+import { UserItem } from './components/UserItem';
 import { useActiveUsers } from './VoiceChannels.hooks';
 
 function VoiceChannels() {
@@ -58,7 +41,6 @@ function VoiceChannels() {
   const rooms = getUserGroups(users);
   const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
-  const [isHovered, setIsHovered] = useState('');
   const [isEditing, setIsEditing] = useState<EditModal>({
     isEdit: false,
     initialData: '',
@@ -125,6 +107,37 @@ function VoiceChannels() {
     );
   };
 
+  const calculateSliderValue = (producerIds: string[]) => {
+    const audioProducerId = producerIds.find((id) =>
+      consumers.some((c) => c.producerId === id && c.kind === 'audio')
+    );
+
+    return (userVolumes[audioProducerId || ''] || 1) * 100;
+  };
+
+  const calculateIsSpeaking = (producerIds: string[], channelId: string) => {
+    const isSpeaking =
+      producerIds.some((id) =>
+        activeUsers.some((user) => user.producerId === id)
+      ) && channelId === currentVoiceChannelId;
+
+    return isSpeaking;
+  };
+
+  const handleOpenStream = (socketId: string) => {
+    setSelectedUserId(socketId);
+    dispatch(setUserStreamView(true));
+  };
+
+  const handleEditChannel = (channelName: string, channelId: string) => {
+    setIsEditing({
+      isEdit: true,
+      initialData: channelName,
+      channelId: channelId,
+    });
+    openChannelModal();
+  };
+
   useEffect(() => {
     consumers.forEach((consumer) => {
       if (consumer.kind === 'audio') {
@@ -177,170 +190,52 @@ function VoiceChannels() {
   return (
     <>
       <Stack align="flex-start" gap="xs">
-        <Group justify="space-between" w="100%" wrap="nowrap">
-          <Button
-            leftSection={opened ? <ChevronDown /> : <ChevronRight />}
-            variant="transparent"
-            onClick={toggle}
-            p={0}
-            color="#fffff"
-            styles={{
-              root: {
-                '--button-hover-color': '#4f4f4f',
-                transition: 'color 0.3s ease',
-              },
-            }}
-          >
-            Голосовые каналы
-          </Button>
-          {isAdmin && (
-            <ActionIcon variant="transparent" onClick={handleAddChannel}>
-              <Plus color="#ffffff" />
-            </ActionIcon>
-          )}
-        </Group>
+        <CollapseButton
+          opened={opened}
+          toggle={toggle}
+          isAdmin={isAdmin}
+          handleAddChannel={handleAddChannel}
+        />
         <Collapse in={opened} w="100%">
           <Stack gap="xs">
             {serverData.channels.voiceChannels.map(
               ({ channelId, channelName }) => (
                 <React.Fragment key={channelId}>
-                  <Box
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                    onMouseEnter={() => setIsHovered(channelId)}
-                    onMouseLeave={() => setIsHovered('')}
-                  >
-                    <Button
-                      leftSection={<Volume2 />}
-                      variant="transparent"
-                      p={0}
-                      color="#ffffff"
-                      justify="flex-start"
-                      styles={{
-                        root: {
-                          '--button-hover-color': '#4f4f4f',
-                          transition: 'color 0.3s ease',
-                        },
-                      }}
-                      fullWidth
-                      onClick={() => handleConnect(channelId)}
-                    >
-                      {channelName}
-                    </Button>
-                    {isAdmin && isHovered === channelId && (
-                      <Button
-                        variant="subtle"
-                        p={0}
-                        color="#ffffff"
-                        justify="flex-start"
-                        w="20px"
-                        styles={{
-                          root: styles.buttonSettings,
-                        }}
-                        onClick={() => {
-                          setIsEditing({
-                            isEdit: true,
-                            initialData: channelName,
-                            channelId: channelId,
-                          });
-                          openChannelModal();
-                        }}
-                      >
-                        <Settings size={16} />
-                      </Button>
-                    )}
-                  </Box>
-
+                  <ChannelItem
+                    channelId={channelId}
+                    channelName={channelName}
+                    isAdmin={isAdmin}
+                    handleConnect={() => handleConnect(channelId)}
+                    handleEditChannel={() =>
+                      handleEditChannel(channelName, channelId)
+                    }
+                  />
                   <Stack gap="xs">
                     {rooms
                       .filter((room) => room.roomName === channelId)
                       .flatMap((room) =>
                         Object.entries(room.users).map(
                           ([socketId, { producerIds, userName }]) => {
-                            const isSpeaking =
-                              producerIds.some((id) =>
-                                activeUsers.some(
-                                  (user) => user.producerId === id
-                                )
-                              ) && channelId === currentVoiceChannelId;
+                            const isSpeaking = calculateIsSpeaking(
+                              producerIds,
+                              channelId
+                            );
+
+                            const userVolume =
+                              calculateSliderValue(producerIds);
 
                             return (
-                              <Menu
-                                key={socketId}
-                                shadow="md"
-                                width={200}
-                                closeOnItemClick={true}
-                              >
-                                <Menu.Target>
-                                  <Group
-                                    style={{ cursor: 'pointer' }}
-                                    wrap="nowrap"
-                                  >
-                                    <User
-                                      color={isSpeaking ? '#43b581' : undefined}
-                                      style={{
-                                        flexShrink: 0,
-                                      }}
-                                    />
-                                    <Text truncate="end">{userName}</Text>
-                                    {producerIds.length > 1 && (
-                                      <Video
-                                        color="#43b581"
-                                        style={{
-                                          marginLeft: 'auto',
-                                          flexShrink: 0,
-                                        }}
-                                      />
-                                    )}
-                                  </Group>
-                                </Menu.Target>
-                                <Menu.Dropdown>
-                                  <Menu.Item leftSection={<Volume2 />}>
-                                    <Slider
-                                      label="Громкость"
-                                      value={
-                                        (userVolumes[
-                                          producerIds.find((id) =>
-                                            consumers.some(
-                                              (c) =>
-                                                c.producerId === id &&
-                                                c.kind === 'audio'
-                                            )
-                                          ) || ''
-                                        ] || 1) * 100
-                                      }
-                                      onChange={(value) =>
-                                        handleVolumeChange(socketId, value)
-                                      }
-                                      min={1}
-                                      max={100}
-                                    />
-                                  </Menu.Item>
-                                  {producerIds.length > 1 && (
-                                    <Menu.Item
-                                      leftSection={<Video />}
-                                      onClick={() => {
-                                        setSelectedUserId(socketId);
-                                        dispatch(setUserStreamView(true));
-                                      }}
-                                    >
-                                      Открыть стрим
-                                    </Menu.Item>
-                                  )}
-                                  {isAdmin && (
-                                    <Menu.Item
-                                      leftSection={<Video />}
-                                      onClick={() => {
-                                        handleKickUser(socketId);
-                                      }}
-                                    >
-                                      Отключить пользователя
-                                    </Menu.Item>
-                                  )}
-                                </Menu.Dropdown>
-                              </Menu>
+                              <UserItem
+                                socketId={socketId}
+                                isSpeaking={isSpeaking}
+                                userName={userName}
+                                producerIds={producerIds}
+                                isAdmin={isAdmin}
+                                userVolume={userVolume}
+                                handleOpenStream={handleOpenStream}
+                                handleVolumeChange={handleVolumeChange}
+                                handleKickUser={handleKickUser}
+                              />
                             );
                           }
                         )

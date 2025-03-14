@@ -45,11 +45,10 @@ const ServerSettingsModal: React.FC<{
       })
     );
     if (result.meta.requestStatus === 'fulfilled') {
-      //setAssignRoleUserId('');
-      //setAssignRoleId('');
       setLoading(false);
       showSuccess('Роль успешно присвоена');
       dispatch(getServerData({ accessToken, serverId: serverData.serverId }));
+      onClose();
     }
   };
 
@@ -84,12 +83,6 @@ const ServerSettingsModal: React.FC<{
               <Text size="lg" w={500}>
                 Присвоить роль пользователю
               </Text>
-              {/*<TextInput
-                label="User ID"
-                placeholder="Введите User ID"
-                value={assignRoleUserId}
-                onChange={(e) => setAssignRoleUserId(e.currentTarget.value)}
-              />*/}
               <Select
                 label="Выбор пользователя"
                 placeholder="Выберите пользователя"

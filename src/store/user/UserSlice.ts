@@ -66,6 +66,7 @@ export const UserSlice = createSlice({
           state.accessToken = action.payload.accessToken;
           state.refreshToken = action.payload.refreshToken;
           localStorage.setItem('accessToken', action.payload.accessToken);
+          localStorage.setItem('refreshToken', action.payload.refreshToken);
           state.isLoggedIn = true;
         }
       )
@@ -82,6 +83,7 @@ export const UserSlice = createSlice({
           state.accessToken = action.payload.accessToken;
           state.refreshToken = action.payload.refreshToken;
           localStorage.setItem('accessToken', action.payload.accessToken);
+          localStorage.setItem('refreshToken', action.payload.refreshToken);
           state.isLoggedIn = true;
         }
       )
@@ -109,6 +111,7 @@ export const UserSlice = createSlice({
         state.accessToken = '';
         state.refreshToken = '';
         localStorage.setItem('accessToken', '');
+        localStorage.setItem('refreshToken', '');
         state.isLoggedIn = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
@@ -116,6 +119,7 @@ export const UserSlice = createSlice({
         state.accessToken = '';
         state.refreshToken = '';
         localStorage.setItem('accessToken', '');
+        localStorage.setItem('refreshToken', '');
         state.isLoggedIn = false;
       })
       .addCase(refreshTokens.pending, (state) => {

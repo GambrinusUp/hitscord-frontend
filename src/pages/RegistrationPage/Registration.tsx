@@ -3,6 +3,7 @@ import {
   Card,
   Flex,
   Group,
+  PasswordInput,
   Stack,
   Text,
   TextInput,
@@ -100,7 +101,7 @@ const RegistrationPage = () => {
                 {...form.getInputProps('accountName')}
                 required
               />
-              <TextInput
+              <PasswordInput
                 label="Пароль"
                 placeholder="Введите пароль"
                 {...form.getInputProps('password')}

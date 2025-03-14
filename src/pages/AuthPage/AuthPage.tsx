@@ -3,6 +3,7 @@ import {
   Card,
   Flex,
   Group,
+  PasswordInput,
   Stack,
   Text,
   TextInput,
@@ -88,7 +89,7 @@ function AuthPage() {
                 {...form.getInputProps('mail')}
                 required
               />
-              <TextInput
+              <PasswordInput
                 label="Пароль"
                 placeholder="Введите пароль"
                 {...form.getInputProps('password')}
