@@ -9,22 +9,20 @@ import {
   Text,
 } from '@mantine/core';
 import { Plus } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { useNotification } from '../../../../hooks/useNotification';
-import {
-  changeRole,
-  getServerData,
-} from '../../../../store/server/ServerActionCreators';
+import { ServerSettingsModalProps } from './ServerSettingsModal.types';
 
-const ServerSettingsModal: React.FC<{
-  opened: boolean;
-  onClose: () => void;
-}> = ({ opened, onClose }) => {
+import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { changeRole, getServerData } from '~/store/ServerStore';
+
+export const ServerSettingsModal = ({
+  opened,
+  onClose,
+}: ServerSettingsModalProps) => {
   const dispatch = useAppDispatch();
   const { serverData, error } = useAppSelector(
-    (state) => state.testServerStore
+    (state) => state.testServerStore,
   );
   const { accessToken, user } = useAppSelector((state) => state.userStore);
   const [activeSetting, setActiveSetting] = useState<'roles'>('roles');
@@ -42,8 +40,9 @@ const ServerSettingsModal: React.FC<{
         serverId: serverData.serverId,
         userId: assignRoleUserId,
         role: assignRoleId,
-      })
+      }),
     );
+
     if (result.meta.requestStatus === 'fulfilled') {
       setLoading(false);
       showSuccess('Роль успешно присвоена');
@@ -57,7 +56,6 @@ const ServerSettingsModal: React.FC<{
       setLoading(false);
       showError(error);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   return (
@@ -115,5 +113,3 @@ const ServerSettingsModal: React.FC<{
     </Modal>
   );
 };
-
-export default ServerSettingsModal;

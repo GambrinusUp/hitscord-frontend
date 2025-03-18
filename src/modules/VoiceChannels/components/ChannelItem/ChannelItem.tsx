@@ -2,8 +2,9 @@ import { Box, Button } from '@mantine/core';
 import { Settings, Volume2 } from 'lucide-react';
 import { useState } from 'react';
 
-import { styles } from '../../VoiceChannels.const';
 import { ChannelItemProps } from './ChannelItem.types';
+
+import { styles } from '~/modules/VoiceChannels';
 
 export const ChannelItem = ({
   channelId,

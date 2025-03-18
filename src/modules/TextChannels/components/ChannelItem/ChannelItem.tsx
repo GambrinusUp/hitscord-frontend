@@ -2,8 +2,9 @@ import { Box, Button } from '@mantine/core';
 import { Hash, Settings } from 'lucide-react';
 import { useState } from 'react';
 
-import { styles } from '../../TextChannels.const';
 import { ChannelItemProps } from './ChannelItem.types';
+
+import { styles } from '~/modules/TextChannels';
 
 export const ChannelItem = ({
   channelId,
@@ -34,7 +35,7 @@ export const ChannelItem = ({
         styles={{
           root: styles.buttonRoot(
             isHovered === channelId,
-            currentChannelId === channelId
+            currentChannelId === channelId,
           ),
         }}
         fullWidth

@@ -1,5 +1,5 @@
-import socket from '../api/socket';
-import { useMediaContext } from '../context/MediaContext/useMediaContext';
+import { socket } from '~/api/socket';
+import { useMediaContext } from '~/context';
 
 export const useDisconnect = () => {
   const {

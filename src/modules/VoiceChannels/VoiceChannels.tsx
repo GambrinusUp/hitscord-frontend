@@ -1,34 +1,34 @@
 import { Collapse, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useEffect, useRef, useState } from 'react';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
-import socket from '../../api/socket';
-import CreateChannelModal from '../../components/CreateChannelModal/CreateChannelModal';
-import { useMediaContext } from '../../context/MediaContext/useMediaContext';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { useConnect } from '../../hooks/useConnect';
-import { useDisconnect } from '../../hooks/useDisconnect';
-import {
-  setUserStreamView,
-  toggleUserStreamView,
-} from '../../store/app/AppSettingsSlice';
-import { setCurrentVoiceChannelId } from '../../store/server/TestServerSlice';
-import { ChannelType, EditModal } from '../../utils/types';
-import { getUserGroups } from '../ChatSectionWithUsers/utils/getUserGroups';
 import { ChannelItem } from './components/ChannelItem';
 import { CollapseButton } from './components/CollapseButton';
 import { UserItem } from './components/UserItem';
 import { useActiveUsers } from './VoiceChannels.hooks';
 
-function VoiceChannels() {
+import { socket } from '~/api/socket';
+import { CreateChannelModal } from '~/components/CreateChannelModal';
+import { useMediaContext } from '~/context';
+import { getUserGroups } from '~/helpers';
+import {
+  useAppDispatch,
+  useAppSelector,
+  useConnect,
+  useDisconnect,
+} from '~/hooks';
+import { EditModal } from '~/shared/types';
+import { setUserStreamView, toggleUserStreamView } from '~/store/AppStore';
+import { ChannelType, setCurrentVoiceChannelId } from '~/store/ServerStore';
+
+export const VoiceChannels = () => {
   const connect = useConnect();
   const disconnect = useDisconnect();
   const { isConnected, consumers, users, setSelectedUserId } =
     useMediaContext();
   const { user } = useAppSelector((state) => state.userStore);
   const { serverData, currentVoiceChannelId, currentServerId } = useAppSelector(
-    (state) => state.testServerStore
+    (state) => state.testServerStore,
   );
   const dispatch = useAppDispatch();
   const [opened, { toggle }] = useDisclosure(true);
@@ -67,15 +67,18 @@ function VoiceChannels() {
     if (!currentVoiceChannelId) return;
 
     const room = rooms.find((room) => room.roomName === currentVoiceChannelId);
+
     if (!room) return;
 
     const user = room.users[socketId];
+
     if (!user) return;
 
     const audioProducerId = user.producerIds.find((producerId) => {
       const consumer = consumers.find(
-        (c) => c.producerId === producerId && c.kind === 'audio'
+        (c) => c.producerId === producerId && c.kind === 'audio',
       );
+
       return !!consumer;
     });
 
@@ -103,13 +106,13 @@ function VoiceChannels() {
         } else {
           console.error('Ошибка кикания пользователя:', response.message);
         }
-      }
+      },
     );
   };
 
   const calculateSliderValue = (producerIds: string[]) => {
     const audioProducerId = producerIds.find((id) =>
-      consumers.some((c) => c.producerId === id && c.kind === 'audio')
+      consumers.some((c) => c.producerId === id && c.kind === 'audio'),
     );
 
     return (userVolumes[audioProducerId || ''] || 1) * 100;
@@ -118,7 +121,7 @@ function VoiceChannels() {
   const calculateIsSpeaking = (producerIds: string[], channelId: string) => {
     const isSpeaking =
       producerIds.some((id) =>
-        activeUsers.some((user) => user.producerId === id)
+        activeUsers.some((user) => user.producerId === id),
       ) && channelId === currentVoiceChannelId;
 
     return isSpeaking;
@@ -168,7 +171,7 @@ function VoiceChannels() {
         audio.pause();
         audio.remove();
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+
       audioRefs.current.clear();
     };
   }, [consumers, userVolumes]);
@@ -218,7 +221,7 @@ function VoiceChannels() {
                           ([socketId, { producerIds, userName }]) => {
                             const isSpeaking = calculateIsSpeaking(
                               producerIds,
-                              channelId
+                              channelId,
                             );
 
                             const userVolume =
@@ -226,6 +229,7 @@ function VoiceChannels() {
 
                             return (
                               <UserItem
+                                key={socketId}
                                 socketId={socketId}
                                 isSpeaking={isSpeaking}
                                 userName={userName}
@@ -237,12 +241,12 @@ function VoiceChannels() {
                                 handleKickUser={handleKickUser}
                               />
                             );
-                          }
-                        )
+                          },
+                        ),
                       )}
                   </Stack>
                 </React.Fragment>
-              )
+              ),
             )}
           </Stack>
         </Collapse>
@@ -258,6 +262,4 @@ function VoiceChannels() {
       )}
     </>
   );
-}
-
-export default VoiceChannels;
+};

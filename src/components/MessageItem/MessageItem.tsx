@@ -2,23 +2,13 @@ import { ActionIcon, Avatar, Box, Group, Text, Textarea } from '@mantine/core';
 import { Check, Edit2, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
-import { formatDateTime } from '../../helpers/formatDateTime';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import {
-  deleteMessage,
-  editMessage,
-} from '../../store/server/ServerActionCreators';
+import { MessageItemProps } from './MessageItem.types';
 
-interface MessageItemProps {
-  isOwnMessage: boolean;
-  userName: string;
-  content: string;
-  time: string;
-  messageId: string;
-  modifiedAt?: string | null;
-}
+import { formatDateTime } from '~/helpers';
+import { useAppDispatch, useAppSelector } from '~/hooks';
+import { deleteMessage, editMessage } from '~/store/ServerStore';
 
-const MessageItem = ({
+export const MessageItem = ({
   isOwnMessage,
   userName,
   content,
@@ -35,7 +25,7 @@ const MessageItem = ({
   const handleEdit = () => {
     if (editedContent.trim()) {
       dispatch(
-        editMessage({ accessToken, messageId, text: editedContent.trim() })
+        editMessage({ accessToken, messageId, text: editedContent.trim() }),
       );
       setIsEditing(false);
     }
@@ -138,5 +128,3 @@ const MessageItem = ({
     </Group>
   );
 };
-
-export default MessageItem;

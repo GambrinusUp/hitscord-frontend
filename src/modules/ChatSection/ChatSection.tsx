@@ -12,16 +12,16 @@ import {
 import { Menu, Paperclip, Search, Send, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import MessageItem from '../../components/MessageItem/MessageItem';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { createMessage } from '../../store/server/ServerActionCreators';
+import { ChatSectionProps } from './ChatSection.types';
 
-interface ChatSectionProps {
-  openSidebar: () => void;
-  openDetailsPanel: () => void;
-}
+import { MessageItem } from '~/components/MessageItem';
+import { useAppDispatch, useAppSelector } from '~/hooks';
+import { createMessage } from '~/store/ServerStore';
 
-const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
+export const ChatSection = ({
+  openSidebar,
+  openDetailsPanel,
+}: ChatSectionProps) => {
   const dispatch = useAppDispatch();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { user, accessToken } = useAppSelector((state) => state.userStore);
@@ -37,7 +37,7 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
           channelId: currentChannelId,
           text: newMessage.trim(),
           nestedChannel: false,
-        })
+        }),
       );
       setNewMessage('');
     }
@@ -94,6 +94,7 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
           {isLoading &&
             messages.length < 1 &&
             Array.from({ length: 5 }).map((_, index) => (
+              // eslint-disable-next-line react/no-array-index-key
               <Group align="flex-start" gap="xs" key={index}>
                 <Skeleton height={40} width={40} circle />
                 <Box style={{ flex: 1 }}>
@@ -136,5 +137,3 @@ const ChatSection = ({ openSidebar, openDetailsPanel }: ChatSectionProps) => {
     </Box>
   );
 };
-
-export default ChatSection;

@@ -3,29 +3,26 @@ import { useDisclosure } from '@mantine/hooks';
 import { ChevronDown, Copy, DoorOpen, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { setOpenHome } from '../../../../store/app/AppSettingsSlice';
+import { SideBarMobileProps } from './SideBarMobile.types';
+
+import { useAppDispatch, useAppSelector } from '~/hooks';
+import { Panel } from '~/modules/SideBar/components/Panel';
+import { ServerSettingsModal } from '~/modules/SideBar/components/ServerSettingsModal';
+import { TextChannels } from '~/modules/TextChannels';
+import { VoiceChannels } from '~/modules/VoiceChannels';
+import { setOpenHome } from '~/store/AppStore/AppStore.reducer';
 import {
   getUserServers,
   unsubscribeFromServer,
-} from '../../../../store/server/ServerActionCreators';
-import { clearServerData } from '../../../../store/server/TestServerSlice';
-import TextChannels from '../../../TextChannels/TextChannels';
-import VoiceChannels from '../../../VoiceChannels/VoiceChannels';
-import Panel from '../Panel/Panel';
-import ServerSettingsModal from '../ServerSettingsModal/ServerSettingsModal';
+} from '~/store/ServerStore/ServerStore.actions';
+import { clearServerData } from '~/store/ServerStore/ServerStore.reducer';
 
-interface SideBarMobileProps {
-  onClose: () => void;
-  opened: boolean;
-}
-
-const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
+export const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [openedModal, { open, close }] = useDisclosure(false);
   const { serverData, isLoading } = useAppSelector(
-    (state) => state.testServerStore
+    (state) => state.testServerStore,
   );
   const { accessToken } = useAppSelector((state) => state.userStore);
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
@@ -36,8 +33,9 @@ const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
 
   const handleUnsubscribe = async () => {
     const result = await dispatch(
-      unsubscribeFromServer({ accessToken, serverId: serverData.serverId })
+      unsubscribeFromServer({ accessToken, serverId: serverData.serverId }),
     );
+
     if (result.meta.requestStatus === 'fulfilled') {
       dispatch(getUserServers({ accessToken }));
       dispatch(setOpenHome(true));
@@ -69,9 +67,7 @@ const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
           <Menu.Target>
             <Group justify="space-between" style={{ cursor: 'pointer' }}>
               {isLoading ? (
-                <>
-                  <Skeleton height={10} width="40%" radius="md" />
-                </>
+                <Skeleton height={10} width="40%" radius="md" />
               ) : (
                 <Text>{serverData.serverName}</Text>
               )}
@@ -109,5 +105,3 @@ const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
     </>
   );
 };
-
-export default SideBarMobile;

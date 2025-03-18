@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 
-import socket from '../../api/socket';
-import { ActiveUser } from '../../utils/types';
+import { ActiveUser } from './VoiceChannels.types';
+
+import { socket } from '~/api/socket';
 
 export const useActiveUsers = () => {
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
@@ -12,7 +13,7 @@ export const useActiveUsers = () => {
       'active-speakers',
       ({ activeSpeakers }: { activeSpeakers: ActiveUser[] }) => {
         setActiveUsers(activeSpeakers);
-      }
+      },
     );
 
     return () => {

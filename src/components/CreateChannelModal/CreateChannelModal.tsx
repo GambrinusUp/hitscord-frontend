@@ -2,24 +2,17 @@ import { Button, Group, Modal, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect } from 'react';
 
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { useNotification } from '../../hooks/useNotification';
+import { CreateChannelModalProps } from './CreateChannelModal.types';
+
+import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import {
+  ChannelType,
   createChannel,
   deleteChannel,
   getServerData,
-} from '../../store/server/ServerActionCreators';
-import { ChannelType, EditModal } from '../../utils/types';
+} from '~/store/ServerStore';
 
-interface CreateChannelModalProps {
-  opened: boolean;
-  onClose: () => void;
-  isEdit: EditModal;
-  serverId: string;
-  channelType: ChannelType;
-}
-
-const CreateChannelModal = ({
+export const CreateChannelModal = ({
   opened,
   onClose,
   isEdit,
@@ -49,7 +42,6 @@ const CreateChannelModal = ({
     } else {
       form.reset();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit]);
 
   const handleSubmit = async (values: typeof form.values) => {
@@ -62,7 +54,7 @@ const CreateChannelModal = ({
           channelType === ChannelType.TEXT_CHANNEL
             ? ChannelType.TEXT_CHANNEL
             : ChannelType.VOICE_CHANNEL,
-      })
+      }),
     );
 
     if (result.meta.requestStatus === 'fulfilled') {
@@ -77,7 +69,7 @@ const CreateChannelModal = ({
       deleteChannel({
         accessToken,
         channelId: isEdit.channelId,
-      })
+      }),
     );
 
     if (result.meta.requestStatus === 'fulfilled') {
@@ -91,7 +83,6 @@ const CreateChannelModal = ({
     if (error) {
       showError(error);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   return (
@@ -154,5 +145,3 @@ const CreateChannelModal = ({
     </Modal>
   );
 };
-
-export default CreateChannelModal;

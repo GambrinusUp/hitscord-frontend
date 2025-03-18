@@ -6,10 +6,11 @@ import {
 } from 'mediasoup-client/lib/types';
 import { useEffect, useState } from 'react';
 
-import socket from '../../api/socket';
-import { Room } from '../../utils/types';
-import { signalNewConsumerTransport } from '../utils/mediaHelpers';
 import { MediaContext } from './MediaContext';
+
+import { socket } from '~/api/socket';
+import { signalNewConsumerTransport } from '~/context/utils';
+import { Room } from '~/shared/types';
 
 export const MediaProvider = (props: React.PropsWithChildren) => {
   //проверить стрим экрана при включении и отключении микрофона, при подключении новых пользователей
@@ -22,7 +23,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
   const [audioProducer, setAudioProducer] = useState<Producer | null>(null);
   const [videoProducer, setVideoProducer] = useState<Producer | null>(null);
   const [producerTransport, setProducerTransport] = useState<Transport | null>(
-    null
+    null,
   );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
@@ -46,15 +47,15 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
 
     socket.on('producerClosed', ({ producerId }) => {
       setConsumers((prev) =>
-        prev.filter((consumer) => consumer.producerId !== producerId)
+        prev.filter((consumer) => consumer.producerId !== producerId),
       );
     });
 
     socket.on('producer-closed', ({ remoteProducerId }) => {
       setConsumers((prevConsumers) =>
         prevConsumers.filter(
-          (consumer) => consumer.producerId !== remoteProducerId
-        )
+          (consumer) => consumer.producerId !== remoteProducerId,
+        ),
       );
     });
 

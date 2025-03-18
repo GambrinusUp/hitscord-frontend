@@ -6,14 +6,13 @@ import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 
-import { MediaProvider } from './context/MediaContext/MediaProvider';
-import AuthPage from './pages/AuthPage/AuthPage';
-import LandingPage from './pages/LandingPage/LandingPage';
-import RegistrationPage from './pages/RegistrationPage/Registration';
-//import TestEntryPage from './pages/TestEntryPage/TestEntryPage';
-import TestMainPage from './pages/TestMainPage/TestMainPage';
+import { MediaProvider } from './context/MediaContext';
+import { AuthPage } from './pages/AuthPage';
+import { LandingPage } from './pages/LandingPage';
+import { MainPage } from './pages/MainPage';
+import { RegistrationPage } from './pages/RegistrationPage';
 
-function App() {
+const App = () => {
   return (
     <MediaProvider>
       <Router
@@ -26,7 +25,7 @@ function App() {
           <Notifications />
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/main" element={<TestMainPage />} />
+            <Route path="/main" element={<MainPage />} />
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<RegistrationPage />} />
           </Routes>
@@ -34,6 +33,6 @@ function App() {
       </Router>
     </MediaProvider>
   );
-}
+};
 
 export default App;

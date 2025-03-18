@@ -4,14 +4,15 @@ import { CirclePlus, Home, LogOut } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { setOpenHome } from '../../store/app/AppSettingsSlice';
-import { getUserServers } from '../../store/server/ServerActionCreators';
-import { logoutUser } from '../../store/user/UserActionCreators';
-import CreateServerModal from './Components/CreateServerModal/CreateServerModal';
-import ServerItem from './Components/ServerItem/ServerItem';
+import { CreateServerModal } from './components/CreateServerModal';
+import { ServerItem } from './components/ServerItem';
 
-const ServerPanel = () => {
+import { useAppDispatch, useAppSelector } from '~/hooks';
+import { setOpenHome } from '~/store/AppStore';
+import { getUserServers } from '~/store/ServerStore';
+import { logoutUser } from '~/store/UserStore';
+
+export const ServerPanel = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const ServerPanel = () => {
 
   const handleLogout = async () => {
     const result = await dispatch(logoutUser({ accessToken }));
+
     if (result.meta.requestStatus === 'fulfilled') {
       navigate('/');
     }
@@ -69,5 +71,3 @@ const ServerPanel = () => {
     </Flex>
   );
 };
-
-export default ServerPanel;

@@ -1,19 +1,13 @@
 import { ActionIcon, Avatar } from '@mantine/core';
 
-import socket from '../../../../api/socket';
-import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import {
-  setOpenHome,
-  setUserStreamView,
-} from '../../../../store/app/AppSettingsSlice';
-import { setCurrentServerId } from '../../../../store/server/TestServerSlice';
+import { ServerItemProps } from './ServerItem.types';
 
-interface ServerItemProps {
-  serverId: string;
-  serverName: string;
-}
+import { socket } from '~/api/socket';
+import { useAppDispatch, useAppSelector } from '~/hooks';
+import { setOpenHome, setUserStreamView } from '~/store/AppStore';
+import { setCurrentServerId } from '~/store/ServerStore';
 
-const ServerItem = ({ serverId, serverName }: ServerItemProps) => {
+export const ServerItem = ({ serverId, serverName }: ServerItemProps) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.userStore);
 
@@ -37,5 +31,3 @@ const ServerItem = ({ serverId, serverName }: ServerItemProps) => {
     </ActionIcon>
   );
 };
-
-export default ServerItem;

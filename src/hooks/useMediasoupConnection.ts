@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/exhaustive-deps */
+
 import { Device } from 'mediasoup-client';
 import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
-
-//import { ActiveUser } from '../utils/types';
 
 interface UseMediasoupConnection {
   connect: () => void;
@@ -18,14 +16,11 @@ interface UseMediasoupConnection {
   toggleMute: () => void;
   isMuted: boolean;
   isStreaming: boolean;
-  //activeUsers: { producerId: string; volume: number }[];
 }
-
-//баги: закрытие окна стрима, при перерендере (изменить и сохранить изменения в коде и потом открыть страничку) пропадают users
 
 export const useMediasoupConnection = (
   roomName: string,
-  userName: string
+  userName: string,
 ): UseMediasoupConnection => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [device, setDevice] = useState<Device | null>(null);
@@ -37,7 +32,6 @@ export const useMediasoupConnection = (
   const [connected, setConnected] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  //const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
 
   const toggleMute = () => {
     if (audioProducerRef.current) {
@@ -51,8 +45,6 @@ export const useMediasoupConnection = (
   };
 
   useEffect(() => {
-    //const newSocket = io('https://hitscord-backend.ru/mediasoup');
-    //const newSocket = io('https://51.250.111.226:3000/mediasoup');
     const newSocket = io('https://192.168.0.101:3000/mediasoup');
     setSocket(newSocket);
 
@@ -94,7 +86,7 @@ export const useMediasoupConnection = (
 
     socket.on('producerClosed', ({ producerId }) => {
       setConsumers((prev) =>
-        prev.filter((consumer) => consumer.producerId !== producerId)
+        prev.filter((consumer) => consumer.producerId !== producerId),
       );
     });
 
@@ -102,13 +94,14 @@ export const useMediasoupConnection = (
       console.log('producer-closed: ', remoteProducerId);
       setConsumers((prevConsumers) =>
         prevConsumers.filter(
-          (consumer) => consumer.producerId !== remoteProducerId
-        )
+          (consumer) => consumer.producerId !== remoteProducerId,
+        ),
       );
     });
 
     socket.on('new-producer', ({ producerId }: { producerId: string }) => {
       console.log('newProducer:', producerId);
+
       if (device) signalNewConsumerTransport(producerId);
     });
 
@@ -116,18 +109,11 @@ export const useMediasoupConnection = (
       setUsers(usersList);
     });
 
-    /*socket.on('active-speakers', ({ activeSpeakers }) => {
-      //console.log('Active speakers:', activeSpeakers);
-      setActiveUsers(activeSpeakers);
-      // Обновите UI, чтобы показать, кто говорит
-    });*/
-
     return () => {
       socket.off('producerClosed');
       socket.off('producer-closed');
       socket.off('new-producer');
       socket.off('updateUsersList');
-      //socket.off('audio-level-updated');
     };
   }, [socket, device]);
 
@@ -154,7 +140,7 @@ export const useMediasoupConnection = (
 
   const createDevice = async (
     audioTrack: MediaStreamTrack,
-    rtpCapabilities: RtpCapabilities
+    rtpCapabilities: RtpCapabilities,
   ) => {
     const newDevice = new Device();
     await newDevice.load({ routerRtpCapabilities: rtpCapabilities });
@@ -164,7 +150,7 @@ export const useMediasoupConnection = (
 
   const createSendTransport = (
     audioTrack: MediaStreamTrack,
-    device: Device
+    device: Device,
   ) => {
     socket?.emit(
       'createWebRtcTransport',
@@ -172,6 +158,7 @@ export const useMediasoupConnection = (
       async ({ params }: any) => {
         if (params.error) {
           console.error('Error creating send transport:', params.error);
+
           return;
         }
 
@@ -194,7 +181,7 @@ export const useMediasoupConnection = (
               console.log(id);
               callback({ id });
               getProducers();
-            }
+            },
           );
         });
 
@@ -207,7 +194,7 @@ export const useMediasoupConnection = (
           console.log('Audio track ended');
           audioProducerRef.current = null;
         });
-      }
+      },
     );
   };
 
@@ -234,14 +221,14 @@ export const useMediasoupConnection = (
         });
 
         connectRecvTransport(consumerTransport, remoteProducerId, params.id);
-      }
+      },
     );
   };
 
   const connectRecvTransport = async (
     consumerTransport: any,
     remoteProducerId: string,
-    serverConsumerTransportId: string
+    serverConsumerTransportId: string,
   ) => {
     socket?.emit(
       'consume',
@@ -257,7 +244,7 @@ export const useMediasoupConnection = (
         socket.emit('consumer-resume', {
           serverConsumerId: params.serverConsumerId,
         });
-      }
+      },
     );
   };
 
@@ -295,6 +282,5 @@ export const useMediasoupConnection = (
     toggleMute,
     isMuted,
     isStreaming,
-    //activeUsers,
   };
 };

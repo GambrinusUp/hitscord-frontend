@@ -1,11 +1,9 @@
 import { io, Socket } from 'socket.io-client';
 
-import { WEBSOCKET_MEDIA_URL } from '../utils/constants';
+import { WEBSOCKET_MEDIA_URL } from '~/constants';
 
-const socket: Socket = io(WEBSOCKET_MEDIA_URL);
+export const socket: Socket = io(WEBSOCKET_MEDIA_URL);
 
 socket.on('connection-success', ({ socketId }: { socketId: string }) => {
   console.log('Connected with socketId', socketId);
 });
-
-export default socket;

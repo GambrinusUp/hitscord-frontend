@@ -1,14 +1,17 @@
 import { ActionIcon, Divider, Group, Stack, Text } from '@mantine/core';
 import { Mic, MicOff, MonitorUp, MonitorX, PhoneMissed } from 'lucide-react';
 
-import { useMediaContext } from '../../../../context/MediaContext/useMediaContext';
-import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { useDisconnect } from '../../../../hooks/useDisconnect';
-import { useScreenSharing } from '../../../../hooks/useScreenSharing';
-import { setUserStreamView } from '../../../../store/app/AppSettingsSlice';
-import { setCurrentVoiceChannelId } from '../../../../store/server/TestServerSlice';
+import { useMediaContext } from '~/context';
+import {
+  useDisconnect,
+  useScreenSharing,
+  useAppDispatch,
+  useAppSelector,
+} from '~/hooks';
+import { setUserStreamView } from '~/store/AppStore';
+import { setCurrentVoiceChannelId } from '~/store/ServerStore';
 
-const Panel = () => {
+export const Panel = () => {
   const { isConnected, toggleMute, isMuted, isStreaming } = useMediaContext();
   const disconnect = useDisconnect();
   const { startScreenSharing, stopScreenSharing } = useScreenSharing();
@@ -54,5 +57,3 @@ const Panel = () => {
     </Stack>
   );
 };
-
-export default Panel;

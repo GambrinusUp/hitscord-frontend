@@ -2,20 +2,19 @@ import { Button, Group, Modal, Tabs, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect, useState } from 'react';
 
-import { useAppDispatch, useAppSelector } from '../../../../hooks/redux';
-import { useNotification } from '../../../../hooks/useNotification';
+import { CreateServerModalProps } from './CreateServerModal.types';
+
+import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import {
   createServer,
   getUserServers,
   subscribeToServer,
-} from '../../../../store/server/ServerActionCreators';
+} from '~/store/ServerStore';
 
-interface CreateServerModalProps {
-  opened: boolean;
-  onClose: () => void;
-}
-
-const CreateServerModal = ({ opened, onClose }: CreateServerModalProps) => {
+export const CreateServerModal = ({
+  opened,
+  onClose,
+}: CreateServerModalProps) => {
   const [activeTab, setActiveTab] = useState<string | null>('create');
   const { showError } = useNotification();
   const { error } = useAppSelector((state) => state.testServerStore);
@@ -47,8 +46,9 @@ const CreateServerModal = ({ opened, onClose }: CreateServerModalProps) => {
       createServer({
         accessToken,
         name: values.name,
-      })
+      }),
     );
+
     if (result.meta.requestStatus === 'fulfilled') {
       dispatch(getUserServers({ accessToken }));
       form.reset();
@@ -62,8 +62,9 @@ const CreateServerModal = ({ opened, onClose }: CreateServerModalProps) => {
         accessToken,
         serverId: values.serverId,
         userName: user.name,
-      })
+      }),
     );
+
     if (result.meta.requestStatus === 'fulfilled') {
       dispatch(getUserServers({ accessToken }));
       form.reset();
@@ -73,7 +74,6 @@ const CreateServerModal = ({ opened, onClose }: CreateServerModalProps) => {
 
   useEffect(() => {
     if (error !== '') showError(error);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
 
   return (
@@ -136,5 +136,3 @@ const CreateServerModal = ({ opened, onClose }: CreateServerModalProps) => {
     </Modal>
   );
 };
-
-export default CreateServerModal;

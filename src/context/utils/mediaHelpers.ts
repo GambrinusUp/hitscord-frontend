@@ -5,7 +5,7 @@ import { RtpCapabilities } from 'mediasoup-client/lib/RtpParameters';
 import { Transport, TransportOptions } from 'mediasoup-client/lib/Transport';
 import { Socket } from 'socket.io-client';
 
-import socket from '../../api/socket';
+import { socket } from '~/api/socket';
 
 export const getLocalAudioStream = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -15,13 +15,14 @@ export const getLocalAudioStream = async () => {
       autoGainControl: false,
     },
   });
+
   return stream.getAudioTracks()[0];
 };
 
 export const joinRoom = async (
   roomName: string,
   userName: string,
-  serverId: string
+  serverId: string,
 ) => {
   return new Promise<RtpCapabilities>((resolve, reject) => {
     socket.emit(
@@ -33,7 +34,7 @@ export const joinRoom = async (
         } else {
           resolve(response.rtpCapabilities);
         }
-      }
+      },
     );
   });
 };
@@ -41,6 +42,7 @@ export const joinRoom = async (
 export const createDevice = async (rtpCapabilities: RtpCapabilities) => {
   const device = new Device();
   await device.load({ routerRtpCapabilities: rtpCapabilities });
+
   return device;
 };
 
@@ -48,7 +50,7 @@ export const createSendTransport = async (
   device: Device,
   audioTrack: MediaStreamTrack,
   setAudioProducer: React.Dispatch<React.SetStateAction<Producer | null>>,
-  addConsumer: (consumer: Consumer) => void
+  addConsumer: (consumer: Consumer) => void,
 ): Promise<Transport> =>
   new Promise((resolve, reject) => {
     socket.emit(
@@ -57,6 +59,7 @@ export const createSendTransport = async (
       async ({ params }: { params: TransportOptions & { error?: string } }) => {
         if (params.error) {
           reject(params.error);
+
           return;
         }
 
@@ -77,7 +80,7 @@ export const createSendTransport = async (
             ({ id }: { id: string }) => {
               callback({ id });
               getProducers(socket, device, addConsumer);
-            }
+            },
           );
         });
 
@@ -92,18 +95,18 @@ export const createSendTransport = async (
         audioProducer.on('trackended', () => {
           setAudioProducer(null);
         });
-      }
+      },
     );
   });
 
 export const getProducers = (
   socket: Socket,
   device: Device,
-  addConsumer: (consumer: Consumer) => void
+  addConsumer: (consumer: Consumer) => void,
 ) => {
   socket.emit('getProducers', (producerIds: string[]) => {
     producerIds.forEach((remoteProducerId) =>
-      signalNewConsumerTransport(remoteProducerId, device, addConsumer)
+      signalNewConsumerTransport(remoteProducerId, device, addConsumer),
     );
   });
 };
@@ -111,7 +114,7 @@ export const getProducers = (
 export const signalNewConsumerTransport = async (
   remoteProducerId: string,
   device: Device | null,
-  addConsumer: (consumer: Consumer) => void
+  addConsumer: (consumer: Consumer) => void,
 ) => {
   socket.emit(
     'createWebRtcTransport',
@@ -133,9 +136,9 @@ export const signalNewConsumerTransport = async (
         remoteProducerId,
         params.id,
         device!,
-        addConsumer
+        addConsumer,
       );
-    }
+    },
   );
 };
 
@@ -144,7 +147,7 @@ const connectRecvTransport = async (
   remoteProducerId: string,
   serverConsumerTransportId: string,
   device: Device,
-  addConsumer: (consumer: Consumer) => void
+  addConsumer: (consumer: Consumer) => void,
 ) => {
   socket.emit(
     'consume',
@@ -163,6 +166,6 @@ const connectRecvTransport = async (
       socket.emit('consumer-resume', {
         serverConsumerId: params.serverConsumerId,
       });
-    }
+    },
   );
 };

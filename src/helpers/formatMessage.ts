@@ -1,4 +1,4 @@
-import { ChannelMessage } from '../utils/types';
+import { ChannelMessage } from '~/store/ServerStore';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatMessage = (rawMessage: any): ChannelMessage => ({

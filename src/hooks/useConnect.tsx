@@ -1,11 +1,11 @@
-import socket from '../api/socket';
-import { useMediaContext } from '../context/MediaContext/useMediaContext';
+import { socket } from '~/api/socket';
 import {
+  useMediaContext,
   createDevice,
   createSendTransport,
   getLocalAudioStream,
   joinRoom,
-} from '../context/utils/mediaHelpers';
+} from '~/context';
 
 export const useConnect = () => {
   const {
@@ -19,7 +19,7 @@ export const useConnect = () => {
   const connect = async (
     roomName: string,
     userName: string,
-    serverId: string
+    serverId: string,
   ) => {
     try {
       if (!socket.connected) {
@@ -37,7 +37,7 @@ export const useConnect = () => {
         device,
         audioTrack,
         setAudioProducer,
-        addConsumer
+        addConsumer,
       );
       setProducerTransport(producerTransport);
 

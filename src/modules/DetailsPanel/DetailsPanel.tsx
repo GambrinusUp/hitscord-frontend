@@ -9,9 +9,9 @@ import {
   Text,
 } from '@mantine/core';
 
-import { useAppSelector } from '../../hooks/redux';
+import { useAppSelector } from '~/hooks';
 
-const DetailsPanel = () => {
+export const DetailsPanel = () => {
   const { serverData } = useAppSelector((state) => state.testServerStore);
 
   return (
@@ -48,5 +48,3 @@ const DetailsPanel = () => {
     </Box>
   );
 };
-
-export default DetailsPanel;

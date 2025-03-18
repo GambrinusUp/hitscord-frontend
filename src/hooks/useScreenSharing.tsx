@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 
-import socket from '../api/socket';
-import { useMediaContext } from '../context/MediaContext/useMediaContext';
+import { socket } from '~/api';
+import { useMediaContext } from '~/context';
 
 export const useScreenSharing = () => {
   const { videoProducer, setVideoProducer, producerTransport, setIsStreaming } =

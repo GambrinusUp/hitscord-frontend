@@ -1,8 +1,8 @@
-import ProfileMessagesSection from './components/ProfileMessagesSection';
-import ProfileSideBar from './components/ProfileSideBar';
-import ProfileThreadsPanel from './components/ProfileThreadsPanel';
+import { ProfileMessagesSection } from './components/ProfileMessagesSection';
+import { ProfileSideBar } from './components/ProfileSideBar';
+import { ProfileThreadsPanel } from './components/ProfileThreadsPanel';
 
-const Profile = () => {
+export const Profile = () => {
   return (
     <>
       {/*<Stack
@@ -32,5 +32,3 @@ const Profile = () => {
     </>
   );
 };
-
-export default Profile;

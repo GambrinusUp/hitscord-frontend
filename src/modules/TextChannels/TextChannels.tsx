@@ -3,18 +3,16 @@ import { useDisclosure } from '@mantine/hooks';
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import CreateChannelModal from '../../components/CreateChannelModal/CreateChannelModal';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { setUserStreamView } from '../../store/app/AppSettingsSlice';
-import { setCurrentChannelId } from '../../store/server/TestServerSlice';
-import { ChannelType, EditModal } from '../../utils/types';
 import { ChannelItem } from './components/ChannelItem';
+import { TextChannelsProps } from './TextChannels.types';
 
-interface TextChannelsProps {
-  onClose: () => void;
-}
+import { CreateChannelModal } from '~/components/CreateChannelModal';
+import { useAppDispatch, useAppSelector } from '~/hooks';
+import { EditModal } from '~/shared';
+import { setUserStreamView } from '~/store/AppStore';
+import { ChannelType, setCurrentChannelId } from '~/store/ServerStore';
 
-function TextChannels({ onClose }: TextChannelsProps) {
+export const TextChannels = ({ onClose }: TextChannelsProps) => {
   const dispatch = useAppDispatch();
   const [opened, { toggle }] = useDisclosure(true);
   const [
@@ -27,7 +25,7 @@ function TextChannels({ onClose }: TextChannelsProps) {
     channelId: '',
   });
   const { serverData, currentServerId, currentChannelId } = useAppSelector(
-    (state) => state.testServerStore
+    (state) => state.testServerStore,
   );
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
 
@@ -86,6 +84,7 @@ function TextChannels({ onClose }: TextChannelsProps) {
             {serverData.channels.textChannels.map(
               ({ channelId, channelName }) => (
                 <ChannelItem
+                  key={channelId}
                   channelId={channelId}
                   currentChannelId={currentChannelId}
                   channelName={channelName}
@@ -95,7 +94,7 @@ function TextChannels({ onClose }: TextChannelsProps) {
                     handleEditChannel(channelName, channelId)
                   }
                 />
-              )
+              ),
             )}
           </Stack>
         </Collapse>
@@ -111,6 +110,4 @@ function TextChannels({ onClose }: TextChannelsProps) {
       )}
     </>
   );
-}
-
-export default TextChannels;
+};

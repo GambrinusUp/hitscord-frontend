@@ -3,28 +3,26 @@ import { useDisclosure } from '@mantine/hooks';
 import { ChevronDown, Copy, DoorOpen, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
-import { setOpenHome } from '../../store/app/AppSettingsSlice';
+import { Panel } from './components/Panel';
+import { ServerSettingsModal } from './components/ServerSettingsModal';
+import { SideBarProps } from './SideBarProps.types';
+
+import { useAppDispatch, useAppSelector } from '~/hooks';
+import { TextChannels } from '~/modules/TextChannels';
+import { VoiceChannels } from '~/modules/VoiceChannels';
+import { setOpenHome } from '~/store/AppStore/AppStore.reducer';
 import {
   getUserServers,
   unsubscribeFromServer,
-} from '../../store/server/ServerActionCreators';
-import { clearServerData } from '../../store/server/TestServerSlice';
-import TextChannels from '../TextChannels/TextChannels';
-import VoiceChannels from '../VoiceChannels/VoiceChannels';
-import Panel from './Components/Panel/Panel';
-import ServerSettingsModal from './Components/ServerSettingsModal/ServerSettingsModal';
+} from '~/store/ServerStore/ServerStore.actions';
+import { clearServerData } from '~/store/ServerStore/ServerStore.reducer';
 
-interface SideBarProps {
-  onClose: () => void;
-}
-
-const SideBar = ({ onClose }: SideBarProps) => {
+export const SideBar = ({ onClose }: SideBarProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [opened, { open, close }] = useDisclosure(false);
   const { serverData, isLoading } = useAppSelector(
-    (state) => state.testServerStore
+    (state) => state.testServerStore,
   );
   const { accessToken } = useAppSelector((state) => state.userStore);
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
@@ -35,8 +33,9 @@ const SideBar = ({ onClose }: SideBarProps) => {
 
   const handleUnsubscribe = async () => {
     const result = await dispatch(
-      unsubscribeFromServer({ accessToken, serverId: serverData.serverId })
+      unsubscribeFromServer({ accessToken, serverId: serverData.serverId }),
     );
+
     if (result.meta.requestStatus === 'fulfilled') {
       dispatch(getUserServers({ accessToken }));
       dispatch(setOpenHome(true));
@@ -59,9 +58,7 @@ const SideBar = ({ onClose }: SideBarProps) => {
           <Menu.Target>
             <Group justify="space-between" style={{ cursor: 'pointer' }}>
               {isLoading ? (
-                <>
-                  <Skeleton height={10} width="40%" radius="md" />
-                </>
+                <Skeleton height={10} width="40%" radius="md" />
               ) : (
                 <Text>{serverData.serverName}</Text>
               )}
@@ -99,5 +96,3 @@ const SideBar = ({ onClose }: SideBarProps) => {
     </>
   );
 };
-
-export default SideBar;

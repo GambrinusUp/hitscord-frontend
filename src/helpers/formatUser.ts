@@ -1,4 +1,4 @@
-import { UserOnServer } from '../utils/types';
+import { UserOnServer } from '~/store/ServerStore/ServerStore.types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatUser = (rawMessage: any): UserOnServer => ({

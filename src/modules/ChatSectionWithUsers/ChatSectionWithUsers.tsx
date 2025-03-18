@@ -2,24 +2,25 @@ import { Box, Button, Flex, ScrollArea } from '@mantine/core';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
-import socket from '../../api/socket';
-import { useMediaContext } from '../../context/MediaContext/useMediaContext';
-import { useAppSelector } from '../../hooks/redux';
 import { UserItem } from './components/UserItem';
-import UsersCards from './components/UsersCards/UsersCards';
-import { getUserGroups } from './utils/getUserGroups';
+import { UsersCards } from './components/UsersCards';
 
-const ChatSectionWithUsers = () => {
+import { socket } from '~/api/socket';
+import { useMediaContext } from '~/context/';
+import { getUserGroups } from '~/helpers';
+import { useAppSelector } from '~/hooks';
+
+export const ChatSectionWithUsers = () => {
   const { consumers, users, selectedUserId, setSelectedUserId } =
     useMediaContext();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const selectedStreamRef = useRef<MediaStream | null>(null);
   const { currentVoiceChannelId } = useAppSelector(
-    (state) => state.testServerStore
+    (state) => state.testServerStore,
   );
   const rooms = getUserGroups(users);
   const currentRoom = rooms.find(
-    (room) => room.roomName === currentVoiceChannelId
+    (room) => room.roomName === currentVoiceChannelId,
   );
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -41,6 +42,7 @@ const ChatSectionWithUsers = () => {
 
   const handleCloseStream = () => {
     setSelectedUserId(null);
+
     if (videoRef.current) {
       selectedStreamRef.current = null;
       videoRef.current.srcObject = null;
@@ -55,7 +57,7 @@ const ChatSectionWithUsers = () => {
         (consumer) =>
           consumer.kind === 'video' &&
           consumer.producerId === producerId &&
-          currentRoom.users[selectedUserId!]?.producerIds.includes(producerId)
+          currentRoom.users[selectedUserId!]?.producerIds.includes(producerId),
       );
 
       if (isStreamSelected) {
@@ -68,7 +70,6 @@ const ChatSectionWithUsers = () => {
     return () => {
       socket.off('producerClosed', onProducerClosed);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, consumers, currentRoom, selectedUserId]);
 
   useEffect(() => {
@@ -78,12 +79,13 @@ const ChatSectionWithUsers = () => {
       (consumer) =>
         consumer.kind === 'video' &&
         currentRoom.users[selectedUserId]?.producerIds.includes(
-          consumer.producerId
-        )
+          consumer.producerId,
+        ),
     );
 
     if (videoConsumer) {
       const newTrack = videoConsumer.track;
+
       if (
         !selectedStreamRef.current ||
         selectedStreamRef.current.getVideoTracks()[0]?.id !== newTrack.id
@@ -96,7 +98,7 @@ const ChatSectionWithUsers = () => {
           videoRef.current
             .play()
             .catch((err) =>
-              console.error('Ошибка воспроизведения видео:', err)
+              console.error('Ошибка воспроизведения видео:', err),
             );
         }
       }
@@ -165,13 +167,14 @@ const ChatSectionWithUsers = () => {
 
                       return (
                         <UserItem
+                          key={socketId}
                           socketId={socketId}
                           userName={userName}
                           isStreaming={isStreaming}
                           handleUserClick={handleUserClick}
                         />
                       );
-                    }
+                    },
                   )}
               </Flex>
             </ScrollArea>
@@ -191,5 +194,3 @@ const ChatSectionWithUsers = () => {
     </Box>
   );
 };
-
-export default ChatSectionWithUsers;

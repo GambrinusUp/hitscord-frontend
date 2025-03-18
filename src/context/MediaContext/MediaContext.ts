@@ -5,7 +5,7 @@ import { Transport } from 'mediasoup-client/lib/Transport';
 import { AppData } from 'mediasoup-client/lib/types';
 import React, { createContext } from 'react';
 
-import { Room } from '../../utils/types';
+import { Room } from '~/shared/types';
 
 export const MediaContext = createContext<{
   isConnected: boolean;

@@ -1,16 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 
-import appReducer from './app/AppSettingsSlice';
-import mediaReducer from './mediasoup/MediasoupSlice';
-import testServerReducer from './server/TestServerSlice';
-import userReducer from './user/UserSlice';
+import { AppReducer } from './AppStore';
+import { ServerReducer } from './ServerStore';
+import { UserReducer } from './UserStore';
 
 const store = configureStore({
   reducer: {
-    userStore: userReducer,
-    appStore: appReducer,
-    testServerStore: testServerReducer,
-    mediaStore: mediaReducer,
+    userStore: UserReducer,
+    appStore: AppReducer,
+    testServerStore: ServerReducer,
   },
 });
 
