@@ -1,3 +1,5 @@
+import { LoadingState } from '~/shared';
+
 export interface ServerState {
   serversList: ServerItem[];
   serverData: ServerData;
@@ -5,6 +7,8 @@ export interface ServerState {
   currentChannelId: string | null;
   currentVoiceChannelId: string | null;
   messages: ChannelMessage[];
+  hasNewMessage: boolean;
+  messagesStatus: LoadingState;
   isLoading: boolean;
   error: string;
 }

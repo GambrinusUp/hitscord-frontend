@@ -3,20 +3,22 @@ import {
   Box,
   Divider,
   Group,
+  Indicator,
   ScrollArea,
   Skeleton,
   Stack,
   Textarea,
   TextInput,
 } from '@mantine/core';
-import { Menu, Paperclip, Search, Send, Users } from 'lucide-react';
+import { ArrowDown, Menu, Paperclip, Search, Send, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { ChatSectionProps } from './ChatSection.types';
 
 import { MessageItem } from '~/components/MessageItem';
 import { useAppDispatch, useAppSelector } from '~/hooks';
-import { createMessage } from '~/store/ServerStore';
+import { LoadingState } from '~/shared';
+import { clearHasNewMessage, createMessage } from '~/store/ServerStore';
 
 export const ChatSection = ({
   openSidebar,
@@ -25,9 +27,18 @@ export const ChatSection = ({
   const dispatch = useAppDispatch();
   const scrollRef = useRef<HTMLDivElement>(null);
   const { user, accessToken } = useAppSelector((state) => state.userStore);
-  const { currentServerId, currentChannelId, messages, isLoading } =
-    useAppSelector((state) => state.testServerStore);
+  const {
+    currentServerId,
+    currentChannelId,
+    messages,
+    hasNewMessage,
+    isLoading,
+    messagesStatus,
+  } = useAppSelector((state) => state.testServerStore);
   const [newMessage, setNewMessage] = useState('');
+
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [showButton, setShowButton] = useState(false);
 
   const handleSendMessage = () => {
     if (newMessage.trim() && currentServerId && currentChannelId) {
@@ -50,20 +61,38 @@ export const ChatSection = ({
     }
   };
 
-  useEffect(() => {
+  const handleScroll = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+      const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
+      setIsAtBottom(atBottom);
+
+      if (atBottom) {
+        setShowButton(false);
+      }
     }
-  }, [messages]);
+  };
 
   useEffect(() => {
-    if (scrollRef.current) {
+    if (!isAtBottom) {
+      setShowButton(true);
+    } else if (scrollRef.current) {
       scrollRef.current.scrollTo({
         top: scrollRef.current.scrollHeight,
         behavior: 'smooth',
       });
+      dispatch(clearHasNewMessage());
     }
-  }, [messages]);
+  }, [messages, isAtBottom]);
+
+  useEffect(() => {
+    if (messagesStatus === LoadingState.FULFILLED && scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'instant',
+      });
+    }
+  }, [messagesStatus]);
 
   return (
     <Box
@@ -89,7 +118,11 @@ export const ChatSection = ({
         </ActionIcon>
       </Group>
       <Divider my="md" />
-      <ScrollArea viewportRef={scrollRef} style={{ flex: 1, padding: 10 }}>
+      <ScrollArea
+        viewportRef={scrollRef}
+        style={{ flex: 1, padding: 10 }}
+        onScrollPositionChange={handleScroll}
+      >
         <Stack gap="sm">
           {isLoading &&
             messages.length < 1 &&
@@ -116,6 +149,37 @@ export const ChatSection = ({
           ))}
         </Stack>
       </ScrollArea>
+
+      {!isAtBottom && showButton && (
+        <Box
+          style={{
+            position: 'absolute',
+            bottom: 60,
+            right: 320,
+            zIndex: 10,
+          }}
+        >
+          <Indicator size={14} disabled={!hasNewMessage} withBorder>
+            <ActionIcon
+              size="lg"
+              variant="filled"
+              onClick={() => {
+                if (scrollRef.current) {
+                  scrollRef.current.scrollTo({
+                    top: scrollRef.current.scrollHeight,
+                    behavior: 'smooth',
+                  });
+                  setShowButton(false);
+                  dispatch(clearHasNewMessage());
+                }
+              }}
+            >
+              <ArrowDown size={20} />
+            </ActionIcon>
+          </Indicator>
+        </Box>
+      )}
+
       <Group mt="auto" align="center" wrap="nowrap" gap={0}>
         <ActionIcon size="xl" variant="transparent">
           <Paperclip size={20} />

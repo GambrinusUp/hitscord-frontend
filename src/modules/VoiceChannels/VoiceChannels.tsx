@@ -1,6 +1,6 @@
 import { Collapse, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ChannelItem } from './components/ChannelItem';
 import { CollapseButton } from './components/CollapseButton';
@@ -10,6 +10,7 @@ import { useActiveUsers } from './VoiceChannels.hooks';
 import { socket } from '~/api/socket';
 import { CreateChannelModal } from '~/components/CreateChannelModal';
 import { useMediaContext } from '~/context';
+import { useAudioContext } from '~/context/AudioContext';
 import { getUserGroups } from '~/helpers';
 import {
   useAppDispatch,
@@ -36,10 +37,9 @@ export const VoiceChannels = () => {
     channelModalOpened,
     { open: openChannelModal, close: closeChannelModal },
   ] = useDisclosure(false);
-  const [userVolumes, setUserVolumes] = useState<Record<string, number>>({});
   const activeUsers = useActiveUsers();
+  const { setVolume, userVolumes } = useAudioContext();
   const rooms = getUserGroups(users);
-  const audioRefs = useRef<Map<string, HTMLAudioElement>>(new Map());
   const isAdmin = serverData.userRole === 'Admin' ? true : false;
   const [isEditing, setIsEditing] = useState<EditModal>({
     isEdit: false,
@@ -83,10 +83,7 @@ export const VoiceChannels = () => {
     });
 
     if (audioProducerId) {
-      setUserVolumes((prev) => ({
-        ...prev,
-        [audioProducerId]: value / 100,
-      }));
+      setVolume(audioProducerId, value);
     }
   };
 
@@ -140,41 +137,6 @@ export const VoiceChannels = () => {
     });
     openChannelModal();
   };
-
-  useEffect(() => {
-    consumers.forEach((consumer) => {
-      if (consumer.kind === 'audio') {
-        const { producerId, track } = consumer;
-
-        if (!audioRefs.current.has(producerId)) {
-          const audio = document.createElement('audio');
-          audio.srcObject = new MediaStream([track]);
-          audio.autoplay = true;
-          audio.volume = userVolumes[producerId] ?? 1;
-          audioRefs.current.set(producerId, audio);
-          document.body.appendChild(audio);
-        }
-      }
-    });
-
-    const activeProducers = consumers.map((c) => c.producerId);
-    audioRefs.current.forEach((audio, producerId) => {
-      if (!activeProducers.includes(producerId)) {
-        audio.pause();
-        audio.remove();
-        audioRefs.current.delete(producerId);
-      }
-    });
-
-    return () => {
-      audioRefs.current.forEach((audio) => {
-        audio.pause();
-        audio.remove();
-      });
-
-      audioRefs.current.clear();
-    };
-  }, [consumers, userVolumes]);
 
   useEffect(() => {
     if (!socket) return;

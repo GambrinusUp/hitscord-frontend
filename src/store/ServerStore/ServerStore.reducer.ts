@@ -24,6 +24,8 @@ import {
   UserOnServer,
 } from './ServerStore.types';
 
+import { LoadingState } from '~/shared';
+
 const initialState: ServerState = {
   serversList: [],
   serverData: {
@@ -43,6 +45,8 @@ const initialState: ServerState = {
   currentChannelId: null,
   currentVoiceChannelId: null,
   messages: [],
+  hasNewMessage: false,
+  messagesStatus: LoadingState.IDLE,
   isLoading: false,
   error: '',
 };
@@ -66,6 +70,7 @@ const testServerSlice = createSlice({
 
       if (channelId === state.currentChannelId) {
         state.messages.push(action.payload);
+        state.hasNewMessage = true;
       }
     },
     deleteMessageWs: (
@@ -118,6 +123,9 @@ const testServerSlice = createSlice({
           announcementChannels: [],
         },
       };
+    },
+    clearHasNewMessage: (state) => {
+      state.hasNewMessage = false;
     },
   },
   extraReducers: (builder) => {
@@ -221,6 +229,7 @@ const testServerSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(getChannelMessages.pending, (state) => {
+        state.messagesStatus = LoadingState.PENDING;
         state.isLoading = true;
         state.error = '';
       })
@@ -228,12 +237,15 @@ const testServerSlice = createSlice({
         getChannelMessages.fulfilled,
         (state, action: PayloadAction<ChannelMessage[]>) => {
           state.messages = action.payload;
+          state.hasNewMessage = false;
+          state.messagesStatus = LoadingState.FULFILLED;
           state.isLoading = false;
           state.error = '';
         },
       )
       .addCase(getChannelMessages.rejected, (state, action) => {
         state.isLoading = false;
+        state.messagesStatus = LoadingState.REJECTED;
         state.error = action.payload as string;
       })
       .addCase(getMoreMessages.pending, (state) => {
@@ -319,6 +331,7 @@ export const {
   addUserWs,
   deleteUserWs,
   clearServerData,
+  clearHasNewMessage,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

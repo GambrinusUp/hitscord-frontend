@@ -66,7 +66,8 @@ export const MainPage = () => {
         }),
       );
     }
-  }, [accessToken, currentChannelId, dispatch]);
+    // Изменить логику получения сообщений, при переключении между серверами
+  }, [accessToken, currentChannelId, currentServerId, dispatch]);
 
   return (
     <Box style={{ display: 'flex', height: '100dvh' }}>

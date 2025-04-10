@@ -6,6 +6,7 @@ import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 
+import { AudioProvider } from './context/AudioContext';
 import { MediaProvider } from './context/MediaContext';
 import { AuthPage } from './pages/AuthPage';
 import { LandingPage } from './pages/LandingPage';
@@ -15,22 +16,24 @@ import { RegistrationPage } from './pages/RegistrationPage';
 const App = () => {
   return (
     <MediaProvider>
-      <Router
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
-        <MantineProvider>
-          <Notifications />
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/main" element={<MainPage />} />
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/register" element={<RegistrationPage />} />
-          </Routes>
-        </MantineProvider>
-      </Router>
+      <AudioProvider>
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
+          <MantineProvider>
+            <Notifications />
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/main" element={<MainPage />} />
+              <Route path="/login" element={<AuthPage />} />
+              <Route path="/register" element={<RegistrationPage />} />
+            </Routes>
+          </MantineProvider>
+        </Router>
+      </AudioProvider>
     </MediaProvider>
   );
 };

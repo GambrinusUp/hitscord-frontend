@@ -15,6 +15,7 @@ export {
   deleteMessageWs,
   deleteUserWs,
   editMessageWs,
+  clearHasNewMessage,
 } from './ServerStore.reducer';
 
 export {

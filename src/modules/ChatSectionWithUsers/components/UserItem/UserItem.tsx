@@ -22,11 +22,11 @@ export const UserItem = ({
         borderRadius: '8px',
         backgroundColor: '#1A1B1E',
         textAlign: 'center',
-        height: '100px',
+        height: 'auto',
         width: '100px',
       }}
     >
-      <Avatar radius="xl" size="sm">
+      <Avatar radius="xl" size="sm" style={{ flexShrink: 0 }}>
         {userName[0]}
       </Avatar>
       <Text c="white" size="xs">
@@ -37,6 +37,7 @@ export const UserItem = ({
           size="xs"
           variant="outline"
           onClick={() => handleUserClick(socketId)}
+          style={{ flexShrink: 0 }}
         >
           <Video />
         </Button>

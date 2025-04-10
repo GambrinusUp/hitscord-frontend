@@ -1,9 +1,10 @@
-import { Box, Button } from '@mantine/core';
+import { Badge, Box, Button } from '@mantine/core';
 import { Hash, Settings } from 'lucide-react';
 import { useState } from 'react';
 
 import { ChannelItemProps } from './ChannelItem.types';
 
+import { useAppSelector } from '~/hooks';
 import { styles } from '~/modules/TextChannels';
 
 export const ChannelItem = ({
@@ -14,6 +15,7 @@ export const ChannelItem = ({
   handleEditChannel,
   handleOpenChannel,
 }: ChannelItemProps) => {
+  const { hasNewMessage } = useAppSelector((state) => state.testServerStore);
   const [isHovered, setIsHovered] = useState('');
 
   return (
@@ -27,7 +29,13 @@ export const ChannelItem = ({
       onMouseLeave={() => setIsHovered('')}
     >
       <Button
-        leftSection={<Hash />}
+        leftSection={
+          hasNewMessage && channelId === currentChannelId ? (
+            <Badge circle>1</Badge>
+          ) : (
+            <Hash />
+          )
+        }
         variant="subtle"
         p={0}
         color="#ffffff"
