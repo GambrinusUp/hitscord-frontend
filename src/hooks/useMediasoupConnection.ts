@@ -133,9 +133,13 @@ export const useMediasoupConnection = (
   };
 
   const joinRoom = (audioTrack: MediaStreamTrack) => {
-    socket?.emit('joinRoom', { roomName, userName }, (data: any) => {
-      createDevice(audioTrack, data.rtpCapabilities);
-    });
+    socket?.emit(
+      'joinRoom',
+      { roomName, userName },
+      (data: { rtpCapabilities: RtpCapabilities }) => {
+        createDevice(audioTrack, data.rtpCapabilities);
+      },
+    );
   };
 
   const createDevice = async (

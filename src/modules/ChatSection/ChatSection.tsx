@@ -18,11 +18,14 @@ import { ChatSectionProps } from './ChatSection.types';
 import { MessageItem } from '~/components/MessageItem';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
-import { clearHasNewMessage, createMessage } from '~/store/ServerStore';
+import { clearHasNewMessage } from '~/store/ServerStore';
 
 export const ChatSection = ({
   openSidebar,
   openDetailsPanel,
+  sendMessage,
+  editMessage,
+  deleteMessage,
 }: ChatSectionProps) => {
   const dispatch = useAppDispatch();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -42,14 +45,20 @@ export const ChatSection = ({
 
   const handleSendMessage = () => {
     if (newMessage.trim() && currentServerId && currentChannelId) {
-      dispatch(
+      sendMessage({
+        Token: accessToken,
+        ChannelId: currentChannelId,
+        Text: newMessage.trim(),
+        NestedChannel: false,
+      });
+      /*dispatch(
         createMessage({
           accessToken: accessToken,
           channelId: currentChannelId,
           text: newMessage.trim(),
           nestedChannel: false,
         }),
-      );
+      );*/
       setNewMessage('');
     }
   };
@@ -140,11 +149,13 @@ export const ChatSection = ({
             <MessageItem
               key={message.id}
               messageId={message.id}
-              userName={message.authorName}
               content={message.text}
               isOwnMessage={user.id === message.authorId}
               time={message.createdAt}
               modifiedAt={message.modifiedAt}
+              authorId={message.authorId}
+              editMessage={editMessage}
+              deleteMessage={deleteMessage}
             />
           ))}
         </Stack>

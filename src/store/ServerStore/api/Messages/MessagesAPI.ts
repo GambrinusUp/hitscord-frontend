@@ -7,7 +7,7 @@ export const createMessage = async (
   nestedChannel: boolean,
 ) => {
   try {
-    const response = await fetch(`${API_URL}/message/createmessage`, {
+    const response = await fetch(`${API_URL}/message/create`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -32,7 +32,7 @@ export const createMessage = async (
 
 export const deleteMessage = async (accessToken: string, messageId: string) => {
   try {
-    const response = await fetch(`${API_URL}/message/deletemessage`, {
+    const response = await fetch(`${API_URL}/message/delete`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -59,7 +59,7 @@ export const editMessage = async (
   text: string,
 ) => {
   try {
-    const response = await fetch(`${API_URL}/message/updatemessage`, {
+    const response = await fetch(`${API_URL}/message/update`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${accessToken}`,

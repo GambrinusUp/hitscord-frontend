@@ -1,4 +1,12 @@
-import { Divider, Group, Menu, Skeleton, Stack, Text } from '@mantine/core';
+import {
+  Divider,
+  Group,
+  Menu,
+  ScrollArea,
+  Skeleton,
+  Stack,
+  Text,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ChevronDown, Copy, DoorOpen, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -7,31 +15,42 @@ import { Panel } from './components/Panel';
 import { ServerSettingsModal } from './components/ServerSettingsModal';
 import { SideBarProps } from './SideBarProps.types';
 
-import { useAppDispatch, useAppSelector } from '~/hooks';
+import { useAppDispatch, useAppSelector, useDisconnect } from '~/hooks';
 import { TextChannels } from '~/modules/TextChannels';
 import { VoiceChannels } from '~/modules/VoiceChannels';
-import { setOpenHome } from '~/store/AppStore/AppStore.reducer';
+import {
+  setOpenHome,
+  setUserStreamView,
+} from '~/store/AppStore/AppStore.reducer';
 import {
   getUserServers,
   unsubscribeFromServer,
 } from '~/store/ServerStore/ServerStore.actions';
-import { clearServerData } from '~/store/ServerStore/ServerStore.reducer';
+import {
+  clearServerData,
+  setCurrentVoiceChannelId,
+} from '~/store/ServerStore/ServerStore.reducer';
 
 export const SideBar = ({ onClose }: SideBarProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const disconnect = useDisconnect();
   const [opened, { open, close }] = useDisclosure(false);
-  const { serverData, isLoading } = useAppSelector(
+  const { serverData, isLoading, currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const isAdmin = serverData.userRole === 'Admin' ? true : false;
+  const isAdmin = serverData.isCreator;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
 
   const handleUnsubscribe = async () => {
+    disconnect(accessToken, currentVoiceChannelId!);
+    dispatch(setUserStreamView(false));
+    dispatch(setCurrentVoiceChannelId(null));
+
     const result = await dispatch(
       unsubscribeFromServer({ accessToken, serverId: serverData.serverId }),
     );
@@ -88,8 +107,10 @@ export const SideBar = ({ onClose }: SideBarProps) => {
           </Menu.Dropdown>
         </Menu>
         <Divider />
-        <TextChannels onClose={onClose} />
-        <VoiceChannels />
+        <ScrollArea.Autosize mah="100%" maw="100%" scrollbarSize={0}>
+          <TextChannels onClose={onClose} />
+          <VoiceChannels />
+        </ScrollArea.Autosize>
         <Panel />
       </Stack>
       <ServerSettingsModal opened={opened} onClose={close} />

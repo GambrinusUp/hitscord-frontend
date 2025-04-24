@@ -12,6 +12,7 @@ export const useScreenSharing = () => {
     const screenStream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
     });
+
     const screenTrack = screenStream.getVideoTracks()[0];
 
     const producer = await producerTransport!.produce({
@@ -26,11 +27,19 @@ export const useScreenSharing = () => {
   };
 
   const stopScreenSharing = async () => {
+    const accessToken = localStorage.getItem('accessToken');
+
     if (videoProducer) {
       videoProducer.close();
-      socket.emit('stopProducer', { producerId: videoProducer!.id });
+      socket.emit('stopProducer', {
+        producerId: videoProducer!.id,
+        accessToken,
+      });
     } else {
-      socket.emit('stopProducer', { producerId: producerIdRef.current });
+      socket.emit('stopProducer', {
+        producerId: producerIdRef.current,
+        accessToken,
+      });
     }
     producerIdRef.current = null;
     setVideoProducer(null);

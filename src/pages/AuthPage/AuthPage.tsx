@@ -12,14 +12,13 @@ import { useForm } from '@mantine/form';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { useAppDispatch, useAppSelector } from '~/hooks';
 import { loginUser } from '~/store/UserStore';
 
 export const AuthPage = () => {
-  const { accessToken, error } = useAppSelector((state) => state.userStore);
+  const { accessToken } = useAppSelector((state) => state.userStore);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { showError } = useNotification();
 
   const form = useForm({
     initialValues: {
@@ -50,12 +49,6 @@ export const AuthPage = () => {
       navigate('/main');
     }
   }, [accessToken, navigate]);
-
-  useEffect(() => {
-    if (error) {
-      showError(error);
-    }
-  }, [error]);
 
   return (
     <Flex

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { WebSocketHandlerProps } from './MainPage.types';
 
@@ -11,6 +11,9 @@ import {
   deleteMessageWs,
   deleteUserWs,
   editMessageWs,
+  CreateMessageWs,
+  DeleteMessageWs,
+  EditMessageWs,
 } from '~/store/ServerStore';
 
 export const useWebSocketHandler = ({
@@ -20,11 +23,12 @@ export const useWebSocketHandler = ({
   currentVoiceChannelId,
 }: WebSocketHandlerProps) => {
   const disconnect = useDisconnect();
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     if (accessToken) {
       const ws = new WebSocket(
-        `wss://hitscord-backend.online/ws?accessToken=${accessToken}`,
+        `wss://hitscord-backend.online/sockets/ws?accessToken=${accessToken}`,
       );
 
       ws.onmessage = (event) => {
@@ -88,7 +92,7 @@ export const useWebSocketHandler = ({
               data.Payload.ChannelType === 1 &&
               data.Payload.ChannelId === currentVoiceChannelId
             ) {
-              disconnect();
+              disconnect(accessToken, currentVoiceChannelId!);
             }
 
             if (serverId === data.Payload.ServerId) {
@@ -102,10 +106,62 @@ export const useWebSocketHandler = ({
         console.error('WebSocket error:', error);
       };
 
+      wsRef.current = ws;
+
       return () => {
         console.log('Closing WebSocket connection');
         ws.close();
       };
     }
   }, [accessToken, serverId, currentVoiceChannelId, dispatch]);
+
+  const sendMessage = useCallback((message: CreateMessageWs) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      const sendData = {
+        Type: 'New message',
+        Content: message,
+      };
+
+      wsRef.current.send(JSON.stringify(sendData));
+    } else {
+      console.error(
+        'WebSocket is not open. Ready state:',
+        wsRef.current?.readyState,
+      );
+    }
+  }, []);
+
+  const editMessage = useCallback((message: EditMessageWs) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      const sendData = {
+        Type: 'Update message',
+        Content: message,
+      };
+
+      wsRef.current.send(JSON.stringify(sendData));
+    } else {
+      console.error(
+        'WebSocket is not open. Ready state:',
+        wsRef.current?.readyState,
+      );
+    }
+  }, []);
+
+  const deleteMessage = useCallback((message: DeleteMessageWs) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      const sendData = {
+        Type: 'Delete message',
+        Content: message,
+      };
+
+      wsRef.current.send(JSON.stringify(sendData));
+    } else {
+      console.error(
+        'WebSocket is not open. Ready state:',
+        wsRef.current?.readyState,
+      );
+    }
+  }, []);
+
+  return { sendMessage, editMessage, deleteMessage };
 };

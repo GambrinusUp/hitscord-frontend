@@ -9,7 +9,7 @@ export const getChannelsMessages = async (
 ): Promise<ChannelMessage[]> => {
   try {
     const response = await fetch(
-      `${API_URL}/channel/gettextchannelmessages?channelId=${channelId}&number=${numberOfMessages}&fromStart=${fromStart}`,
+      `${API_URL}/api/channel/messages?channelId=${channelId}&number=${numberOfMessages}&fromStart=${fromStart}`,
       {
         method: 'GET',
         headers: {
@@ -39,7 +39,7 @@ export const createChannel = async (
   channelType: ChannelType,
 ) => {
   try {
-    const response = await fetch(`${API_URL}/channel/createchannel`, {
+    const response = await fetch(`${API_URL}/api/channel/create`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -64,7 +64,7 @@ export const createChannel = async (
 
 export const deleteChannel = async (accessToken: string, channelId: string) => {
   try {
-    const response = await fetch(`${API_URL}/channel/deletechannel`, {
+    const response = await fetch(`${API_URL}/api/channel/delete`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,

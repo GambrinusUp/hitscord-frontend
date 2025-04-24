@@ -7,7 +7,6 @@ export const formatMessage = (rawMessage: any): ChannelMessage => ({
   id: rawMessage.Id,
   text: rawMessage.Text,
   authorId: rawMessage.AuthorId,
-  authorName: rawMessage.AuthorName,
   createdAt: rawMessage.CreatedAt,
   modifiedAt: rawMessage.ModifiedAt || null,
   nestedChannelId: rawMessage.NestedChannelId || null,

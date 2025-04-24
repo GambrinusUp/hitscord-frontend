@@ -1,10 +1,10 @@
 import { Button, Group, Modal, Tabs, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { CreateServerModalProps } from './CreateServerModal.types';
 
-import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { useAppDispatch, useAppSelector } from '~/hooks';
 import {
   createServer,
   getUserServers,
@@ -16,8 +16,6 @@ export const CreateServerModal = ({
   onClose,
 }: CreateServerModalProps) => {
   const [activeTab, setActiveTab] = useState<string | null>('create');
-  const { showError } = useNotification();
-  const { error } = useAppSelector((state) => state.testServerStore);
   const { user, accessToken } = useAppSelector((state) => state.userStore);
   const dispatch = useAppDispatch();
 
@@ -72,10 +70,6 @@ export const CreateServerModal = ({
     }
   };
 
-  useEffect(() => {
-    if (error !== '') showError(error);
-  }, [error]);
-
   return (
     <Modal
       opened={opened}
@@ -96,7 +90,15 @@ export const CreateServerModal = ({
         },
       }}
     >
-      <Tabs value={activeTab} onChange={setActiveTab}>
+      <Tabs
+        value={activeTab}
+        onChange={setActiveTab}
+        styles={{
+          tab: {
+            '--tab-hover-color': '#4f4f4f',
+          },
+        }}
+      >
         <Tabs.List>
           <Tabs.Tab value="create">Создать сервер</Tabs.Tab>
           <Tabs.Tab value="connect">Подключиться к серверу</Tabs.Tab>

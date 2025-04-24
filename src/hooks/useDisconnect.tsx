@@ -12,8 +12,8 @@ export const useDisconnect = () => {
     setAudioProducer,
   } = useMediaContext();
 
-  const disconnect = () => {
-    socket.emit('leaveRoom');
+  const disconnect = (accessToken: string, voiceChannelId: string) => {
+    socket.emit('leaveRoom', { accessToken, voiceChannelId });
     setIsConnected(false);
     setDevice(null);
     setConsumers([]);

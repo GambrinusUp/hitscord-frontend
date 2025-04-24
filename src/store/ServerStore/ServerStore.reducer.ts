@@ -38,8 +38,11 @@ const initialState: ServerState = {
     channels: {
       textChannels: [],
       voiceChannels: [],
-      announcementChannels: [],
     },
+    isCreator: false,
+    canChangeRole: false,
+    canDeleteUsers: false,
+    canWorkWithChannels: false,
   },
   currentServerId: null,
   currentChannelId: null,
@@ -120,8 +123,11 @@ const testServerSlice = createSlice({
         channels: {
           textChannels: [],
           voiceChannels: [],
-          announcementChannels: [],
         },
+        isCreator: false,
+        canChangeRole: false,
+        canDeleteUsers: false,
+        canWorkWithChannels: false,
       };
     },
     clearHasNewMessage: (state) => {
@@ -149,8 +155,6 @@ const testServerSlice = createSlice({
       })
       .addCase(getServerData.pending, (state) => {
         state.isLoading = true;
-        //state.messages = [];
-        //state.currentChannelId = null;
         state.serverData = {
           serverId: '',
           serverName: '',
@@ -161,8 +165,11 @@ const testServerSlice = createSlice({
           channels: {
             textChannels: [],
             voiceChannels: [],
-            announcementChannels: [],
           },
+          isCreator: false,
+          canChangeRole: false,
+          canDeleteUsers: false,
+          canWorkWithChannels: false,
         };
         state.error = '';
       })

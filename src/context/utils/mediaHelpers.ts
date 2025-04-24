@@ -23,11 +23,12 @@ export const joinRoom = async (
   roomName: string,
   userName: string,
   serverId: string,
+  accessToken: string,
 ) => {
   return new Promise<RtpCapabilities>((resolve, reject) => {
     socket.emit(
       'joinRoom',
-      { roomName, userName, serverId },
+      { roomName, userName, serverId, accessToken },
       (response: { rtpCapabilities: RtpCapabilities; error?: string }) => {
         if (response.error) {
           reject(response.error);
@@ -71,11 +72,14 @@ export const createSendTransport = async (
         });
 
         producerTransport.on('produce', (parameters, callback) => {
+          const accessToken = localStorage.getItem('accessToken');
+
           socket.emit(
             'transport-produce',
             {
               kind: parameters.kind,
               rtpParameters: parameters.rtpParameters,
+              accessToken,
             },
             ({ id }: { id: string }) => {
               callback({ id });

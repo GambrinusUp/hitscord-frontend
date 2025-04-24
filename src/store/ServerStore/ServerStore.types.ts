@@ -19,7 +19,6 @@ export interface ChannelMessage {
   id: string;
   text: string;
   authorId: string;
-  authorName: string;
   createdAt: string;
   modifiedAt: string | null;
   nestedChannelId: boolean | null;
@@ -33,6 +32,7 @@ export enum ChannelType {
 
 export interface Role {
   id: string;
+  serverId: string;
   name: string;
 }
 
@@ -75,11 +75,14 @@ export interface ServerData {
   roles: Role[];
   userRoleId: string;
   userRole: string;
+  isCreator: boolean;
+  canChangeRole: boolean;
+  canDeleteUsers: boolean;
+  canWorkWithChannels: boolean;
   users: UserOnServer[];
   channels: {
     textChannels: TextChannel[];
     voiceChannels: VoiceChannel[];
-    announcementChannels?: AnnouncementChannel[];
   };
 }
 
@@ -90,4 +93,22 @@ export interface ServerItem {
 
 export interface GetServersResponse {
   serversList: ServerItem[];
+}
+
+export interface CreateMessageWs {
+  Token: string;
+  ChannelId: string;
+  Text: string;
+  NestedChannel: boolean;
+}
+
+export interface EditMessageWs {
+  Token: string;
+  MessageId: string;
+  Text: string;
+}
+
+export interface DeleteMessageWs {
+  Token: string;
+  MessageId: string;
 }

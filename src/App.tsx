@@ -12,6 +12,7 @@ import { AuthPage } from './pages/AuthPage';
 import { LandingPage } from './pages/LandingPage';
 import { MainPage } from './pages/MainPage';
 import { RegistrationPage } from './pages/RegistrationPage';
+import { ErrorsProvider } from './providers/errors';
 
 const App = () => {
   return (
@@ -25,12 +26,14 @@ const App = () => {
         >
           <MantineProvider>
             <Notifications />
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/main" element={<MainPage />} />
-              <Route path="/login" element={<AuthPage />} />
-              <Route path="/register" element={<RegistrationPage />} />
-            </Routes>
+            <ErrorsProvider>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/main" element={<MainPage />} />
+                <Route path="/login" element={<AuthPage />} />
+                <Route path="/register" element={<RegistrationPage />} />
+              </Routes>
+            </ErrorsProvider>
           </MantineProvider>
         </Router>
       </AudioProvider>

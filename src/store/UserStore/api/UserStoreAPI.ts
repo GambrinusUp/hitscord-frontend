@@ -10,7 +10,7 @@ export const registerUser = async (
   registerData: RegisterCredentials,
 ): Promise<LoginResponse> => {
   try {
-    const response = await fetch(`${API_URL}/auth/registration`, {
+    const response = await fetch(`${API_URL}/api/auth/registration`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export const loginUser = async (
   loginData: LoginCredentials,
 ): Promise<LoginResponse> => {
   try {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export const loginUser = async (
 
 export const getProfile = async (accessToken: string): Promise<User> => {
   try {
-    const response = await fetch(`${API_URL}/auth/profile`, {
+    const response = await fetch(`${API_URL}/api/auth/profile/get`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -84,7 +84,7 @@ export const getProfile = async (accessToken: string): Promise<User> => {
 
 export const logout = async (accessToken: string) => {
   try {
-    const response = await fetch(`${API_URL}/auth/logout`, {
+    const response = await fetch(`${API_URL}/api/auth/logout`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -106,7 +106,7 @@ export const refreshToken = async (
   refreshToken: string,
 ): Promise<LoginResponse> => {
   try {
-    const response = await fetch(`${API_URL}/auth/refreshTokens`, {
+    const response = await fetch(`${API_URL}/api/auth/refresh`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${refreshToken}`,

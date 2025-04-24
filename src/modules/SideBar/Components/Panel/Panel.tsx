@@ -17,7 +17,10 @@ export const Panel = () => {
   const { startScreenSharing, stopScreenSharing } = useScreenSharing();
 
   const dispatch = useAppDispatch();
-  const { user } = useAppSelector((state) => state.userStore);
+  const { user, accessToken } = useAppSelector((state) => state.userStore);
+  const { currentVoiceChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
 
   const handleScreenShareClick = () => {
     if (isStreaming) {
@@ -28,7 +31,7 @@ export const Panel = () => {
   };
 
   const handleClick = () => {
-    disconnect();
+    disconnect(accessToken, currentVoiceChannelId!);
     dispatch(setUserStreamView(false));
     dispatch(setCurrentVoiceChannelId(null));
   };

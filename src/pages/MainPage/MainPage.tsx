@@ -34,7 +34,7 @@ export const MainPage = () => {
     detailsPanelOpened,
     { open: openDetailsPanel, close: closeDetailsPanel },
   ] = useDisclosure(false);
-  useWebSocketHandler({
+  const { sendMessage, editMessage, deleteMessage } = useWebSocketHandler({
     accessToken,
     dispatch,
     serverId: currentServerId,
@@ -81,6 +81,9 @@ export const MainPage = () => {
             <ChatSection
               openSidebar={open}
               openDetailsPanel={openDetailsPanel}
+              sendMessage={sendMessage}
+              editMessage={editMessage}
+              deleteMessage={deleteMessage}
             />
           ) : (
             <ChatSectionWithUsers />

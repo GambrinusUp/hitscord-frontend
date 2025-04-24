@@ -20,6 +20,7 @@ export const useConnect = () => {
     roomName: string,
     userName: string,
     serverId: string,
+    accessToken: string,
   ) => {
     try {
       if (!socket.connected) {
@@ -28,7 +29,12 @@ export const useConnect = () => {
 
       const audioTrack = await getLocalAudioStream();
 
-      const roomData = await joinRoom(roomName, userName, serverId);
+      const roomData = await joinRoom(
+        roomName,
+        userName,
+        serverId,
+        accessToken,
+      );
 
       const device = await createDevice(roomData);
       setDevice(device);

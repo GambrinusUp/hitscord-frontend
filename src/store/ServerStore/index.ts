@@ -2,6 +2,9 @@ export type {
   ChannelMessage,
   GetServersResponse,
   ServerData,
+  CreateMessageWs,
+  EditMessageWs,
+  DeleteMessageWs,
 } from './ServerStore.types';
 export { ChannelType } from './ServerStore.types';
 

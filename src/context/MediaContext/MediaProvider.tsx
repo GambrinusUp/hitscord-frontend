@@ -10,6 +10,7 @@ import { MediaContext } from './MediaContext';
 
 import { socket } from '~/api/socket';
 import { signalNewConsumerTransport } from '~/context/utils';
+import { useAppSelector } from '~/hooks';
 import { Room } from '~/shared/types';
 
 export const MediaProvider = (props: React.PropsWithChildren) => {
@@ -26,6 +27,11 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
     null,
   );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
+  const { currentVoiceChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
+  const { accessToken } = useAppSelector((state) => state.userStore);
 
   const addConsumer = (consumer: Consumer) => {
     setConsumers((prev) => [...prev, consumer]);
@@ -70,7 +76,17 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
       setUsers(rooms);
     });
 
+    const handleBeforeUnload = () => {
+      socket.emit('leaveRoom', {
+        accessToken,
+        voiceChannelId: currentVoiceChannelId,
+      });
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       socket.off('producerClosed');
       socket.off('producer-closed');
       socket.off('new-producer');

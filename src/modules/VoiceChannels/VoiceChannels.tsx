@@ -27,7 +27,7 @@ export const VoiceChannels = () => {
   const disconnect = useDisconnect();
   const { isConnected, consumers, users, setSelectedUserId } =
     useMediaContext();
-  const { user } = useAppSelector((state) => state.userStore);
+  const { user, accessToken } = useAppSelector((state) => state.userStore);
   const { serverData, currentVoiceChannelId, currentServerId } = useAppSelector(
     (state) => state.testServerStore,
   );
@@ -40,7 +40,7 @@ export const VoiceChannels = () => {
   const activeUsers = useActiveUsers();
   const { setVolume, userVolumes } = useAudioContext();
   const rooms = getUserGroups(users);
-  const isAdmin = serverData.userRole === 'Admin' ? true : false;
+  const isAdmin = serverData.isCreator;
   const [isEditing, setIsEditing] = useState<EditModal>({
     isEdit: false,
     initialData: '',
@@ -50,15 +50,10 @@ export const VoiceChannels = () => {
   const handleConnect = (channelId: string) => {
     if (!isConnected) {
       dispatch(setCurrentVoiceChannelId(channelId));
-      connect(channelId, user.name, serverData.serverId);
+      connect(channelId, user.name, serverData.serverId, accessToken);
     } else {
       if (channelId === currentVoiceChannelId) {
         dispatch(toggleUserStreamView());
-      } else {
-        disconnect();
-        dispatch(setUserStreamView(false));
-        dispatch(setCurrentVoiceChannelId(channelId));
-        connect(channelId, user.name, serverData.serverId);
       }
     }
   };
@@ -142,7 +137,7 @@ export const VoiceChannels = () => {
     if (!socket) return;
 
     socket.on('kickedUser', () => {
-      disconnect();
+      disconnect(accessToken, currentVoiceChannelId!);
       dispatch(setUserStreamView(false));
       dispatch(setCurrentVoiceChannelId(null));
     });

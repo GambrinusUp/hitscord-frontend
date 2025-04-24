@@ -29,7 +29,7 @@ export const ServerSettingsModal = ({
   const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
   const [assignRoleId, setAssignRoleId] = useState<string | null>('');
   const [loading, setLoading] = useState(false);
-  const { showSuccess, showError } = useNotification();
+  const { showSuccess } = useNotification();
 
   const assignRole = async () => {
     if (!assignRoleUserId || !assignRoleId) return;
@@ -54,7 +54,6 @@ export const ServerSettingsModal = ({
   useEffect(() => {
     if (error) {
       setLoading(false);
-      showError(error);
     }
   }, [error]);
 

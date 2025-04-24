@@ -5,7 +5,7 @@ export const getServers = async (
   accessToken: string,
 ): Promise<GetServersResponse> => {
   try {
-    const response = await fetch(`${API_URL}/user/getservers`, {
+    const response = await fetch(`${API_URL}/api/server/get/List`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -32,7 +32,7 @@ export const getServerData = async (
 ): Promise<ServerData> => {
   try {
     const response = await fetch(
-      `${API_URL}/user/getserverdata?serverId=${serverId}`,
+      `${API_URL}/api/server/getserverdata?serverId=${serverId}`,
       {
         method: 'GET',
         headers: {
@@ -57,7 +57,7 @@ export const getServerData = async (
 
 export const createServer = async (accessToken: string, name: string) => {
   try {
-    const response = await fetch(`${API_URL}/user/createServer`, {
+    const response = await fetch(`${API_URL}/api/server/create`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -80,7 +80,7 @@ export const createServer = async (accessToken: string, name: string) => {
 
 export const deleteServer = async (accessToken: string, serverId: string) => {
   try {
-    const response = await fetch(`${API_URL}/user/deleteserver`, {
+    const response = await fetch(`${API_URL}/api/server/delete`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -108,7 +108,7 @@ export const changeRole = async (
   role: string,
 ) => {
   try {
-    const response = await fetch(`${API_URL}/user/changerole`, {
+    const response = await fetch(`${API_URL}/api/server/changerole`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -137,7 +137,7 @@ export const subscribeToServer = async (
   userName: string,
 ) => {
   try {
-    const response = await fetch(`${API_URL}/user/subscribetest`, {
+    const response = await fetch(`${API_URL}/api/server/subscribe`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -164,7 +164,7 @@ export const unsubscribeFromServer = async (
   serverId: string,
 ) => {
   try {
-    const response = await fetch(`${API_URL}/user/unsubscribetest`, {
+    const response = await fetch(`${API_URL}/api/server/unsubscribe`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,
