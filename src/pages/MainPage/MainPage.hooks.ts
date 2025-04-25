@@ -22,7 +22,6 @@ export const useWebSocketHandler = ({
   serverId,
   currentVoiceChannelId,
 }: WebSocketHandlerProps) => {
-  const disconnect = useDisconnect();
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
