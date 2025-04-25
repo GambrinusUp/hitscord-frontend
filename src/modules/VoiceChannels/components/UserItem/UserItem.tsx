@@ -24,7 +24,7 @@ export const UserItem = ({
               flexShrink: 0,
             }}
           />
-          <Text truncate="end">{userName}</Text>
+          <Text truncate="end" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}> {userName}</Text>
           {producerIds.length > 1 && (
             <Video
               color="#43b581"

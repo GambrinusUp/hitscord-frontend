@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { useWebSocketHandler } from './MainPage.hooks';
+import { useApiWebSocketHandler, useWebSocketHandler } from './MainPage.hooks';
 
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { ChatSection } from '~/modules/ChatSection/ChatSection';
@@ -35,6 +35,13 @@ export const MainPage = () => {
     { open: openDetailsPanel, close: closeDetailsPanel },
   ] = useDisclosure(false);
   const { sendMessage, editMessage, deleteMessage } = useWebSocketHandler({
+    accessToken,
+    dispatch,
+    serverId: currentServerId,
+    currentVoiceChannelId,
+  });
+
+  useApiWebSocketHandler({
     accessToken,
     dispatch,
     serverId: currentServerId,

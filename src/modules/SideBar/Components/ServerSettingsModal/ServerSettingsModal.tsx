@@ -7,6 +7,7 @@ import {
   Select,
   Stack,
   Text,
+  TextInput,
 } from '@mantine/core';
 import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -25,10 +26,11 @@ export const ServerSettingsModal = ({
     (state) => state.testServerStore,
   );
   const { accessToken, user } = useAppSelector((state) => state.userStore);
-  const [activeSetting, setActiveSetting] = useState<'roles'>('roles');
+  const [activeSetting, setActiveSetting] = useState<'name' | 'roles'>('roles');
   const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
   const [assignRoleId, setAssignRoleId] = useState<string | null>('');
   const [loading, setLoading] = useState(false);
+  const [newServerName, setNewServerName] = useState(serverData.serverName);
   const { showSuccess } = useNotification();
 
   const assignRole = async () => {
@@ -73,6 +75,12 @@ export const ServerSettingsModal = ({
             active={activeSetting === 'roles'}
             onClick={() => setActiveSetting('roles')}
           />
+          <NavLink
+            label="Название сервера"
+            leftSection={<Plus size={16} />}
+            active={activeSetting === 'name'}
+            onClick={() => setActiveSetting('name')}
+          />
         </Stack>
         <ScrollArea>
           {activeSetting === 'roles' && (
@@ -104,6 +112,22 @@ export const ServerSettingsModal = ({
               />
               <Button onClick={assignRole} loading={loading}>
                 Присвоить роль
+              </Button>
+            </Stack>
+          )}
+          {activeSetting === 'name' && (
+            <Stack gap="md">
+              <Text size="lg" w={500}>
+                Изменить название сервера
+              </Text>
+              <TextInput
+                label="Новое название сервера"
+                value={newServerName}
+                onChange={(e) => setNewServerName(e.target.value)}
+                placeholder={serverData.serverName}
+              />
+              <Button onClick={() => console.log('Сохранить настройки')}>
+                Изменить название
               </Button>
             </Stack>
           )}

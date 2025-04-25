@@ -1,5 +1,4 @@
-import { Avatar, Box, Stack, Text, Title } from '@mantine/core';
-
+import { Avatar, Box, Stack, Text, Title, Tooltip } from '@mantine/core';
 import { useAppSelector } from '~/hooks';
 
 export const ProfileSideBar = () => {
@@ -11,11 +10,23 @@ export const ProfileSideBar = () => {
       w={{ base: 300 }}
       visibleFrom="sm"
     >
-      <Stack gap="md" align="center" style={{ whiteSpace: 'nowrap' }}>
-        <Avatar size={80} radius="xl" src={undefined} alt={user.name} />
-        <Title order={3}>{user.name}</Title>
-        <Text c="gray">ID: {user.tag}</Text>
-        <Text c="gray">E-mail: {user.mail}</Text>
+      <Stack gap="md" align="center">
+        <Avatar size={80} radius="xl" src={undefined} alt={user.name} />  
+        <Tooltip label={user.name} withArrow>
+          <Title order={3} style={{ textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+            {user.name}
+          </Title>
+        </Tooltip>  
+        <Tooltip label={user.tag} withArrow>
+          <Text c="gray" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%', display: 'block' }}>
+            ID: {user.tag}
+          </Text>
+        </Tooltip>   
+        <Tooltip label={user.mail} withArrow>
+          <Text c="gray" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%', display: 'block' }}>
+            E-mail: {user.mail}
+          </Text>
+        </Tooltip>
         <Text c="gray">Аккаунт создан: {user.accontCreateDate}</Text>
       </Stack>
     </Box>
