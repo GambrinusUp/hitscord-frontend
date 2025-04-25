@@ -42,7 +42,6 @@ export const SideBar = ({ onClose }: SideBarProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
   const isAdmin = serverData.isCreator;
 
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
