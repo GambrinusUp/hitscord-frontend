@@ -84,3 +84,51 @@ export const deleteChannel = async (accessToken: string, channelId: string) => {
     throw error;
   }
 };
+
+export const changeChannelName = async (
+  accessToken: string,
+  id: string,
+  name: string,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/channel/name/change`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id,
+        name,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change channel name:', error);
+    throw error;
+  }
+};
+
+export const selfMute = async (accessToken: string) => {
+  try {
+    const response = await fetch(`${API_URL}/api/channel/voice/mute/self`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error self mute:', error);
+    throw error;
+  }
+};

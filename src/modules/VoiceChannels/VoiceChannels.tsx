@@ -54,6 +54,13 @@ export const VoiceChannels = () => {
     } else {
       if (channelId === currentVoiceChannelId) {
         dispatch(toggleUserStreamView());
+      } else {
+        if (currentVoiceChannelId) {
+          disconnect(accessToken, currentVoiceChannelId);
+        }
+        dispatch(setUserStreamView(false));
+        dispatch(setCurrentVoiceChannelId(channelId));
+        connect(channelId, user.name, serverData.serverId, accessToken);
       }
     }
   };
@@ -124,15 +131,6 @@ export const VoiceChannels = () => {
     dispatch(setUserStreamView(true));
   };
 
-  const handleEditChannel = (channelName: string, channelId: string) => {
-    setIsEditing({
-      isEdit: true,
-      initialData: channelName,
-      channelId: channelId,
-    });
-    openChannelModal();
-  };
-
   useEffect(() => {
     if (!socket) return;
 
@@ -166,9 +164,6 @@ export const VoiceChannels = () => {
                     channelName={channelName}
                     isAdmin={isAdmin}
                     handleConnect={() => handleConnect(channelId)}
-                    handleEditChannel={() =>
-                      handleEditChannel(channelName, channelId)
-                    }
                   />
                   <Stack gap="xs">
                     {rooms
@@ -196,6 +191,7 @@ export const VoiceChannels = () => {
                                 handleOpenStream={handleOpenStream}
                                 handleVolumeChange={handleVolumeChange}
                                 handleKickUser={handleKickUser}
+                                channelId={channelId}
                               />
                             );
                           },

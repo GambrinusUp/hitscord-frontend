@@ -8,11 +8,13 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ChevronDown, Copy, DoorOpen, Settings } from 'lucide-react';
+import { ChevronDown, Copy, DoorOpen, Settings, UserPen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { ChangeNameModal } from './components/ChangeNameModal';
 import { Panel } from './components/Panel';
 import { ServerSettingsModal } from './components/ServerSettingsModal';
+import { UnsubscribeModal } from './components/UnsubscribeModal';
 import { SideBarProps } from './SideBarProps.types';
 
 import { useAppDispatch, useAppSelector, useDisconnect } from '~/hooks';
@@ -36,11 +38,20 @@ export const SideBar = ({ onClose }: SideBarProps) => {
   const dispatch = useAppDispatch();
   const disconnect = useDisconnect();
   const [opened, { open, close }] = useDisclosure(false);
+  const [
+    changeNameModalOpened,
+    { open: openChangeNameModalOpened, close: closeChangeNameModalOpened },
+  ] = useDisclosure(false);
+  const [
+    unsubscribeModalOpened,
+    { open: openUnsubscribeModal, close: closeUnsubscribeModal },
+  ] = useDisclosure(false);
   const { serverData, isLoading, currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const isAdmin = serverData.isCreator;
+  const canChangeRole = serverData.canChangeRole;
+  const isCreator = serverData.isCreator;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -85,20 +96,34 @@ export const SideBar = ({ onClose }: SideBarProps) => {
             </Group>
           </Menu.Target>
           <Menu.Dropdown>
-            {isAdmin && (
+            {(canChangeRole || isCreator) && (
               <Menu.Item leftSection={<Settings size={16} />} onClick={open}>
                 Настройки сервера
               </Menu.Item>
             )}
+            <Menu.Item
+              onClick={openChangeNameModalOpened}
+              leftSection={<UserPen size={16} />}
+            >
+              Изменить имя на сервере
+            </Menu.Item>
             <Menu.Item
               onClick={() => copyToClipboard(serverData.serverId)}
               leftSection={<Copy size={16} />}
             >
               Копировать ID сервера
             </Menu.Item>
-            {!isAdmin && (
+            {!isCreator && (
               <Menu.Item
                 onClick={handleUnsubscribe}
+                leftSection={<DoorOpen size={16} />}
+              >
+                Отписаться от сервера
+              </Menu.Item>
+            )}
+            {isCreator && (
+              <Menu.Item
+                onClick={() => openUnsubscribeModal()}
                 leftSection={<DoorOpen size={16} />}
               >
                 Отписаться от сервера
@@ -114,6 +139,14 @@ export const SideBar = ({ onClose }: SideBarProps) => {
         <Panel />
       </Stack>
       <ServerSettingsModal opened={opened} onClose={close} />
+      <ChangeNameModal
+        opened={changeNameModalOpened}
+        onClose={closeChangeNameModalOpened}
+      />
+      <UnsubscribeModal
+        opened={unsubscribeModalOpened}
+        onClose={closeUnsubscribeModal}
+      />
     </>
   );
 };

@@ -309,3 +309,106 @@ export const deleteChannel = createAsyncThunk<
     }
   },
 );
+
+export const changeServerName = createAsyncThunk<
+  void,
+  { accessToken: string; serverId: string; name: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeServerName',
+  async ({ accessToken, serverId, name }, { rejectWithValue }) => {
+    try {
+      await ServerAPI.changeServerName(accessToken, serverId, name);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const changeNameOnServer = createAsyncThunk<
+  void,
+  { accessToken: string; serverId: string; name: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeNameOnServer',
+  async ({ accessToken, serverId, name }, { rejectWithValue }) => {
+    try {
+      await ServerAPI.changeNameOnServer(accessToken, serverId, name);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const deleteUserFromServer = createAsyncThunk<
+  void,
+  { accessToken: string; serverId: string; userId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/deleteUserFromServer',
+  async ({ accessToken, serverId, userId }, { rejectWithValue }) => {
+    try {
+      await ServerAPI.deleteUserFromServer(accessToken, serverId, userId);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const changeChannelName = createAsyncThunk<
+  void,
+  { accessToken: string; id: string; name: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeChannelName',
+  async ({ accessToken, id, name }, { rejectWithValue }) => {
+    try {
+      await ChannelsAPI.changeChannelName(accessToken, id, name);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const creatorUnsubscribeFromServer = createAsyncThunk<
+  void,
+  { accessToken: string; serverId: string; newCreatorId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/creatorUnsubscribeFromServer',
+  async ({ accessToken, serverId, newCreatorId }, { rejectWithValue }) => {
+    try {
+      await ServerAPI.creatorUnsubscribeFromServer(
+        accessToken,
+        serverId,
+        newCreatorId,
+      );
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const selfMute = createAsyncThunk<
+  void,
+  { accessToken: string },
+  { rejectValue: string }
+>('testServerSlice/selfMute', async ({ accessToken }, { rejectWithValue }) => {
+  try {
+    await ChannelsAPI.selfMute(accessToken);
+  } catch (e) {
+    return rejectWithValue(
+      e instanceof Error ? e.message : 'Неизвестная ошибка',
+    );
+  }
+});

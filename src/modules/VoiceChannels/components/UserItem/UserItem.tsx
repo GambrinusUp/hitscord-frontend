@@ -1,7 +1,9 @@
 import { Group, Menu, Slider, Text } from '@mantine/core';
-import { User, Video, Volume2 } from 'lucide-react';
+import { Unplug, User, Video, Volume2 } from 'lucide-react';
 
 import { UserItemProps } from './UserItem.types';
+
+//import { useAppSelector } from '~/hooks';
 
 export const UserItem = ({
   socketId,
@@ -13,18 +15,43 @@ export const UserItem = ({
   handleVolumeChange,
   handleOpenStream,
   handleKickUser,
+  //channelId,
 }: UserItemProps) => {
+  /*const { voiceChannels } = useAppSelector(
+    (state) => state.testServerStore.serverData.channels,
+  );*/
+
+  /*const isMuted = voiceChannels.find(
+    (channel) => channel.channelId === channelId,
+  )?.users;*/
+
   return (
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>
       <Menu.Target>
-        <Group style={{ cursor: 'pointer' }} wrap="nowrap">
+        <Group
+          style={{ cursor: 'pointer', overflow: 'hidden', width: '100%' }}
+          wrap="nowrap"
+        >
           <User
             color={isSpeaking ? '#43b581' : undefined}
-            style={{
-              flexShrink: 0,
-            }}
+            style={{ flexShrink: 0 }}
           />
-          <Text truncate="end" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}> {userName}</Text>
+          <Text
+            style={{
+              flex: 1,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'normal',
+              lineHeight: '1.2em',
+              maxHeight: '2.4em',
+              wordBreak: 'break-word',
+            }}
+          >
+            {userName}
+          </Text>
           {producerIds.length > 1 && (
             <Video
               color="#43b581"
@@ -56,7 +83,7 @@ export const UserItem = ({
         )}
         {isAdmin && (
           <Menu.Item
-            leftSection={<Video />}
+            leftSection={<Unplug />}
             onClick={() => handleKickUser(socketId)}
           >
             Отключить пользователя

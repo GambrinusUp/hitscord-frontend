@@ -3,5 +3,4 @@ export interface ChannelItemProps {
   channelName: string;
   isAdmin: boolean;
   handleConnect: () => void;
-  handleEditChannel: () => void;
 }

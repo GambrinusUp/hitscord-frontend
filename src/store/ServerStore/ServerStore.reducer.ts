@@ -1,18 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
+  changeChannelName,
+  changeNameOnServer,
   changeRole,
+  changeServerName,
   createChannel,
   createMessage,
   createServer,
   deleteChannel,
   deleteMessage,
   deleteServer,
+  deleteUserFromServer,
   editMessage,
   getChannelMessages,
   getMoreMessages,
   getServerData,
   getUserServers,
+  selfMute,
   subscribeToServer,
   unsubscribeFromServer,
 } from './ServerStore.actions';
@@ -132,6 +137,117 @@ const testServerSlice = createSlice({
     },
     clearHasNewMessage: (state) => {
       state.hasNewMessage = false;
+    },
+    setNewServerName: (state, action: PayloadAction<{ name: string }>) => {
+      state.serverData.serverName = action.payload.name;
+    },
+    setNewUserName: (
+      state,
+      action: PayloadAction<{ userId: string; name: string }>,
+    ) => {
+      const userIndex = state.serverData.users.findIndex(
+        (user) => user.userId === action.payload.userId,
+      );
+
+      if (userIndex !== -1) {
+        state.serverData.users[userIndex].userName = action.payload.name;
+      }
+    },
+    removeUser: (state, action: PayloadAction<{ userId: string }>) => {
+      const userIndex = state.serverData.users.findIndex(
+        (user) => user.userId === action.payload.userId,
+      );
+
+      if (userIndex !== -1) {
+        state.serverData.users.splice(userIndex, 1);
+      }
+    },
+    removeServer: (state, action: PayloadAction<{ serverId: string }>) => {
+      const serverIndex = state.serversList.findIndex(
+        (server) => server.serverId === action.payload.serverId,
+      );
+
+      if (serverIndex !== -1) {
+        state.serversList.splice(serverIndex, 1);
+      }
+    },
+    editChannelName: (
+      state,
+      action: PayloadAction<{ channelId: string; newName: string }>,
+    ) => {
+      const { channelId, newName } = action.payload;
+
+      const textChannel = state.serverData.channels.textChannels.find(
+        (channel) => channel.channelId === channelId,
+      );
+
+      if (textChannel) {
+        textChannel.channelName = newName;
+
+        return;
+      }
+
+      const voiceChannel = state.serverData.channels.voiceChannels.find(
+        (channel) => channel.channelId === channelId,
+      );
+
+      if (voiceChannel) {
+        voiceChannel.channelName = newName;
+
+        return;
+      }
+    },
+    addUserOnVoiceChannel: (
+      state,
+      action: PayloadAction<{ channelId: string; userId: string }>,
+    ) => {
+      const { channelId, userId } = action.payload;
+
+      const voiceChannel = state.serverData.channels.voiceChannels.find(
+        (channel) => channel.channelId === channelId,
+      );
+
+      if (voiceChannel) {
+        if (!voiceChannel.users.some((user) => user.userId === userId)) {
+          voiceChannel.users.push({ userId, isMuted: false });
+        }
+      }
+    },
+    removeUserFromVoiceChannel: (
+      state,
+      action: PayloadAction<{ channelId: string; userId: string }>,
+    ) => {
+      const { channelId, userId } = action.payload;
+
+      const voiceChannel = state.serverData.channels.voiceChannels.find(
+        (channel) => channel.channelId === channelId,
+      );
+
+      if (voiceChannel) {
+        voiceChannel.users = voiceChannel.users.filter(
+          (user) => user.userId !== userId,
+        );
+      }
+    },
+    toggleUserMuteStatus: (
+      state,
+      action: PayloadAction<{
+        channelId: string;
+        userId: string;
+        isMuted: boolean;
+      }>,
+    ) => {
+      const { channelId, userId, isMuted } = action.payload;
+
+      const voiceChannel = state.serverData.channels.voiceChannels.find(
+        (channel) => channel.channelId === channelId,
+      );
+
+      if (voiceChannel) {
+        voiceChannel.users = voiceChannel.users.map((user) =>
+          user.userId === userId ? { ...user, isMuted } : user,
+        );
+      }
     },
   },
   extraReducers: (builder) => {
@@ -324,6 +440,51 @@ const testServerSlice = createSlice({
       })
       .addCase(unsubscribeFromServer.rejected, (state, action) => {
         state.error = action.payload as string;
+      })
+      .addCase(changeServerName.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(changeServerName.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(changeServerName.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(changeNameOnServer.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(changeNameOnServer.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(changeNameOnServer.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(deleteUserFromServer.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(deleteUserFromServer.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(deleteUserFromServer.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(changeChannelName.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(changeChannelName.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(changeChannelName.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(selfMute.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(selfMute.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(selfMute.rejected, (state, action) => {
+        state.error = action.payload as string;
       });
   },
 });
@@ -339,6 +500,14 @@ export const {
   deleteUserWs,
   clearServerData,
   clearHasNewMessage,
+  setNewServerName,
+  setNewUserName,
+  removeUser,
+  removeServer,
+  editChannelName,
+  addUserOnVoiceChannel,
+  removeUserFromVoiceChannel,
+  toggleUserMuteStatus,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

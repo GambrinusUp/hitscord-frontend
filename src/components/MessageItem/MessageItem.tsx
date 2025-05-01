@@ -85,6 +85,16 @@ export const MessageItem = ({
             width: isEditing ? '100%' : 'auto',
           }}
         >
+          <Text
+            fw={500}
+            style={{
+              wordWrap: 'break-word',
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            {userName}
+          </Text>
           {isEditing ? (
             <Textarea
               value={editedContent}

@@ -1,9 +1,11 @@
 import { Box, Button } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { Settings, Volume2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { ChannelItemProps } from './ChannelItem.types';
 
+import { SettingsChannelModal } from '~/components/SettingsChannelModal';
 import { styles } from '~/modules/VoiceChannels';
 
 export const ChannelItem = ({
@@ -11,51 +13,63 @@ export const ChannelItem = ({
   channelName,
   isAdmin,
   handleConnect,
-  handleEditChannel,
 }: ChannelItemProps) => {
+  const [opened, { open, close }] = useDisclosure(false);
   const [isHovered, setIsHovered] = useState('');
 
+  const handleOpenChannelSettings = () => {
+    open();
+  };
+
   return (
-    <Box
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-      }}
-      onMouseEnter={() => setIsHovered(channelId)}
-      onMouseLeave={() => setIsHovered('')}
-    >
-      <Button
-        leftSection={<Volume2 />}
-        variant="transparent"
-        p={0}
-        color="#ffffff"
-        justify="flex-start"
-        styles={{
-          root: {
-            '--button-hover-color': '#4f4f4f',
-            transition: 'color 0.3s ease',
-          },
+    <>
+      <Box
+        style={{
+          display: 'flex',
+          alignItems: 'center',
         }}
-        fullWidth
-        onClick={handleConnect}
+        onMouseEnter={() => setIsHovered(channelId)}
+        onMouseLeave={() => setIsHovered('')}
       >
-        {channelName}
-      </Button>
-      {isAdmin && isHovered === channelId && (
         <Button
-          variant="subtle"
+          leftSection={<Volume2 />}
+          variant="transparent"
           p={0}
           color="#ffffff"
           justify="flex-start"
-          w="20px"
           styles={{
-            root: styles.buttonSettings,
+            root: {
+              '--button-hover-color': '#4f4f4f',
+              transition: 'color 0.3s ease',
+            },
           }}
-          onClick={handleEditChannel}
+          fullWidth
+          onClick={handleConnect}
         >
-          <Settings size={16} />
+          {channelName}
         </Button>
-      )}
-    </Box>
+        {isAdmin && isHovered === channelId && (
+          <Button
+            variant="subtle"
+            p={0}
+            color="#ffffff"
+            justify="flex-start"
+            w="20px"
+            styles={{
+              root: styles.buttonSettings,
+            }}
+            onClick={handleOpenChannelSettings}
+          >
+            <Settings size={16} />
+          </Button>
+        )}
+      </Box>
+      <SettingsChannelModal
+        opened={opened}
+        onClose={close}
+        channelId={channelId}
+        channelName={channelName}
+      />
+    </>
   );
 };

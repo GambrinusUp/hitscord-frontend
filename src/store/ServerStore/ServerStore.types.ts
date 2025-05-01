@@ -34,6 +34,8 @@ export interface Role {
   id: string;
   serverId: string;
   name: string;
+  tag: string;
+  color: string;
 }
 
 export interface UserOnServer {
@@ -51,7 +53,7 @@ export interface TextChannel {
 
 export interface UserInVoiceChannel {
   userId: string;
-  userName: string;
+  isMuted: boolean;
 }
 
 export interface VoiceChannel {

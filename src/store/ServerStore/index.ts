@@ -5,6 +5,7 @@ export type {
   CreateMessageWs,
   EditMessageWs,
   DeleteMessageWs,
+  UserOnServer,
 } from './ServerStore.types';
 export { ChannelType } from './ServerStore.types';
 
@@ -19,6 +20,15 @@ export {
   deleteUserWs,
   editMessageWs,
   clearHasNewMessage,
+  setNewServerName,
+  setNewUserName,
+  removeUser,
+  removeServer,
+  editChannelName,
+  clearServerData,
+  addUserOnVoiceChannel,
+  removeUserFromVoiceChannel,
+  toggleUserMuteStatus,
 } from './ServerStore.reducer';
 
 export {
@@ -32,4 +42,10 @@ export {
   getUserServers,
   subscribeToServer,
   changeRole,
+  changeServerName,
+  changeNameOnServer,
+  deleteUserFromServer,
+  changeChannelName,
+  creatorUnsubscribeFromServer,
+  selfMute,
 } from './ServerStore.actions';

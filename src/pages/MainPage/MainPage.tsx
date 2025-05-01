@@ -27,8 +27,9 @@ export const MainPage = () => {
   const { accessToken, isLoggedIn } = useAppSelector(
     (state) => state.userStore,
   );
-  const { currentServerId, currentChannelId, currentVoiceChannelId } =
-    useAppSelector((state) => state.testServerStore);
+  const { currentServerId, currentChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
   const [sidebarOpened, { open, close }] = useDisclosure(false);
   const [
     detailsPanelOpened,
@@ -38,14 +39,12 @@ export const MainPage = () => {
     accessToken,
     dispatch,
     serverId: currentServerId,
-    currentVoiceChannelId,
   });
 
   useApiWebSocketHandler({
     accessToken,
     dispatch,
     serverId: currentServerId,
-    currentVoiceChannelId,
   });
 
   useEffect(() => {

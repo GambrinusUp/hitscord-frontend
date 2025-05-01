@@ -184,3 +184,115 @@ export const unsubscribeFromServer = async (
     throw error;
   }
 };
+
+export const changeServerName = async (
+  accessToken: string,
+  serverId: string,
+  name: string,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/server/name/server/change`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: serverId,
+        name,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change server name:', error);
+    throw error;
+  }
+};
+
+export const changeNameOnServer = async (
+  accessToken: string,
+  serverId: string,
+  name: string,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/server/name/user/change`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: serverId,
+        name,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change user name on server:', error);
+    throw error;
+  }
+};
+
+export const deleteUserFromServer = async (
+  accessToken: string,
+  serverId: string,
+  userId: string,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/server/deleteuser`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        serverId,
+        userId,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error delete user from server:', error);
+    throw error;
+  }
+};
+
+export const creatorUnsubscribeFromServer = async (
+  accessToken: string,
+  serverId: string,
+  newCreatorId: string,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/server/unsubscribe/creator`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        serverId,
+        newCreatorId,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error unsubscribe creator from server:', error);
+    throw error;
+  }
+};

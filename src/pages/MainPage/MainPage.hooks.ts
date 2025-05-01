@@ -3,7 +3,8 @@ import { useCallback, useEffect, useRef } from 'react';
 import { WebSocketHandlerProps } from './MainPage.types';
 
 import { formatMessage, formatUser } from '~/helpers';
-import { useDisconnect } from '~/hooks';
+import { useAppSelector, useDisconnect } from '~/hooks';
+import { setOpenHome } from '~/store/AppStore';
 import {
   getServerData,
   addMessage,
@@ -14,15 +15,21 @@ import {
   CreateMessageWs,
   DeleteMessageWs,
   EditMessageWs,
+  setNewServerName,
+  setNewUserName,
+  removeUser,
+  removeServer,
+  editChannelName,
+  addUserOnVoiceChannel,
+  removeUserFromVoiceChannel,
+  toggleUserMuteStatus,
 } from '~/store/ServerStore';
 
 export const useWebSocketHandler = ({
   accessToken,
   dispatch,
   serverId,
-  currentVoiceChannelId,
 }: WebSocketHandlerProps) => {
-  const disconnect = useDisconnect();
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -70,7 +77,7 @@ export const useWebSocketHandler = ({
         ws.close();
       };
     }
-  }, [accessToken, serverId, currentVoiceChannelId, dispatch]);
+  }, [accessToken, serverId, dispatch]);
 
   const sendMessage = useCallback((message: CreateMessageWs) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -127,10 +134,12 @@ export const useApiWebSocketHandler = ({
   accessToken,
   dispatch,
   serverId,
-  currentVoiceChannelId,
 }: WebSocketHandlerProps) => {
   const disconnect = useDisconnect();
   const wsRef = useRef<WebSocket | null>(null);
+  const { currentServerId, currentVoiceChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
 
   useEffect(() => {
     if (accessToken) {
@@ -185,6 +194,82 @@ export const useApiWebSocketHandler = ({
             }
           }
         }
+
+        if (data.MessageType === 'New server name') {
+          if (currentServerId === data.Payload.ServerId) {
+            dispatch(setNewServerName({ name: data.Payload.Name }));
+          }
+        }
+
+        if (data.MessageType === 'New users name on server') {
+          if (currentServerId === data.Payload.ServerId) {
+            dispatch(
+              setNewUserName({
+                userId: data.Payload.UserId,
+                name: data.Payload.Name,
+              }),
+            );
+          }
+        }
+
+        if (data.MessageType === 'User unsubscribe') {
+          if (currentServerId === data.Payload.ServerId) {
+            dispatch(removeUser({ userId: data.Payload.UserId }));
+          }
+        }
+
+        if (data.MessageType === 'You removed from server') {
+          if (data.Payload.IsNeedRemoveFromVC) {
+            disconnect(accessToken, currentVoiceChannelId!);
+          }
+          dispatch(setOpenHome(true));
+          dispatch(removeServer({ serverId: data.Payload.ServerId }));
+        }
+
+        if (data.MessageType === 'Change channel name') {
+          if (data.Payload.ServerId === currentServerId) {
+            dispatch(
+              editChannelName({
+                channelId: data.Payload.ChannelId,
+                newName: data.Payload.Name,
+              }),
+            );
+          }
+        }
+
+        if (data.MessageType === 'New user in voice channel') {
+          if (data.Payload.ServerId === currentServerId) {
+            dispatch(
+              addUserOnVoiceChannel({
+                channelId: data.Payload.ChannelId,
+                userId: data.Payload.UserId,
+              }),
+            );
+          }
+        }
+
+        if (data.MessageType === 'User remove from voice channel') {
+          if (data.Payload.ServerId === currentServerId) {
+            dispatch(
+              removeUserFromVoiceChannel({
+                channelId: data.Payload.ChannelId,
+                userId: data.Payload.UserId,
+              }),
+            );
+          }
+        }
+
+        if (data.MessageType === 'User change his mute status') {
+          if (data.Payload.ServerId === currentServerId) {
+            dispatch(
+              toggleUserMuteStatus({
+                channelId: data.Payload.ChannelId,
+                userId: data.Payload.UserId,
+                isMuted: data.Payload.MuteStatus === 1,
+              }),
+            );
+          }
+        }
       };
 
       ws.onerror = (error) => {
@@ -198,5 +283,5 @@ export const useApiWebSocketHandler = ({
         ws.close();
       };
     }
-  }, [accessToken, serverId, currentVoiceChannelId, dispatch]);
+  }, [accessToken, serverId, dispatch]);
 };

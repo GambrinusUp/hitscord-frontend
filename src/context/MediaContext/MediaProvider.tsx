@@ -10,8 +10,9 @@ import { MediaContext } from './MediaContext';
 
 import { socket } from '~/api/socket';
 import { signalNewConsumerTransport } from '~/context/utils';
-import { useAppSelector } from '~/hooks';
+import { useAppDispatch, useAppSelector } from '~/hooks';
 import { Room } from '~/shared/types';
+import { selfMute } from '~/store/ServerStore';
 
 export const MediaProvider = (props: React.PropsWithChildren) => {
   //проверить стрим экрана при включении и отключении микрофона, при подключении новых пользователей
@@ -27,7 +28,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
     null,
   );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-
+  const dispatch = useAppDispatch();
   const { currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
@@ -44,6 +45,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
       } else {
         audioProducer.pause();
       }
+      dispatch(selfMute({ accessToken }));
       setIsMuted(!isMuted);
     }
   };

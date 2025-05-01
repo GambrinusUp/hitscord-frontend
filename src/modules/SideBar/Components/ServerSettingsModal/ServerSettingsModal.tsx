@@ -9,29 +9,39 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { Plus } from 'lucide-react';
+import { Plus, UserMinus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { ServerSettingsModalProps } from './ServerSettingsModal.types';
 
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
-import { changeRole, getServerData } from '~/store/ServerStore';
+import {
+  changeRole,
+  changeServerName,
+  deleteUserFromServer,
+  getServerData,
+} from '~/store/ServerStore';
 
 export const ServerSettingsModal = ({
   opened,
   onClose,
 }: ServerSettingsModalProps) => {
   const dispatch = useAppDispatch();
-  const { serverData, error } = useAppSelector(
+  const { serverData, currentServerId, error } = useAppSelector(
     (state) => state.testServerStore,
   );
   const { accessToken, user } = useAppSelector((state) => state.userStore);
-  const [activeSetting, setActiveSetting] = useState<'name' | 'roles'>('roles');
+  const [activeSetting, setActiveSetting] = useState<
+    'name' | 'roles' | 'deleteUser'
+  >('roles');
   const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
   const [assignRoleId, setAssignRoleId] = useState<string | null>('');
   const [loading, setLoading] = useState(false);
   const [newServerName, setNewServerName] = useState(serverData.serverName);
   const { showSuccess } = useNotification();
+  const [deletedUserId, setDeletedUserId] = useState<string | null>('');
+  const isCreator = serverData.isCreator;
+  const canDeleteUsers = serverData.canDeleteUsers;
 
   const assignRole = async () => {
     if (!assignRoleUserId || !assignRoleId) return;
@@ -50,6 +60,47 @@ export const ServerSettingsModal = ({
       showSuccess('Роль успешно присвоена');
       dispatch(getServerData({ accessToken, serverId: serverData.serverId }));
       onClose();
+    }
+  };
+
+  const handleChangeServerName = async () => {
+    if (currentServerId) {
+      setLoading(true);
+
+      const result = await dispatch(
+        changeServerName({
+          accessToken,
+          serverId: currentServerId,
+          name: newServerName,
+        }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        setLoading(false);
+        showSuccess('Название успешно изменено');
+        onClose();
+      }
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (currentServerId && deletedUserId) {
+      setLoading(true);
+
+      const result = await dispatch(
+        deleteUserFromServer({
+          accessToken,
+          serverId: currentServerId,
+          userId: deletedUserId,
+        }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        setLoading(false);
+        showSuccess('Пользователь успешно удалён');
+        setDeletedUserId(null);
+        onClose();
+      }
     }
   };
 
@@ -75,12 +126,22 @@ export const ServerSettingsModal = ({
             active={activeSetting === 'roles'}
             onClick={() => setActiveSetting('roles')}
           />
-          <NavLink
-            label="Название сервера"
-            leftSection={<Plus size={16} />}
-            active={activeSetting === 'name'}
-            onClick={() => setActiveSetting('name')}
-          />
+          {isCreator && (
+            <NavLink
+              label="Название сервера"
+              leftSection={<Plus size={16} />}
+              active={activeSetting === 'name'}
+              onClick={() => setActiveSetting('name')}
+            />
+          )}
+          {(isCreator || canDeleteUsers) && (
+            <NavLink
+              label="Удаление пользователя"
+              leftSection={<UserMinus size={16} />}
+              active={activeSetting === 'deleteUser'}
+              onClick={() => setActiveSetting('deleteUser')}
+            />
+          )}
         </Stack>
         <ScrollArea>
           {activeSetting === 'roles' && (
@@ -115,7 +176,7 @@ export const ServerSettingsModal = ({
               </Button>
             </Stack>
           )}
-          {activeSetting === 'name' && (
+          {activeSetting === 'name' && isCreator && (
             <Stack gap="md">
               <Text size="lg" w={500}>
                 Изменить название сервера
@@ -126,8 +187,30 @@ export const ServerSettingsModal = ({
                 onChange={(e) => setNewServerName(e.target.value)}
                 placeholder={serverData.serverName}
               />
-              <Button onClick={() => console.log('Сохранить настройки')}>
+              <Button onClick={handleChangeServerName} loading={loading}>
                 Изменить название
+              </Button>
+            </Stack>
+          )}
+          {activeSetting === 'deleteUser' && (isCreator || canDeleteUsers) && (
+            <Stack gap="md">
+              <Text size="lg" w={500}>
+                Удалить пользователя с сервера
+              </Text>
+              <Select
+                label="Выбор пользователя"
+                placeholder="Выберите пользователя"
+                data={serverData.users
+                  .filter((userOnServer) => userOnServer.userId !== user.id)
+                  .map((userOnServer) => ({
+                    value: userOnServer.userId,
+                    label: userOnServer.userName,
+                  }))}
+                value={deletedUserId}
+                onChange={setDeletedUserId}
+              />
+              <Button onClick={handleDeleteUser} loading={loading}>
+                Удалить
               </Button>
             </Stack>
           )}
