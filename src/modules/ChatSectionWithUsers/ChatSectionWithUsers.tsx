@@ -72,7 +72,7 @@ export const ChatSectionWithUsers = () => {
     };
   }, [socket, consumers, currentRoom, selectedUserId]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (!selectedUserId || !currentRoom) return;
 
     const videoConsumer = consumers.find(
@@ -101,6 +101,46 @@ export const ChatSectionWithUsers = () => {
               console.error('Ошибка воспроизведения видео:', err),
             );
         }
+      }
+    }
+  }, [selectedUserId, consumers, currentRoom]);*/
+
+  useEffect(() => {
+    if (!selectedUserId || !currentRoom) return;
+
+    const userProducerIds =
+      currentRoom.users[selectedUserId]?.producerIds ?? [];
+
+    const videoConsumer = consumers.find(
+      (consumer) =>
+        consumer.kind === 'video' &&
+        userProducerIds.includes(consumer.producerId),
+    );
+
+    const audioConsumer = consumers.find(
+      (consumer) =>
+        consumer.kind === 'audio' &&
+        consumer.appData?.source === 'screen-audio' &&
+        userProducerIds.includes(consumer.producerId),
+    );
+
+    const tracks: MediaStreamTrack[] = [];
+
+    if (videoConsumer?.track) tracks.push(videoConsumer.track);
+
+    if (audioConsumer?.track) tracks.push(audioConsumer.track);
+
+    if (tracks.length > 0) {
+      const newStream = new MediaStream(tracks);
+      selectedStreamRef.current = newStream;
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = newStream;
+        videoRef.current
+          .play()
+          .catch((err) =>
+            console.error('Ошибка воспроизведения видео/аудио:', err),
+          );
       }
     }
   }, [selectedUserId, consumers, currentRoom]);

@@ -6,6 +6,8 @@ export type {
   EditMessageWs,
   DeleteMessageWs,
   UserOnServer,
+  ChannelSettings,
+  GetChannelSettings,
 } from './ServerStore.types';
 export { ChannelType } from './ServerStore.types';
 
@@ -48,4 +50,6 @@ export {
   changeChannelName,
   creatorUnsubscribeFromServer,
   selfMute,
+  changeChannelSettings,
+  getChannelSettings,
 } from './ServerStore.actions';

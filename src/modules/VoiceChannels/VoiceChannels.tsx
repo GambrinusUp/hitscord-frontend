@@ -50,7 +50,7 @@ export const VoiceChannels = () => {
   const handleConnect = (channelId: string) => {
     if (!isConnected) {
       dispatch(setCurrentVoiceChannelId(channelId));
-      connect(channelId, user.name, serverData.serverId, accessToken);
+      connect(channelId, user.name, user.id, serverData.serverId, accessToken);
     } else {
       if (channelId === currentVoiceChannelId) {
         dispatch(toggleUserStreamView());
@@ -60,7 +60,13 @@ export const VoiceChannels = () => {
         }
         dispatch(setUserStreamView(false));
         dispatch(setCurrentVoiceChannelId(channelId));
-        connect(channelId, user.name, serverData.serverId, accessToken);
+        connect(
+          channelId,
+          user.name,
+          user.id,
+          serverData.serverId,
+          accessToken,
+        );
       }
     }
   };
@@ -170,7 +176,7 @@ export const VoiceChannels = () => {
                       .filter((room) => room.roomName === channelId)
                       .flatMap((room) =>
                         Object.entries(room.users).map(
-                          ([socketId, { producerIds, userName }]) => {
+                          ([socketId, { producerIds, userName, userId }]) => {
                             const isSpeaking = calculateIsSpeaking(
                               producerIds,
                               channelId,
@@ -192,6 +198,7 @@ export const VoiceChannels = () => {
                                 handleVolumeChange={handleVolumeChange}
                                 handleKickUser={handleKickUser}
                                 channelId={channelId}
+                                userId={userId}
                               />
                             );
                           },

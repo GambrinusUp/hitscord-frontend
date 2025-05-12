@@ -8,6 +8,8 @@ import {
   ServerData,
   ChannelMessage,
   ChannelType,
+  ChannelSettings,
+  GetChannelSettings,
 } from './ServerStore.types';
 
 export const getUserServers = createAsyncThunk<
@@ -412,3 +414,42 @@ export const selfMute = createAsyncThunk<
     );
   }
 });
+
+export const changeChannelSettings = createAsyncThunk<
+  void,
+  { accessToken: string; settings: ChannelSettings },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeChannelSettings',
+  async ({ accessToken, settings }, { rejectWithValue }) => {
+    try {
+      await ChannelsAPI.changeChannelSettings(accessToken, settings);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const getChannelSettings = createAsyncThunk<
+  GetChannelSettings,
+  { accessToken: string; channelId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/getChannelSettings',
+  async ({ accessToken, channelId }, { rejectWithValue }) => {
+    try {
+      const response = await ChannelsAPI.getChannelSettings(
+        accessToken,
+        channelId,
+      );
+
+      return response;
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);

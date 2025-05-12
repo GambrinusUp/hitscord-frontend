@@ -1,5 +1,6 @@
 export interface UserGroup {
   userName: string;
+  userId?: string;
   producerIds: string[];
 }
 

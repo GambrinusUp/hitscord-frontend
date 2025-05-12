@@ -8,6 +8,8 @@ export interface UserInList {
   socketId: string;
   producerId: string;
   userName: string;
+  userId?: string;
+  source?: string;
 }
 
 export interface Room {

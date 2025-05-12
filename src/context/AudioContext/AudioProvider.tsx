@@ -10,8 +10,15 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
   const [userVolumes, setUserVolumes] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    consumers.forEach(({ producerId, track, kind }) => {
-      if (kind === 'audio' && !audioRefs.current.has(producerId)) {
+    consumers.forEach(({ producerId, track, kind, appData }) => {
+      const source = appData?.source;
+
+      if (
+        kind === 'audio' &&
+        source !== 'screen-audio' &&
+        !audioRefs.current.has(producerId) &&
+        appData.source
+      ) {
         const audio = document.createElement('audio');
         audio.srcObject = new MediaStream([track]);
         audio.autoplay = true;

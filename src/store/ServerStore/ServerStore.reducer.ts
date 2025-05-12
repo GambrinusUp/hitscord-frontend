@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import {
   changeChannelName,
+  changeChannelSettings,
   changeNameOnServer,
   changeRole,
   changeServerName,
@@ -14,6 +15,7 @@ import {
   deleteUserFromServer,
   editMessage,
   getChannelMessages,
+  getChannelSettings,
   getMoreMessages,
   getServerData,
   getUserServers,
@@ -23,6 +25,7 @@ import {
 } from './ServerStore.actions';
 import {
   ChannelMessage,
+  GetChannelSettings,
   ServerData,
   ServerItem,
   ServerState,
@@ -48,6 +51,10 @@ const initialState: ServerState = {
     canChangeRole: false,
     canDeleteUsers: false,
     canWorkWithChannels: false,
+    roleSettings: {
+      canRead: [],
+      canWrite: [],
+    },
   },
   currentServerId: null,
   currentChannelId: null,
@@ -133,6 +140,10 @@ const testServerSlice = createSlice({
         canChangeRole: false,
         canDeleteUsers: false,
         canWorkWithChannels: false,
+        roleSettings: {
+          canRead: [],
+          canWrite: [],
+        },
       };
     },
     clearHasNewMessage: (state) => {
@@ -286,6 +297,10 @@ const testServerSlice = createSlice({
           canChangeRole: false,
           canDeleteUsers: false,
           canWorkWithChannels: false,
+          roleSettings: {
+            canRead: [],
+            canWrite: [],
+          },
         };
         state.error = '';
       })
@@ -484,6 +499,29 @@ const testServerSlice = createSlice({
         state.error = '';
       })
       .addCase(selfMute.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(changeChannelSettings.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(changeChannelSettings.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(changeChannelSettings.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+
+      .addCase(getChannelSettings.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(
+        getChannelSettings.fulfilled,
+        (state, action: PayloadAction<GetChannelSettings>) => {
+          state.serverData.roleSettings = action.payload;
+          state.error = '';
+        },
+      )
+      .addCase(getChannelSettings.rejected, (state, action) => {
         state.error = action.payload as string;
       });
   },

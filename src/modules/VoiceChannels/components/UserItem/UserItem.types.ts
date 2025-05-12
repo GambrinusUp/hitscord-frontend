@@ -9,4 +9,5 @@ export interface UserItemProps {
   handleVolumeChange: (socketId: string, value: number) => void;
   handleKickUser: (socketId: string) => void;
   channelId: string;
+  userId?: string;
 }

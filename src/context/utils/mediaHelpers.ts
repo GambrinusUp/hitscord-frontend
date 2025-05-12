@@ -22,13 +22,14 @@ export const getLocalAudioStream = async () => {
 export const joinRoom = async (
   roomName: string,
   userName: string,
+  userId: string,
   serverId: string,
   accessToken: string,
 ) => {
   return new Promise<RtpCapabilities>((resolve, reject) => {
     socket.emit(
       'joinRoom',
-      { roomName, userName, serverId, accessToken },
+      { roomName, userName, userId, serverId, accessToken },
       (response: { rtpCapabilities: RtpCapabilities; error?: string }) => {
         if (response.error) {
           reject(response.error);
@@ -79,6 +80,7 @@ export const createSendTransport = async (
             {
               kind: parameters.kind,
               rtpParameters: parameters.rtpParameters,
+              appData: parameters.appData,
               accessToken,
             },
             ({ id }: { id: string }) => {
@@ -163,9 +165,22 @@ const connectRecvTransport = async (
     async ({
       params,
     }: {
-      params: ConsumerOptions & { serverConsumerId: string; userName?: string };
+      params: ConsumerOptions & {
+        serverConsumerId: string;
+        userName?: string;
+        source?: string;
+      };
     }) => {
-      const consumer = await consumerTransport.consume(params);
+      const { source, ...consumerParams } = params;
+
+      const consumer = await consumerTransport.consume({
+        ...consumerParams,
+        appData: {
+          source, // 👈 передаём вручную
+        },
+      });
+
+      console.log(consumer.appData.source);
       addConsumer(consumer);
       socket.emit('consumer-resume', {
         serverConsumerId: params.serverConsumerId,

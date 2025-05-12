@@ -7,7 +7,11 @@ export const getUserGroups = (rooms: Room[]): RoomGroup[] => {
     const usersGroup = room.users.reduce(
       (acc, user) => {
         if (!acc[user.socketId]) {
-          acc[user.socketId] = { userName: user.userName, producerIds: [] };
+          acc[user.socketId] = {
+            userName: user.userName,
+            userId: user.userId,
+            producerIds: [],
+          };
         }
         acc[user.socketId].producerIds.push(user.producerId);
 

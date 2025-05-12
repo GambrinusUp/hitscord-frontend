@@ -86,6 +86,7 @@ export interface ServerData {
     textChannels: TextChannel[];
     voiceChannels: VoiceChannel[];
   };
+  roleSettings: GetChannelSettings;
 }
 
 export interface ServerItem {
@@ -113,4 +114,16 @@ export interface EditMessageWs {
 export interface DeleteMessageWs {
   Token: string;
   MessageId: string;
+}
+
+export interface ChannelSettings {
+  channelId: string;
+  add: boolean;
+  type: number;
+  roleId: string;
+}
+
+export interface GetChannelSettings {
+  canRead: Role[];
+  canWrite: Role[];
 }

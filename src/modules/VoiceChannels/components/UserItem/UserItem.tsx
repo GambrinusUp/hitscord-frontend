@@ -1,9 +1,9 @@
 import { Group, Menu, Slider, Text } from '@mantine/core';
-import { Unplug, User, Video, Volume2 } from 'lucide-react';
+import { MicOff, Unplug, User, Video, Volume2 } from 'lucide-react';
 
 import { UserItemProps } from './UserItem.types';
 
-//import { useAppSelector } from '~/hooks';
+import { useAppSelector } from '~/hooks';
 
 export const UserItem = ({
   socketId,
@@ -15,15 +15,17 @@ export const UserItem = ({
   handleVolumeChange,
   handleOpenStream,
   handleKickUser,
-  //channelId,
+  channelId,
+  userId,
 }: UserItemProps) => {
-  /*const { voiceChannels } = useAppSelector(
+  const { voiceChannels } = useAppSelector(
     (state) => state.testServerStore.serverData.channels,
-  );*/
-
-  /*const isMuted = voiceChannels.find(
+  );
+  const users = voiceChannels.find(
     (channel) => channel.channelId === channelId,
-  )?.users;*/
+  )?.users;
+
+  const isMuted = users?.find((user) => user.userId === userId)?.isMuted;
 
   return (
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>
@@ -36,6 +38,7 @@ export const UserItem = ({
             color={isSpeaking ? '#43b581' : undefined}
             style={{ flexShrink: 0 }}
           />
+          {isMuted && <MicOff size={20} style={{ flexShrink: 0 }} />}
           <Text
             style={{
               flex: 1,

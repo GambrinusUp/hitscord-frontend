@@ -15,7 +15,11 @@ export const ServerItem = ({ serverId, serverName }: ServerItemProps) => {
     dispatch(setCurrentServerId(serverId));
     dispatch(setUserStreamView(false));
     dispatch(setOpenHome(false));
-    socket.emit('setServer', { serverId, user: user.name });
+    socket.emit('setServer', {
+      serverId,
+      userName: user.name,
+      userId: user.id,
+    });
   };
 
   return (

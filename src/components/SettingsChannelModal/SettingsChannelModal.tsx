@@ -4,17 +4,22 @@ import {
   Modal,
   NavLink,
   ScrollArea,
+  Select,
   Stack,
   Text,
   TextInput,
 } from '@mantine/core';
-import { Pencil, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { Pencil, Trash2, UserRoundCog, UserRoundPen } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { SettingsChannelModalProps } from './SettingsChannelModal.types';
 
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
-import { changeChannelName, deleteChannel } from '~/store/ServerStore';
+import {
+  changeChannelName,
+  deleteChannel,
+  getChannelSettings,
+} from '~/store/ServerStore';
 
 export const SettingsChannelModal = ({
   opened,
@@ -24,10 +29,16 @@ export const SettingsChannelModal = ({
 }: SettingsChannelModalProps) => {
   const dispatch = useAppDispatch();
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const [activeSetting, setActiveSetting] = useState<'name' | 'delete'>('name');
+  const { serverData } = useAppSelector((state) => state.testServerStore);
+  const [activeSetting, setActiveSetting] = useState<
+    'name' | 'delete' | 'watchSettings' | 'settings'
+  >('name');
   const [newChannelName, setNewChannelName] = useState(channelName);
   const [loading, setLoading] = useState(false);
   const { showSuccess } = useNotification();
+  const [add, setAdd] = useState<string | null>(null);
+  const [type, setType] = useState<string | null>(null);
+  const [assignRoleId, setAssignRoleId] = useState<string | null>('');
 
   const handleChangeChannelName = async () => {
     setLoading(true);
@@ -62,6 +73,16 @@ export const SettingsChannelModal = ({
     }
   };
 
+  const handleChangeChannelSettings = () => {
+    console.log(add, type);
+  };
+
+  useEffect(() => {
+    if (accessToken) {
+      dispatch(getChannelSettings({ accessToken, channelId }));
+    }
+  }, [accessToken]);
+
   return (
     <Modal
       opened={opened}
@@ -83,6 +104,18 @@ export const SettingsChannelModal = ({
             leftSection={<Trash2 size={16} />}
             active={activeSetting === 'delete'}
             onClick={() => setActiveSetting('delete')}
+          />
+          <NavLink
+            label="Роли"
+            leftSection={<UserRoundCog size={16} />}
+            active={activeSetting === 'watchSettings'}
+            onClick={() => setActiveSetting('watchSettings')}
+          />
+          <NavLink
+            label="Настройки"
+            leftSection={<UserRoundPen size={16} />}
+            active={activeSetting === 'settings'}
+            onClick={() => setActiveSetting('settings')}
           />
         </Stack>
         <ScrollArea>
@@ -113,6 +146,57 @@ export const SettingsChannelModal = ({
                 loading={loading}
               >
                 Удалить канал
+              </Button>
+            </Stack>
+          )}
+          {activeSetting === 'watchSettings' && (
+            <Stack gap="md">
+              <Text size="lg" w={500}>
+                Просмотр ролей
+              </Text>
+              <Text>Могу читать:</Text>
+              <Text>Могу писать:</Text>
+            </Stack>
+          )}
+          {activeSetting === 'settings' && (
+            <Stack gap="md">
+              <Text size="lg" w={500}>
+                Смена настроек для ролей
+              </Text>
+              <Group align="center">
+                <Select
+                  label="Действие"
+                  placeholder="Выберите действие"
+                  data={[
+                    { value: 'true', label: 'Разрешить' },
+                    { value: 'false', label: 'Запретить' },
+                  ]}
+                  value={add}
+                  onChange={setAdd}
+                />
+                <Select
+                  label="Возможность"
+                  placeholder="Выберите возможность"
+                  data={[
+                    { value: '0', label: 'Читать' },
+                    { value: '1', label: 'Писать' },
+                  ]}
+                  value={type}
+                  onChange={setType}
+                />
+                <Select
+                  label="Выбор роли"
+                  placeholder="Выберите роль"
+                  data={serverData.roles.map((role) => ({
+                    value: role.id,
+                    label: role.name,
+                  }))}
+                  value={assignRoleId}
+                  onChange={setAssignRoleId}
+                />
+              </Group>
+              <Button onClick={handleChangeChannelSettings} loading={loading}>
+                Изменить настройки
               </Button>
             </Stack>
           )}

@@ -19,6 +19,7 @@ export const useConnect = () => {
   const connect = async (
     roomName: string,
     userName: string,
+    userId: string,
     serverId: string,
     accessToken: string,
   ) => {
@@ -32,6 +33,7 @@ export const useConnect = () => {
       const roomData = await joinRoom(
         roomName,
         userName,
+        userId,
         serverId,
         accessToken,
       );

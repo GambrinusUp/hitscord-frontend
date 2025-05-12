@@ -24,6 +24,9 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
   const [device, setDevice] = useState<Device | null>(null);
   const [audioProducer, setAudioProducer] = useState<Producer | null>(null);
   const [videoProducer, setVideoProducer] = useState<Producer | null>(null);
+  const [videoAudioProducer, setVideoAudioProducer] = useState<Producer | null>(
+    null,
+  );
   const [producerTransport, setProducerTransport] = useState<Transport | null>(
     null,
   );
@@ -74,7 +77,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
     });
 
     socket.on('updateUsersList', ({ rooms }) => {
-      // console.log(rooms);
+      console.log(rooms);
       setUsers(rooms);
     });
 
@@ -120,6 +123,8 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
         toggleMute,
         selectedUserId,
         setSelectedUserId,
+        videoAudioProducer,
+        setVideoAudioProducer,
       }}
     >
       {props.children}
