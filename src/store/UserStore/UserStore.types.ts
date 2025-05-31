@@ -4,6 +4,9 @@ export interface UserState {
   accessToken: string;
   refreshToken: string;
   isLoggedIn: boolean;
+  applicationFrom: Application[];
+  applicationTo: Application[];
+  friendshipList: Friend[];
   error: string;
   isLoading: boolean;
 }
@@ -30,4 +33,28 @@ export interface RegisterCredentials {
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
+}
+
+export interface Friend {
+  userId: string;
+  userName: string;
+  userTag: string;
+  mail: string;
+  notifiable: boolean;
+  friendshipApplication: boolean;
+  nonFriendMessage: boolean;
+}
+
+export interface Application {
+  id: string;
+  user: Friend;
+  createdAt: string;
+}
+
+export interface GetApplication {
+  applications: Application[];
+}
+
+export interface GetFriends {
+  users: Friend[];
 }

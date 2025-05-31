@@ -1,5 +1,5 @@
 import { notifications } from '@mantine/notifications';
-import { CircleCheck, CircleX } from 'lucide-react';
+import { CircleCheck, CircleX, MessageSquareWarning } from 'lucide-react';
 
 export function useNotification() {
   const showSuccess = (message: string) => {
@@ -25,5 +25,17 @@ export function useNotification() {
     });
   };
 
-  return { showSuccess, showError };
+  const showMessage = (message: string) => {
+    notifications.show({
+      title: 'Уведомление',
+      message,
+      position: 'top-right',
+      color: 'yellow',
+      radius: 'md',
+      autoClose: 2000,
+      icon: <MessageSquareWarning />,
+    });
+  };
+
+  return { showSuccess, showError, showMessage };
 }

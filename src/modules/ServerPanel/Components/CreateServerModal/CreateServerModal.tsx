@@ -104,7 +104,6 @@ export const CreateServerModal = ({
           <Tabs.Tab value="connect">Подключиться к серверу</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="create">
-          {' '}
           <form onSubmit={form.onSubmit(handleCreateSubmit)}>
             <TextInput
               label="Название сервера"

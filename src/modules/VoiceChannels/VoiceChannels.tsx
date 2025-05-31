@@ -47,7 +47,7 @@ export const VoiceChannels = () => {
     channelId: '',
   });
 
-  const handleConnect = (channelId: string) => {
+  const handleConnect = async (channelId: string) => {
     if (!isConnected) {
       dispatch(setCurrentVoiceChannelId(channelId));
       connect(channelId, user.name, user.id, serverData.serverId, accessToken);
@@ -56,7 +56,7 @@ export const VoiceChannels = () => {
         dispatch(toggleUserStreamView());
       } else {
         if (currentVoiceChannelId) {
-          disconnect(accessToken, currentVoiceChannelId);
+          await disconnect(accessToken, currentVoiceChannelId);
         }
         dispatch(setUserStreamView(false));
         dispatch(setCurrentVoiceChannelId(channelId));
@@ -137,6 +137,15 @@ export const VoiceChannels = () => {
     dispatch(setUserStreamView(true));
   };
 
+  const handleMuteUser = (userId: string, isMuted: boolean | undefined) => {
+    if (!isMuted || isMuted === undefined) {
+      console.log(userId, isMuted, socket);
+      socket.emit('muteUserById', { userId });
+    } else {
+      socket.emit('unmuteUserById', { userId });
+    }
+  };
+
   useEffect(() => {
     if (!socket) return;
 
@@ -199,6 +208,7 @@ export const VoiceChannels = () => {
                                 handleKickUser={handleKickUser}
                                 channelId={channelId}
                                 userId={userId}
+                                handleMuteUser={handleMuteUser}
                               />
                             );
                           },

@@ -17,6 +17,7 @@ export const UserItem = ({
   handleKickUser,
   channelId,
   userId,
+  handleMuteUser,
 }: UserItemProps) => {
   const { voiceChannels } = useAppSelector(
     (state) => state.testServerStore.serverData.channels,
@@ -24,6 +25,7 @@ export const UserItem = ({
   const users = voiceChannels.find(
     (channel) => channel.channelId === channelId,
   )?.users;
+  const { user } = useAppSelector((state) => state.userStore);
 
   const isMuted = users?.find((user) => user.userId === userId)?.isMuted;
 
@@ -67,15 +69,17 @@ export const UserItem = ({
         </Group>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Item leftSection={<Volume2 />}>
-          <Slider
-            label="Громкость"
-            value={userVolume}
-            onChange={(value) => handleVolumeChange(socketId, value)}
-            min={1}
-            max={100}
-          />
-        </Menu.Item>
+        {userId !== user.id && (
+          <Menu.Item leftSection={<Volume2 />}>
+            <Slider
+              label="Громкость"
+              value={userVolume}
+              onChange={(value) => handleVolumeChange(socketId, value)}
+              min={1}
+              max={100}
+            />
+          </Menu.Item>
+        )}
         {producerIds.length > 1 && (
           <Menu.Item
             leftSection={<Video />}
@@ -84,12 +88,20 @@ export const UserItem = ({
             Открыть стрим
           </Menu.Item>
         )}
-        {isAdmin && (
+        {isAdmin && userId !== user.id && (
           <Menu.Item
             leftSection={<Unplug />}
             onClick={() => handleKickUser(socketId)}
           >
             Отключить пользователя
+          </Menu.Item>
+        )}
+        {isAdmin && userId !== user.id && (
+          <Menu.Item
+            leftSection={<MicOff />}
+            onClick={() => handleMuteUser(userId!, isMuted)}
+          >
+            Оключить звук пользователя
           </Menu.Item>
         )}
       </Menu.Dropdown>

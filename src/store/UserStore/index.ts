@@ -3,6 +3,8 @@ export type {
   LoginCredentials,
   RegisterCredentials,
   LoginResponse,
+  GetApplication,
+  GetFriends,
 } from './UserStore.types';
 
 export {
@@ -11,6 +13,14 @@ export {
   getUserProfile,
   logoutUser,
   refreshTokens,
+  createApplication,
+  getApplicationsFrom,
+  getApplicationsTo,
+  approveApplication,
+  declineApplication,
+  deleteApplication,
+  getFriendshipList,
+  deleteFriendship,
 } from './UserStore.actions';
 
 export { UserReducer } from './UserStore.reducer';

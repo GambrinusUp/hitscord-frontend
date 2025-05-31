@@ -1,11 +1,12 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
 
 import {
   changeChannelName,
-  changeChannelSettings,
   changeNameOnServer,
   changeRole,
   changeServerName,
+  changeTextChannelSettings,
+  changeVoiceChannelSettings,
   createChannel,
   createMessage,
   createServer,
@@ -51,10 +52,6 @@ const initialState: ServerState = {
     canChangeRole: false,
     canDeleteUsers: false,
     canWorkWithChannels: false,
-    roleSettings: {
-      canRead: [],
-      canWrite: [],
-    },
   },
   currentServerId: null,
   currentChannelId: null,
@@ -62,6 +59,14 @@ const initialState: ServerState = {
   messages: [],
   hasNewMessage: false,
   messagesStatus: LoadingState.IDLE,
+  roleSettings: {
+    canSee: null,
+    canJoin: null,
+    canWrite: null,
+    canWriteSub: null,
+    canUse: null,
+    notificated: null,
+  },
   isLoading: false,
   error: '',
 };
@@ -140,10 +145,14 @@ const testServerSlice = createSlice({
         canChangeRole: false,
         canDeleteUsers: false,
         canWorkWithChannels: false,
-        roleSettings: {
-          canRead: [],
-          canWrite: [],
-        },
+      };
+      state.roleSettings = {
+        canSee: null,
+        canJoin: null,
+        canWrite: null,
+        canWriteSub: null,
+        canUse: null,
+        notificated: null,
       };
     },
     clearHasNewMessage: (state) => {
@@ -297,10 +306,6 @@ const testServerSlice = createSlice({
           canChangeRole: false,
           canDeleteUsers: false,
           canWorkWithChannels: false,
-          roleSettings: {
-            canRead: [],
-            canWrite: [],
-          },
         };
         state.error = '';
       })
@@ -501,29 +506,42 @@ const testServerSlice = createSlice({
       .addCase(selfMute.rejected, (state, action) => {
         state.error = action.payload as string;
       })
-      .addCase(changeChannelSettings.pending, (state) => {
-        state.error = '';
-      })
-      .addCase(changeChannelSettings.fulfilled, (state) => {
-        state.error = '';
-      })
-      .addCase(changeChannelSettings.rejected, (state, action) => {
-        state.error = action.payload as string;
-      })
-
-      .addCase(getChannelSettings.pending, (state) => {
-        state.error = '';
-      })
-      .addCase(
-        getChannelSettings.fulfilled,
+      .addMatcher(
+        isAnyOf(getChannelSettings.fulfilled),
         (state, action: PayloadAction<GetChannelSettings>) => {
-          state.serverData.roleSettings = action.payload;
+          state.roleSettings = action.payload;
           state.error = '';
         },
       )
-      .addCase(getChannelSettings.rejected, (state, action) => {
-        state.error = action.payload as string;
-      });
+      .addMatcher(
+        isAnyOf(
+          getChannelSettings.pending,
+          changeTextChannelSettings.pending,
+          changeVoiceChannelSettings.pending,
+        ),
+        (state) => {
+          state.error = '';
+        },
+      )
+      .addMatcher(
+        isAnyOf(
+          changeTextChannelSettings.fulfilled,
+          changeVoiceChannelSettings.fulfilled,
+        ),
+        (state) => {
+          state.error = '';
+        },
+      )
+      .addMatcher(
+        isAnyOf(
+          getChannelSettings.rejected,
+          changeTextChannelSettings.rejected,
+          changeVoiceChannelSettings.rejected,
+        ),
+        (state, action) => {
+          state.error = action.payload as string;
+        },
+      );
   },
 });
 

@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Group,
   Modal,
@@ -12,11 +13,19 @@ import {
 import { Pencil, Trash2, UserRoundCog, UserRoundPen } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import './SettingsChannelModal.style.css';
 import { SettingsChannelModalProps } from './SettingsChannelModal.types';
+import {
+  getOptionsForChannelType,
+  toBoolean,
+} from './SettingsChannelModal.utils';
 
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import {
   changeChannelName,
+  changeTextChannelSettings,
+  changeVoiceChannelSettings,
+  ChannelType,
   deleteChannel,
   getChannelSettings,
 } from '~/store/ServerStore';
@@ -26,10 +35,13 @@ export const SettingsChannelModal = ({
   onClose,
   channelId,
   channelName,
+  channelType,
 }: SettingsChannelModalProps) => {
   const dispatch = useAppDispatch();
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const { serverData } = useAppSelector((state) => state.testServerStore);
+  const { serverData, roleSettings } = useAppSelector(
+    (state) => state.testServerStore,
+  );
   const [activeSetting, setActiveSetting] = useState<
     'name' | 'delete' | 'watchSettings' | 'settings'
   >('name');
@@ -39,6 +51,13 @@ export const SettingsChannelModal = ({
   const [add, setAdd] = useState<string | null>(null);
   const [type, setType] = useState<string | null>(null);
   const [assignRoleId, setAssignRoleId] = useState<string | null>('');
+
+  const canSee = roleSettings.canSee;
+  const canJoin = roleSettings.canJoin;
+  const canWrite = roleSettings.canWrite;
+  const canWriteSub = roleSettings.canWriteSub;
+  //const canUse = roleSettings.canUse;
+  //const notificated = roleSettings.notificated;
 
   const handleChangeChannelName = async () => {
     setLoading(true);
@@ -73,15 +92,65 @@ export const SettingsChannelModal = ({
     }
   };
 
-  const handleChangeChannelSettings = () => {
-    console.log(add, type);
+  const handleChangeChannelSettings = async () => {
+    setLoading(true);
+
+    if (
+      channelType === ChannelType.TEXT_CHANNEL &&
+      add &&
+      type &&
+      assignRoleId
+    ) {
+      const result = await dispatch(
+        changeTextChannelSettings({
+          accessToken,
+          settings: {
+            channelId,
+            add: toBoolean(add),
+            type: Number(type),
+            roleId: assignRoleId,
+          },
+        }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        setLoading(false);
+        showSuccess('Настройки успешно изменены');
+        onClose();
+      }
+    }
+
+    if (
+      channelType === ChannelType.VOICE_CHANNEL &&
+      add &&
+      type &&
+      assignRoleId
+    ) {
+      const result = await dispatch(
+        changeVoiceChannelSettings({
+          accessToken,
+          settings: {
+            channelId,
+            add: toBoolean(add),
+            type: Number(type),
+            roleId: assignRoleId,
+          },
+        }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        setLoading(false);
+        showSuccess('Настройки успешно изменены');
+        onClose();
+      }
+    }
   };
 
   useEffect(() => {
-    if (accessToken) {
+    if (accessToken && opened) {
       dispatch(getChannelSettings({ accessToken, channelId }));
     }
-  }, [accessToken]);
+  }, [accessToken, opened]);
 
   return (
     <Modal
@@ -90,6 +159,10 @@ export const SettingsChannelModal = ({
       centered
       title="Настройки канала"
       size="auto"
+      styles={{
+        content: { backgroundColor: '#2c2e33', color: '#ffffff' },
+        header: { backgroundColor: '#2c2e33' },
+      }}
     >
       <Group align="flex-start" gap="md">
         <Stack gap="xs" style={{ width: 200 }}>
@@ -154,8 +227,78 @@ export const SettingsChannelModal = ({
               <Text size="lg" w={500}>
                 Просмотр ролей
               </Text>
-              <Text>Могу читать:</Text>
-              <Text>Могу писать:</Text>
+              {canSee && (
+                <>
+                  <Text>Могут читать:</Text>
+                  <Stack gap="xs">
+                    {canSee.map((role) => (
+                      <Badge
+                        key={role.id}
+                        color={role.color}
+                        size="lg"
+                        variant="light"
+                        radius="md"
+                      >
+                        {role.name}
+                      </Badge>
+                    ))}
+                  </Stack>
+                </>
+              )}
+              {canJoin && (
+                <>
+                  <Text>Могут присоединиться:</Text>
+                  <Stack gap="xs">
+                    {canJoin.map((role) => (
+                      <Badge
+                        key={role.id}
+                        color={role.color}
+                        size="lg"
+                        variant="light"
+                        radius="md"
+                      >
+                        {role.name}
+                      </Badge>
+                    ))}
+                  </Stack>
+                </>
+              )}
+              {canWrite && (
+                <>
+                  <Text>Могут писать:</Text>
+                  <Stack gap="xs">
+                    {canWrite.map((role) => (
+                      <Badge
+                        key={role.id}
+                        color={role.color}
+                        size="lg"
+                        variant="light"
+                        radius="md"
+                      >
+                        {role.name}
+                      </Badge>
+                    ))}
+                  </Stack>
+                </>
+              )}
+              {canWriteSub && (
+                <>
+                  <Text>Могут создавать подчаты:</Text>
+                  <Stack gap="xs">
+                    {canWriteSub.map((role) => (
+                      <Badge
+                        key={role.id}
+                        color={role.color}
+                        size="lg"
+                        variant="light"
+                        radius="md"
+                      >
+                        {role.name}
+                      </Badge>
+                    ))}
+                  </Stack>
+                </>
+              )}
             </Stack>
           )}
           {activeSetting === 'settings' && (
@@ -177,10 +320,7 @@ export const SettingsChannelModal = ({
                 <Select
                   label="Возможность"
                   placeholder="Выберите возможность"
-                  data={[
-                    { value: '0', label: 'Читать' },
-                    { value: '1', label: 'Писать' },
-                  ]}
+                  data={getOptionsForChannelType(channelType)}
                   value={type}
                   onChange={setType}
                 />

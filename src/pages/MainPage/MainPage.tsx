@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useApiWebSocketHandler, useWebSocketHandler } from './MainPage.hooks';
 
-import { useAppDispatch, useAppSelector } from '~/hooks';
+import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { ChatSection } from '~/modules/ChatSection/ChatSection';
 import { ChatSectionWithUsers } from '~/modules/ChatSectionWithUsers';
 import { DetailsPanel, DetailsPanelMobile } from '~/modules/DetailsPanel';
@@ -21,6 +21,7 @@ import { getUserProfile } from '~/store/UserStore/UserStore.actions';
 export const MainPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { showMessage } = useNotification();
   const { isUserStreamView, isOpenHome } = useAppSelector(
     (state) => state.appStore,
   );
@@ -39,6 +40,7 @@ export const MainPage = () => {
     accessToken,
     dispatch,
     serverId: currentServerId,
+    showMessage,
   });
 
   useApiWebSocketHandler({

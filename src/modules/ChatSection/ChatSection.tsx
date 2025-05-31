@@ -1,24 +1,28 @@
 import {
   ActionIcon,
+  Avatar,
   Box,
   Divider,
   Group,
   Indicator,
+  Paper,
   ScrollArea,
   Skeleton,
   Stack,
+  Text,
   Textarea,
   TextInput,
 } from '@mantine/core';
 import { ArrowDown, Menu, Paperclip, Search, Send, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
-import { ChatSectionProps } from './ChatSection.types';
+import { ChatSectionProps, MentionSuggestion } from './ChatSection.types';
+import { formatUserTagMessage } from './ChatSection.utils';
 
 import { MessageItem } from '~/components/MessageItem';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
-import { clearHasNewMessage } from '~/store/ServerStore';
+import { clearHasNewMessage, UserOnServer } from '~/store/ServerStore';
 
 export const ChatSection = ({
   openSidebar,
@@ -37,36 +41,156 @@ export const ChatSection = ({
     hasNewMessage,
     isLoading,
     messagesStatus,
+    serverData,
   } = useAppSelector((state) => state.testServerStore);
+  const users = serverData.users;
   const [newMessage, setNewMessage] = useState('');
 
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showButton, setShowButton] = useState(false);
 
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<UserOnServer[]>([]);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
+  const [currentMention, setCurrentMention] =
+    useState<MentionSuggestion | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const findMentionAtCursor = (
+    text: string,
+    cursorPosition: number,
+  ): MentionSuggestion | null => {
+    const beforeCursor = text.slice(0, cursorPosition);
+    const mentionMatch = beforeCursor.match(/#(\w*)$/);
+
+    if (mentionMatch) {
+      const searchText = mentionMatch[1];
+      const startIndex = beforeCursor.lastIndexOf('#');
+
+      return {
+        user: {} as UserOnServer,
+        startIndex,
+        searchText,
+      };
+    }
+
+    return null;
+  };
+
+  const filterUsers = (searchText: string): UserOnServer[] => {
+    if (!searchText) return users.slice(0, 5);
+
+    return users
+      .filter(
+        (user) =>
+          user.userName.toLowerCase().includes(searchText.toLowerCase()) ||
+          user.userTag.toLowerCase().includes(searchText.toLowerCase()),
+      )
+      .slice(0, 5);
+  };
+
   const handleSendMessage = () => {
     if (newMessage.trim() && currentServerId && currentChannelId) {
+      console.log(formatUserTagMessage(newMessage.trim()));
       sendMessage({
         Token: accessToken,
         ChannelId: currentChannelId,
-        Text: newMessage.trim(),
+        Text: formatUserTagMessage(newMessage.trim()),
         NestedChannel: false,
       });
-      /*dispatch(
-        createMessage({
-          accessToken: accessToken,
-          channelId: currentChannelId,
-          text: newMessage.trim(),
-          nestedChannel: false,
-        }),
-      );*/
       setNewMessage('');
+      setShowSuggestions(false);
+      setCurrentMention(null);
     }
   };
 
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const cursorPosition = e.target.selectionStart || 0;
+
+    setNewMessage(value);
+
+    const mention = findMentionAtCursor(value, cursorPosition);
+
+    if (mention) {
+      const filteredUsers = filterUsers(mention.searchText);
+      setSuggestions(filteredUsers);
+      setCurrentMention(mention);
+      setShowSuggestions(filteredUsers.length > 0);
+      setSelectedSuggestionIndex(0);
+    } else {
+      setShowSuggestions(false);
+      setCurrentMention(null);
+    }
+  };
+
+  const insertMention = (user: UserOnServer) => {
+    if (!currentMention || !textareaRef.current) return;
+
+    const beforeMention = newMessage.slice(0, currentMention.startIndex);
+    const afterMention = newMessage.slice(
+      textareaRef.current.selectionStart || 0,
+    );
+    const mentionText = `#${user.userTag} `;
+
+    const newText = beforeMention + mentionText + afterMention;
+    setNewMessage(newText);
+    setShowSuggestions(false);
+    setCurrentMention(null);
+
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newCursorPosition = beforeMention.length + mentionText.length;
+        textareaRef.current.setSelectionRange(
+          newCursorPosition,
+          newCursorPosition,
+        );
+        textareaRef.current.focus();
+      }
+    }, 0);
+  };
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      handleSendMessage();
+    if (!showSuggestions) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        handleSendMessage();
+      }
+
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        setSelectedSuggestionIndex((prev) =>
+          prev < suggestions.length - 1 ? prev + 1 : 0,
+        );
+        break;
+
+      case 'ArrowUp':
+        event.preventDefault();
+        setSelectedSuggestionIndex((prev) =>
+          prev > 0 ? prev - 1 : suggestions.length - 1,
+        );
+        break;
+
+      case 'Tab':
+      case 'Enter':
+        event.preventDefault();
+
+        if (suggestions[selectedSuggestionIndex]) {
+          insertMention(suggestions[selectedSuggestionIndex]);
+        }
+        break;
+
+      case 'Escape':
+        event.preventDefault();
+        setShowSuggestions(false);
+        setCurrentMention(null);
+        break;
     }
   };
 
@@ -102,6 +226,18 @@ export const ChatSection = ({
       });
     }
   }, [messagesStatus]);
+
+  useEffect(() => {
+    if (suggestionsRef.current && showSuggestions) {
+      const selectedElement = suggestionsRef.current.children[
+        selectedSuggestionIndex
+      ] as HTMLElement;
+
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: 'nearest' });
+      }
+    }
+  }, [selectedSuggestionIndex, showSuggestions]);
 
   return (
     <Box
@@ -191,24 +327,79 @@ export const ChatSection = ({
         </Box>
       )}
 
-      <Group mt="auto" align="center" wrap="nowrap" gap={0}>
-        <ActionIcon size="xl" variant="transparent">
-          <Paperclip size={20} />
-        </ActionIcon>
-        <Textarea
-          w="100%"
-          placeholder="Написать..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDownCapture={handleKeyDown}
-          autosize
-          minRows={1}
-          maxRows={3}
-        />
-        <ActionIcon size="xl" variant="transparent" onClick={handleSendMessage}>
-          <Send size={20} />
-        </ActionIcon>
-      </Group>
+      <Box pos="relative">
+        {/* Выпадающий список с предложениями */}
+        {showSuggestions && suggestions.length > 0 && (
+          <Paper
+            ref={suggestionsRef}
+            shadow="md"
+            p="xs"
+            pos="absolute"
+            bottom="100%"
+            left={0}
+            right={0}
+            mb="xs"
+            mah={200}
+            bg="#43474f"
+            style={{ overflow: 'auto', zIndex: 1000 }}
+          >
+            <Stack gap="xs">
+              {suggestions.map((user, index) => (
+                <Group
+                  key={user.userId}
+                  p="xs"
+                  style={{
+                    cursor: 'pointer',
+                    borderRadius: '4px',
+                    backgroundColor:
+                      index === selectedSuggestionIndex
+                        ? 'var(--mantine-color-blue-light)'
+                        : 'transparent',
+                  }}
+                  onClick={() => insertMention(user)}
+                  onMouseEnter={() => setSelectedSuggestionIndex(index)}
+                >
+                  <Avatar size="sm" color="blue">
+                    {user.userName.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Box>
+                    <Text size="sm" fw={500}>
+                      {user.userName}
+                    </Text>
+                    <Text size="xs" c="dimmed">
+                      #{user.userTag} • {user.roleName}
+                    </Text>
+                  </Box>
+                </Group>
+              ))}
+            </Stack>
+          </Paper>
+        )}
+
+        <Group mt="auto" align="center" wrap="nowrap" gap={0}>
+          <ActionIcon size="xl" variant="transparent">
+            <Paperclip size={20} />
+          </ActionIcon>
+          <Textarea
+            ref={textareaRef}
+            w="100%"
+            placeholder="Написать..."
+            value={newMessage}
+            onChange={handleTextChange}
+            onKeyDown={handleKeyDown}
+            autosize
+            minRows={1}
+            maxRows={3}
+          />
+          <ActionIcon
+            size="xl"
+            variant="transparent"
+            onClick={handleSendMessage}
+          >
+            <Send size={20} />
+          </ActionIcon>
+        </Group>
+      </Box>
     </Box>
   );
 };

@@ -415,15 +415,15 @@ export const selfMute = createAsyncThunk<
   }
 });
 
-export const changeChannelSettings = createAsyncThunk<
+export const changeTextChannelSettings = createAsyncThunk<
   void,
   { accessToken: string; settings: ChannelSettings },
   { rejectValue: string }
 >(
-  'testServerSlice/changeChannelSettings',
+  'testServerSlice/changeTextChannelSettings',
   async ({ accessToken, settings }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.changeChannelSettings(accessToken, settings);
+      await ChannelsAPI.changeTextChannelSettings(accessToken, settings);
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',
@@ -446,6 +446,45 @@ export const getChannelSettings = createAsyncThunk<
       );
 
       return response;
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+/*export const getVoiceChannelSettings = createAsyncThunk<
+  GetChannelSettings,
+  { accessToken: string; channelId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/getVoiceChannelSettings',
+  async ({ accessToken, channelId }, { rejectWithValue }) => {
+    try {
+      const response = await ChannelsAPI.getVoiceChannelSettings(
+        accessToken,
+        channelId,
+      );
+
+      return response;
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);*/
+
+export const changeVoiceChannelSettings = createAsyncThunk<
+  void,
+  { accessToken: string; settings: ChannelSettings },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeVoiceChannelSettings',
+  async ({ accessToken, settings }, { rejectWithValue }) => {
+    try {
+      await ChannelsAPI.changeVoiceChannelSettings(accessToken, settings);
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',

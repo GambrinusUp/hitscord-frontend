@@ -1,13 +1,13 @@
-import { Divider, Stack, Text } from '@mantine/core';
-import { useState } from 'react';
+import { NavLink, Stack } from '@mantine/core';
+import { BookUser, ChevronRight, Settings } from 'lucide-react';
 
-import { threads } from './ProfileThreadsPanel.const';
-
-import { ThreadItem } from '~/modules/Profile/components/ThreadItem';
-
-export const ProfileThreadsPanel = () => {
-  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
-
+export const ProfileThreadsPanel = ({
+  activeLink,
+  setActiveLink,
+}: {
+  activeLink: 'friends' | 'settings';
+  setActiveLink: React.Dispatch<React.SetStateAction<'friends' | 'settings'>>;
+}) => {
   return (
     <Stack
       gap="xs"
@@ -17,20 +17,20 @@ export const ProfileThreadsPanel = () => {
       visibleFrom="sm"
       p={10}
     >
-      <Text>Сообщения</Text>
-      <Divider />
-      <Stack gap="xs">
-        {threads.map((thread) => (
-          <ThreadItem
-            key={thread.id}
-            name={thread.name}
-            lastMessage={thread.lastMessage}
-            date={thread.date}
-            isActive={activeThreadId === thread.id}
-            onClick={() => setActiveThreadId(thread.id)}
-          />
-        ))}
-      </Stack>
+      <NavLink
+        label="Друзья"
+        leftSection={<BookUser size={16} />}
+        rightSection={<ChevronRight size={12} />}
+        active={activeLink === 'friends'}
+        onClick={() => setActiveLink('friends')}
+      />
+      <NavLink
+        label="Настройки"
+        leftSection={<Settings size={16} />}
+        rightSection={<ChevronRight size={12} />}
+        active={activeLink === 'settings'}
+        onClick={() => setActiveLink('settings')}
+      />
     </Stack>
   );
 };

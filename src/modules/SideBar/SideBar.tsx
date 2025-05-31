@@ -80,7 +80,8 @@ export const SideBar = ({ onClose }: SideBarProps) => {
         gap="xs"
         bg="#1A1B1E"
         p={10}
-        w={{ base: 150, lg: 250 }}
+        //w={{ base: 150, lg: 250 }}
+        w={250}
         h="100%"
         visibleFrom="sm"
       >

@@ -50,6 +50,7 @@ export const UserItem = ({
           </Tooltip>
           <Tooltip label={roleName} position="top-end" withArrow>
             <Badge
+              variant="light"
               color={badgeColor}
               radius="sm"
               style={{

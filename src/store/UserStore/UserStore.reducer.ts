@@ -1,6 +1,14 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
 
 import {
+  approveApplication,
+  createApplication,
+  declineApplication,
+  deleteApplication,
+  deleteFriendship,
+  getApplicationsFrom,
+  getApplicationsTo,
+  getFriendshipList,
   getUserProfile,
   loginUser,
   logoutUser,
@@ -38,6 +46,9 @@ const initialState: UserState = {
   accessToken: loadTokenFromLocalStorage(TokenType.ACCESS),
   refreshToken: loadTokenFromLocalStorage(TokenType.REFRESH),
   isLoggedIn: !!loadTokenFromLocalStorage(TokenType.ACCESS),
+  applicationFrom: [],
+  applicationTo: [],
+  friendshipList: [],
   error: '',
   isLoading: false,
 };
@@ -134,7 +145,85 @@ export const UserSlice = createSlice({
       .addCase(refreshTokens.rejected, (state, action) => {
         state.error = action.payload as string;
         state.isLoading = false;
-      });
+      })
+      .addCase(createApplication.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(createApplication.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(createApplication.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+      .addCase(getApplicationsFrom.fulfilled, (state, action) => {
+        state.applicationFrom = action.payload.applications;
+        state.error = '';
+      })
+      .addCase(getApplicationsTo.fulfilled, (state, action) => {
+        state.applicationTo = action.payload.applications;
+        state.error = '';
+      })
+      .addCase(deleteApplication.fulfilled, (state, { meta }) => {
+        const applicationId = meta.arg.applicationId;
+        state.applicationFrom = state.applicationFrom.filter(
+          (application) => application.id !== applicationId,
+        );
+        state.error = '';
+      })
+      .addCase(declineApplication.fulfilled, (state, { meta }) => {
+        const applicationId = meta.arg.applicationId;
+        state.applicationTo = state.applicationTo.filter(
+          (application) => application.id !== applicationId,
+        );
+        state.error = '';
+      })
+      .addCase(approveApplication.fulfilled, (state, { meta }) => {
+        const applicationId = meta.arg.applicationId;
+        state.applicationTo = state.applicationTo.filter(
+          (application) => application.id !== applicationId,
+        );
+        state.error = '';
+      })
+      .addCase(getFriendshipList.fulfilled, (state, action) => {
+        state.friendshipList = action.payload.users;
+        state.error = '';
+      })
+
+      .addCase(deleteFriendship.fulfilled, (state, { meta }) => {
+        const userId = meta.arg.userId;
+        state.friendshipList = state.friendshipList.filter(
+          (friend) => friend.userId !== userId,
+        );
+        state.error = '';
+      })
+      .addMatcher(
+        isAnyOf(
+          getApplicationsFrom.pending,
+          getApplicationsTo.pending,
+          approveApplication.pending,
+          declineApplication.pending,
+          deleteApplication.pending,
+          getFriendshipList.pending,
+          deleteFriendship.pending,
+        ),
+        (state) => {
+          state.error = '';
+        },
+      )
+      .addMatcher(
+        isAnyOf(
+          getApplicationsFrom.rejected,
+          getApplicationsTo.rejected,
+          approveApplication.rejected,
+          declineApplication.rejected,
+          deleteApplication.rejected,
+          getFriendshipList.rejected,
+          deleteFriendship.rejected,
+        ),
+        (state, action) => {
+          state.error = action.payload as string;
+        },
+      );
   },
 });
 

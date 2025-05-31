@@ -50,6 +50,7 @@ export {
   changeChannelName,
   creatorUnsubscribeFromServer,
   selfMute,
-  changeChannelSettings,
+  changeTextChannelSettings,
   getChannelSettings,
+  changeVoiceChannelSettings,
 } from './ServerStore.actions';

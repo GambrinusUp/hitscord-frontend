@@ -13,9 +13,14 @@ export const useDisconnect = () => {
     setVideoAudioProducer,
   } = useMediaContext();
 
-  const disconnect = (accessToken: string, voiceChannelId: string) => {
+  const disconnect = async (accessToken: string, voiceChannelId: string) => {
     setIsMuted(false);
-    socket.emit('leaveRoom', { accessToken, voiceChannelId });
+
+    await new Promise<void>((resolve) => {
+      socket.once('leaveConfirmed', resolve);
+      socket.emit('leaveRoom', { accessToken, voiceChannelId });
+    });
+
     setIsConnected(false);
     setDevice(null);
     setConsumers([]);

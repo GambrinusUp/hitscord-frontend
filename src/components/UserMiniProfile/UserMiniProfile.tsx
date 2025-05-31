@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Avatar,
   Badge,
+  Button,
   CopyButton,
   Group,
   Stack,
@@ -10,17 +11,39 @@ import {
 } from '@mantine/core';
 import { Check, Copy } from 'lucide-react';
 
-import { useAppSelector } from '~/hooks';
+import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { UserOnServer } from '~/store/ServerStore';
+import { createApplication } from '~/store/UserStore';
 
 export const UserMiniProfile = ({
   userName,
   userTag,
   roleName,
+  userId,
 }: UserOnServer) => {
+  const dispatch = useAppDispatch();
+  const { showSuccess } = useNotification();
   const { roles } = useAppSelector((state) => state.testServerStore.serverData);
+  const { applicationFrom } = useAppSelector((state) => state.userStore);
+  const { accessToken, user } = useAppSelector((state) => state.userStore);
+
+  const application = applicationFrom.find((app) => app.user.userId === userId);
+
   const badgeColor =
     roles.find((role) => role.name === roleName)?.color ?? 'green';
+
+  const handleAddFriend = async () => {
+    const result = await dispatch(
+      createApplication({
+        accessToken,
+        userTag,
+      }),
+    );
+
+    if (result.meta.requestStatus === 'fulfilled') {
+      showSuccess('Запрос на дружбу отправлен');
+    }
+  };
 
   return (
     <Stack gap="xs" justify="center" align="center" w="100%">
@@ -95,6 +118,16 @@ export const UserMiniProfile = ({
           )}
         </CopyButton>
       </Group>
+      {user.id !== userId && (
+        <Button
+          variant="light"
+          radius="md"
+          onClick={handleAddFriend}
+          disabled={application ? true : false}
+        >
+          {application ? 'Заявка отправлена' : 'Добавить в друзья'}
+        </Button>
+      )}
     </Stack>
   );
 };

@@ -29,6 +29,7 @@ export const useWebSocketHandler = ({
   accessToken,
   dispatch,
   serverId,
+  showMessage,
 }: WebSocketHandlerProps) => {
   const wsRef = useRef<WebSocket | null>(null);
 
@@ -63,6 +64,12 @@ export const useWebSocketHandler = ({
         if (data.MessageType === 'Updated message') {
           const formattedMessage = formatMessage(data.Payload);
           dispatch(editMessageWs(formattedMessage));
+        }
+
+        if (data.MessageType === 'User notified') {
+          if (showMessage) {
+            showMessage(data.Payload.Text);
+          }
         }
       };
 
@@ -137,7 +144,7 @@ export const useApiWebSocketHandler = ({
 }: WebSocketHandlerProps) => {
   const disconnect = useDisconnect();
   const wsRef = useRef<WebSocket | null>(null);
-  const { currentServerId, currentVoiceChannelId } = useAppSelector(
+  const { currentServerId, currentVoiceChannelId, serverData } = useAppSelector(
     (state) => state.testServerStore,
   );
 
@@ -268,6 +275,26 @@ export const useApiWebSocketHandler = ({
                 isMuted: data.Payload.MuteStatus === 1,
               }),
             );
+          }
+        }
+
+        if (data.MessageType === 'Text channel settings edited') {
+          const { ServerId, RoleId } = data.Payload;
+
+          if (serverData.userRoleId && serverData.userRoleId === RoleId) {
+            if (serverId && serverId === ServerId) {
+              dispatch(getServerData({ accessToken, serverId }));
+            }
+          }
+        }
+
+        if (data.MessageType === 'Voice channel settings edited') {
+          const { ServerId, RoleId } = data.Payload;
+
+          if (serverData.userRoleId && serverData.userRoleId === RoleId) {
+            if (serverId && serverId === ServerId) {
+              dispatch(getServerData({ accessToken, serverId }));
+            }
           }
         }
       };

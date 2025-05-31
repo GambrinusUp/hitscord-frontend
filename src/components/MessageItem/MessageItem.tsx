@@ -58,6 +58,15 @@ export const MessageItem = ({
     });
   };
 
+  const formatMessage = (text: string): string => {
+    text = text.replace(
+      /\/\/\{usertag:([a-zA-Zа-яА-ЯёЁ]+#\d+)\}\/\//g,
+      '<span style="background-color: rgba(74, 144, 226, 0.3); color: #ffffff; font-weight: 500;">@$1</span>',
+    );
+
+    return text;
+  };
+
   return (
     <Flex
       direction="column"
@@ -115,9 +124,10 @@ export const MessageItem = ({
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
               }}
-            >
-              {content}
-            </Text>
+              dangerouslySetInnerHTML={{
+                __html: formatMessage(content),
+              }}
+            />
           )}
           <Group justify="space-between">
             <Text

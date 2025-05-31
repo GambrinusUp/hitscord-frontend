@@ -8,6 +8,7 @@ import { ChannelItemProps } from './ChannelItem.types';
 import { SettingsChannelModal } from '~/components/SettingsChannelModal';
 import { useAppSelector } from '~/hooks';
 import { styles } from '~/modules/TextChannels';
+import { ChannelType } from '~/store/ServerStore';
 
 export const ChannelItem = ({
   channelId,
@@ -79,6 +80,7 @@ export const ChannelItem = ({
         onClose={close}
         channelId={channelId}
         channelName={channelName}
+        channelType={ChannelType.TEXT_CHANNEL}
       />
     </>
   );

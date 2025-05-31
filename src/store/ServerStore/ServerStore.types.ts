@@ -9,6 +9,7 @@ export interface ServerState {
   messages: ChannelMessage[];
   hasNewMessage: boolean;
   messagesStatus: LoadingState;
+  roleSettings: GetChannelSettings;
   isLoading: boolean;
   error: string;
 }
@@ -86,7 +87,6 @@ export interface ServerData {
     textChannels: TextChannel[];
     voiceChannels: VoiceChannel[];
   };
-  roleSettings: GetChannelSettings;
 }
 
 export interface ServerItem {
@@ -124,6 +124,10 @@ export interface ChannelSettings {
 }
 
 export interface GetChannelSettings {
-  canRead: Role[];
-  canWrite: Role[];
+  canSee: Role[] | null;
+  canJoin: Role[] | null;
+  canWrite: Role[] | null;
+  canWriteSub: Role[] | null;
+  canUse: Role[] | null;
+  notificated: Role[] | null;
 }
