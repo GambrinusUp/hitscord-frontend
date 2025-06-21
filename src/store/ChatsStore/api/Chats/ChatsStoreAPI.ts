@@ -11,7 +11,7 @@ export const createChat = async (
   userTag: string,
 ): Promise<Chat> => {
   try {
-    const response = await fetch(`${API_URL}/api/chat/list`, {
+    const response = await fetch(`${API_URL}/api/chat/create`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,

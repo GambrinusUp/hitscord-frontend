@@ -188,7 +188,7 @@ export const Settings = () => {
             defaultChecked
             size="lg"
             key={form.key('notifiable')}
-            {...form.getInputProps('notifiable')}
+            {...form.getInputProps('notifiable', { type: 'checkbox' })}
           />
         </Group>
         <Divider mt="lg" />
@@ -204,7 +204,9 @@ export const Settings = () => {
             defaultChecked
             size="lg"
             key={form.key('friendshipApplication')}
-            {...form.getInputProps('friendshipApplication')}
+            {...form.getInputProps('friendshipApplication', {
+              type: 'checkbox',
+            })}
           />
         </Group>
         <Divider mt="lg" />
@@ -221,7 +223,7 @@ export const Settings = () => {
             defaultChecked
             size="lg"
             key={form.key('nonFriendMessage')}
-            {...form.getInputProps('nonFriendMessage')}
+            {...form.getInputProps('nonFriendMessage', { type: 'checkbox' })}
           />
         </Group>
       </Card>

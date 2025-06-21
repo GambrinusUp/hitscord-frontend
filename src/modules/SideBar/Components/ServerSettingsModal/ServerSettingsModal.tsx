@@ -19,6 +19,7 @@ import {
   changeRole,
   changeServerName,
   deleteUserFromServer,
+  getBannedUsers,
   getServerData,
 } from '~/store/ServerStore';
 
@@ -41,7 +42,7 @@ export const ServerSettingsModal = ({
   const { showSuccess } = useNotification();
   const [deletedUserId, setDeletedUserId] = useState<string | null>('');
   const isCreator = serverData.isCreator;
-  const canDeleteUsers = serverData.canDeleteUsers;
+  const canDeleteUsers = serverData.permissions.canDeleteUsers;
 
   const assignRole = async () => {
     if (!assignRoleUserId || !assignRoleId) return;
@@ -103,6 +104,12 @@ export const ServerSettingsModal = ({
       }
     }
   };
+
+  useEffect(() => {
+    if (canDeleteUsers && accessToken && currentServerId) {
+      dispatch(getBannedUsers({ accessToken, serverId: currentServerId }));
+    }
+  }, [canDeleteUsers, currentServerId]);
 
   useEffect(() => {
     if (error) {

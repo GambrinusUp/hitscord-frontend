@@ -12,6 +12,8 @@ import { ChannelType } from '~/store/ServerStore';
 export const ChannelItem = ({
   channelId,
   channelName,
+  currentCount,
+  maxCount,
   isAdmin,
   handleConnect,
 }: ChannelItemProps) => {
@@ -28,12 +30,14 @@ export const ChannelItem = ({
         style={{
           display: 'flex',
           alignItems: 'center',
+          maxWidth: 230,
         }}
         onMouseEnter={() => setIsHovered(channelId)}
         onMouseLeave={() => setIsHovered('')}
       >
         <Button
           leftSection={<Volume2 />}
+          rightSection={`${currentCount}/${maxCount}`}
           variant="transparent"
           p={0}
           color="#ffffff"
@@ -42,6 +46,11 @@ export const ChannelItem = ({
             root: {
               '--button-hover-color': '#4f4f4f',
               transition: 'color 0.3s ease',
+            },
+            label: {
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             },
           }}
           fullWidth

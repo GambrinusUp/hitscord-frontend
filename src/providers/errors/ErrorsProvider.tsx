@@ -6,6 +6,7 @@ export const ErrorsProvider = ({ children }: { children?: ReactNode }) => {
   const serverError = useAppSelector((state) => state.testServerStore.error);
   const usersError = useAppSelector((state) => state.userStore.error);
   const chatsError = useAppSelector((state) => state.chatsStore.error);
+  const rolesError = useAppSelector((state) => state.rolesStore.error);
   const { showError } = useNotification();
 
   useEffect(() => {
@@ -25,6 +26,12 @@ export const ErrorsProvider = ({ children }: { children?: ReactNode }) => {
       showError(chatsError);
     }
   }, [chatsError]);
+
+  useEffect(() => {
+    if (rolesError !== '') {
+      showError(rolesError);
+    }
+  }, [rolesError]);
 
   return <>{children}</>;
 };

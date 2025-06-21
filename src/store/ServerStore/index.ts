@@ -8,6 +8,7 @@ export type {
   UserOnServer,
   ChannelSettings,
   GetChannelSettings,
+  BannedUser,
 } from './ServerStore.types';
 export { ChannelType } from './ServerStore.types';
 
@@ -54,4 +55,6 @@ export {
   getChannelSettings,
   changeVoiceChannelSettings,
   getMoreMessages,
+  getBannedUsers,
+  unbanUser,
 } from './ServerStore.actions';

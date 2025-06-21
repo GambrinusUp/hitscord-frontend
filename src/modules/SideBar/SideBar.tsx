@@ -8,11 +8,19 @@ import {
   Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ChevronDown, Copy, DoorOpen, Settings, UserPen } from 'lucide-react';
+import {
+  ChevronDown,
+  Copy,
+  DoorOpen,
+  Settings,
+  UserPen,
+  Users,
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { ChangeNameModal } from './components/ChangeNameModal';
 import { Panel } from './components/Panel';
+import { RolesModal } from './components/RolesModal';
 import { ServerSettingsModal } from './components/ServerSettingsModal';
 import { UnsubscribeModal } from './components/UnsubscribeModal';
 import { SideBarProps } from './SideBarProps.types';
@@ -46,11 +54,13 @@ export const SideBar = ({ onClose }: SideBarProps) => {
     unsubscribeModalOpened,
     { open: openUnsubscribeModal, close: closeUnsubscribeModal },
   ] = useDisclosure(false);
+  const [rolesModalOpened, { open: openRolesModal, close: closeRolesModal }] =
+    useDisclosure(false);
   const { serverData, isLoading, currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const canChangeRole = serverData.canChangeRole;
+  const canChangeRole = serverData.permissions.canChangeRole;
   const isCreator = serverData.isCreator;
 
   const copyToClipboard = (text: string) => {
@@ -102,6 +112,14 @@ export const SideBar = ({ onClose }: SideBarProps) => {
                 Настройки сервера
               </Menu.Item>
             )}
+            {canChangeRole && (
+              <Menu.Item
+                onClick={() => openRolesModal()}
+                leftSection={<Users size={16} />}
+              >
+                Настройки ролей
+              </Menu.Item>
+            )}
             <Menu.Item
               onClick={openChangeNameModalOpened}
               leftSection={<UserPen size={16} />}
@@ -148,6 +166,7 @@ export const SideBar = ({ onClose }: SideBarProps) => {
         opened={unsubscribeModalOpened}
         onClose={closeUnsubscribeModal}
       />
+      <RolesModal opened={rolesModalOpened} onClose={closeRolesModal} />
     </>
   );
 };

@@ -10,6 +10,7 @@ export interface ServerState {
   hasNewMessage: boolean;
   messagesStatus: LoadingState;
   roleSettings: GetChannelSettings;
+  bannedUsers: BannedUser[];
   isLoading: boolean;
   messageIsLoading: LoadingState;
   numberOfStarterMessage: number;
@@ -65,7 +66,9 @@ export interface UserOnServer {
 export interface TextChannel {
   channelId: string;
   channelName: string;
-  canWrite: boolean;
+  canWrite: true;
+  canWriteSub: true;
+  isNotifiable: true;
 }
 
 export interface UserInVoiceChannel {
@@ -78,6 +81,7 @@ export interface VoiceChannel {
   channelName: string;
   canJoin: boolean;
   users: UserInVoiceChannel[];
+  maxCount: number;
 }
 
 export interface AnnouncementChannel {
@@ -155,4 +159,13 @@ export interface GetChannelSettings {
   canWriteSub: Role[] | null;
   canUse: Role[] | null;
   notificated: Role[] | null;
+}
+
+export interface BannedUser {
+  userId: string;
+  userName: string;
+  userTag: string;
+  mail: string;
+  banReason?: string;
+  banTime: Date;
 }

@@ -172,11 +172,17 @@ export const VoiceChannels = () => {
         <Collapse in={opened} w="100%">
           <Stack gap="xs">
             {serverData.channels.voiceChannels.map(
-              ({ channelId, channelName }) => (
+              ({ channelId, channelName, maxCount }) => (
                 <React.Fragment key={channelId}>
                   <ChannelItem
                     channelId={channelId}
                     channelName={channelName}
+                    maxCount={maxCount}
+                    currentCount={
+                      rooms
+                        .filter((room) => room.roomName === channelId)
+                        .flatMap((room) => Object.values(room.users)).length
+                    }
                     isAdmin={isAdmin}
                     handleConnect={() => handleConnect(channelId)}
                   />

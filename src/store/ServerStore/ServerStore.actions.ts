@@ -10,6 +10,7 @@ import {
   ChannelSettings,
   GetChannelSettings,
   GetMessage,
+  BannedUser,
 } from './ServerStore.types';
 
 export const getUserServers = createAsyncThunk<
@@ -485,6 +486,42 @@ export const changeVoiceChannelSettings = createAsyncThunk<
   async ({ accessToken, settings }, { rejectWithValue }) => {
     try {
       await ChannelsAPI.changeVoiceChannelSettings(accessToken, settings);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const getBannedUsers = createAsyncThunk<
+  BannedUser[],
+  { accessToken: string; serverId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/getBannedUsers',
+  async ({ accessToken, serverId }, { rejectWithValue }) => {
+    try {
+      const response = await ServerAPI.getBannedUsers(accessToken, serverId);
+
+      return response;
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const unbanUser = createAsyncThunk<
+  void,
+  { accessToken: string; userId: string; serverId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/unbanUser',
+  async ({ accessToken, userId, serverId }, { rejectWithValue }) => {
+    try {
+      await ServerAPI.unbanUser(accessToken, userId, serverId);
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',

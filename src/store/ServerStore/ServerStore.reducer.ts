@@ -15,6 +15,7 @@ import {
   deleteServer,
   deleteUserFromServer,
   editMessage,
+  getBannedUsers,
   getChannelMessages,
   getChannelSettings,
   getMoreMessages,
@@ -22,9 +23,11 @@ import {
   getUserServers,
   selfMute,
   subscribeToServer,
+  unbanUser,
   unsubscribeFromServer,
 } from './ServerStore.actions';
 import {
+  BannedUser,
   ChannelMessage,
   GetChannelSettings,
   GetMessage,
@@ -78,6 +81,7 @@ const initialState: ServerState = {
     canUse: null,
     notificated: null,
   },
+  bannedUsers: [],
   isLoading: false,
   numberOfStarterMessage: 0,
   remainingMessagesCount: MAX_MESSAGE_NUMBER,
@@ -550,6 +554,25 @@ const testServerSlice = createSlice({
       .addCase(selfMute.rejected, (state, action) => {
         state.error = action.payload as string;
       })
+
+      .addCase(unbanUser.fulfilled, (state, { meta }) => {
+        const { userId } = meta.arg;
+
+        if (state.bannedUsers.length > 0) {
+          state.bannedUsers = state.bannedUsers.filter(
+            (user) => user.userId !== userId,
+          );
+        }
+      })
+
+      .addCase(
+        getBannedUsers.fulfilled,
+        (state, action: PayloadAction<BannedUser[]>) => {
+          state.bannedUsers = action.payload;
+          state.error = '';
+        },
+      )
+
       .addMatcher(
         isAnyOf(getChannelSettings.fulfilled),
         (state, action: PayloadAction<GetChannelSettings>) => {
@@ -562,6 +585,8 @@ const testServerSlice = createSlice({
           getChannelSettings.pending,
           changeTextChannelSettings.pending,
           changeVoiceChannelSettings.pending,
+          getBannedUsers.pending,
+          unbanUser.pending,
         ),
         (state) => {
           state.error = '';
@@ -581,6 +606,8 @@ const testServerSlice = createSlice({
           getChannelSettings.rejected,
           changeTextChannelSettings.rejected,
           changeVoiceChannelSettings.rejected,
+          getBannedUsers.rejected,
+          unbanUser.rejected,
         ),
         (state, action) => {
           state.error = action.payload as string;

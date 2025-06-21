@@ -1,5 +1,9 @@
 import { API_URL } from '~/constants';
-import { GetServersResponse, ServerData } from '~/store/ServerStore';
+import {
+  BannedUser,
+  GetServersResponse,
+  ServerData,
+} from '~/store/ServerStore';
 
 export const getServers = async (
   accessToken: string,
@@ -293,6 +297,63 @@ export const creatorUnsubscribeFromServer = async (
     }
   } catch (error) {
     console.error('Error unsubscribe creator from server:', error);
+    throw error;
+  }
+};
+
+export const getBannedUsers = async (
+  accessToken: string,
+  serverId: string,
+): Promise<BannedUser[]> => {
+  try {
+    const response = await fetch(
+      `${API_URL}/api/server/banned/list?serverId=${serverId}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+
+    return data.bannedList;
+  } catch (error) {
+    console.error('Error get banned users:', error);
+    throw error;
+  }
+};
+
+export const unbanUser = async (
+  accessToken: string,
+  userId: string,
+  serverId: string,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/server/banned/unban`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        serverId,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error unban user:', error);
     throw error;
   }
 };
