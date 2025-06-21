@@ -5,7 +5,10 @@ export type {
   LoginResponse,
   GetApplication,
   GetFriends,
+  ChangeProfileData,
 } from './UserStore.types';
+
+export { SettingType } from './UserStore.types';
 
 export {
   registerUser,
@@ -21,6 +24,8 @@ export {
   deleteApplication,
   getFriendshipList,
   deleteFriendship,
+  changeSettings,
+  changeUserProfile,
 } from './UserStore.actions';
 
 export { UserReducer } from './UserStore.reducer';

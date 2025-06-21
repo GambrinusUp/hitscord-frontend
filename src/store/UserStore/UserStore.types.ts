@@ -17,6 +17,10 @@ export interface User {
   tag: string;
   mail: string;
   accontCreateDate: string;
+  notifiable: boolean;
+  friendshipApplication: boolean;
+  nonFriendMessage: boolean;
+  icon: string | null;
 }
 
 export interface LoginCredentials {
@@ -57,4 +61,15 @@ export interface GetApplication {
 
 export interface GetFriends {
   users: Friend[];
+}
+
+export enum SettingType {
+  NOTIFIABLE = 'notifiable',
+  FRIENDSHIP = 'friendship',
+  NONFRIEND = 'nonfriend',
+}
+
+export interface ChangeProfileData {
+  name: string;
+  mail: string;
 }

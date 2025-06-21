@@ -4,6 +4,8 @@ import {
   LoginCredentials,
   LoginResponse,
   RegisterCredentials,
+  SettingType,
+  ChangeProfileData,
 } from '~/store/UserStore';
 
 export const registerUser = async (
@@ -123,6 +125,58 @@ export const refreshToken = async (
     return data;
   } catch (error) {
     console.error('Error refresh tokens:', error);
+    throw error;
+  }
+};
+
+export const changeSettings = async (
+  accessToken: string,
+  type: SettingType,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/settings/${type}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change settings:', error);
+    throw error;
+  }
+};
+
+export const changeProfile = async (
+  accessToken: string,
+  newProfile: ChangeProfileData,
+): Promise<User> => {
+  try {
+    const response = await fetch(`${API_URL}/api/auth/profile/change`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newProfile),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw {
+        message: data.message || 'Unknown error',
+        status: response.status,
+      };
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error change user profile:', error);
     throw error;
   }
 };

@@ -11,6 +11,9 @@ export interface ServerState {
   messagesStatus: LoadingState;
   roleSettings: GetChannelSettings;
   isLoading: boolean;
+  messageIsLoading: LoadingState;
+  numberOfStarterMessage: number;
+  remainingMessagesCount: number;
   error: string;
 }
 
@@ -24,6 +27,14 @@ export interface ChannelMessage {
   modifiedAt: string | null;
   nestedChannelId: boolean | null;
   replyToMessage: string | null;
+}
+
+export interface GetMessage {
+  messages: ChannelMessage[];
+  numberOfMessages: number;
+  numberOfStarterMessage: number;
+  remainingMessagesCount: number;
+  allMessagesCount: number;
 }
 
 export enum ChannelType {
@@ -43,7 +54,12 @@ export interface UserOnServer {
   userId: string;
   userName: string;
   userTag: string;
+  icon: string | null;
   roleName: string;
+  mail: string;
+  notifiable: boolean;
+  friendshipApplication: boolean;
+  nonFriendMessage: boolean;
 }
 
 export interface TextChannel {
@@ -75,17 +91,26 @@ export interface AnnouncementChannel {
 export interface ServerData {
   serverId: string;
   serverName: string;
+  icon: string | null;
   roles: Role[];
   userRoleId: string;
   userRole: string;
   isCreator: boolean;
-  canChangeRole: boolean;
-  canDeleteUsers: boolean;
-  canWorkWithChannels: boolean;
+  permissions: {
+    canChangeRole: boolean;
+    canWorkChannels: boolean;
+    canDeleteUsers: boolean;
+    canMuteOther: boolean;
+    canDeleteOthersMessages: boolean;
+    canIgnoreMaxCount: boolean;
+    canCreateRoles: boolean;
+  };
+  isNotifiable: boolean;
   users: UserOnServer[];
   channels: {
     textChannels: TextChannel[];
     voiceChannels: VoiceChannel[];
+    notificationChannels: [];
   };
 }
 

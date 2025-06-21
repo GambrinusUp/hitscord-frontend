@@ -53,4 +53,5 @@ export {
   changeTextChannelSettings,
   getChannelSettings,
   changeVoiceChannelSettings,
+  getMoreMessages,
 } from './ServerStore.actions';

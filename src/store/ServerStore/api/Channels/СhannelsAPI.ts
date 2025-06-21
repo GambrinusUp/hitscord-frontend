@@ -1,17 +1,17 @@
 import { API_URL } from '~/constants';
 import {
-  ChannelMessage,
   ChannelSettings,
   ChannelType,
   GetChannelSettings,
 } from '~/store/ServerStore';
+import { GetMessage } from '~/store/ServerStore/ServerStore.types';
 
 export const getChannelsMessages = async (
   accessToken: string,
   channelId: string,
   numberOfMessages: number,
   fromStart: number = 0,
-): Promise<ChannelMessage[]> => {
+): Promise<GetMessage> => {
   try {
     const response = await fetch(
       `${API_URL}/api/channel/messages?channelId=${channelId}&number=${numberOfMessages}&fromStart=${fromStart}`,
@@ -30,7 +30,7 @@ export const getChannelsMessages = async (
       throw new Error(data.message || `Error: ${response.status}`);
     }
 
-    return data.messages;
+    return data;
   } catch (error) {
     console.error('Error get messages:', error);
     throw error;

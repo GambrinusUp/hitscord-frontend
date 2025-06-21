@@ -3,11 +3,13 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { UserAPI } from './api/Auth';
 import { FriendshipAPI } from './api/Friendship';
 import {
+  ChangeProfileData,
   GetApplication,
   GetFriends,
   LoginCredentials,
   LoginResponse,
   RegisterCredentials,
+  SettingType,
   User,
 } from './UserStore.types';
 
@@ -240,6 +242,42 @@ export const deleteFriendship = createAsyncThunk<
   async ({ accessToken, userId }, { rejectWithValue }) => {
     try {
       await FriendshipAPI.deleteFriendship(accessToken, userId);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const changeSettings = createAsyncThunk<
+  void,
+  { accessToken: string; type: SettingType },
+  { rejectValue: string }
+>(
+  'userSlice/changeSettings',
+  async ({ accessToken, type }, { rejectWithValue }) => {
+    try {
+      await UserAPI.changeSettings(accessToken, type);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const changeUserProfile = createAsyncThunk<
+  User,
+  { accessToken: string; newProfile: ChangeProfileData },
+  { rejectValue: string; state: RootState }
+>(
+  'userSlice/changeUserProfile',
+  async ({ accessToken, newProfile }, { rejectWithValue }) => {
+    try {
+      const response = await UserAPI.changeProfile(accessToken, newProfile);
+
+      return response;
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',

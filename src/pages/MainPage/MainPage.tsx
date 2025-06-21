@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useApiWebSocketHandler, useWebSocketHandler } from './MainPage.hooks';
 
+import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { ChatSection } from '~/modules/ChatSection/ChatSection';
 import { ChatSectionWithUsers } from '~/modules/ChatSectionWithUsers';
@@ -28,15 +29,21 @@ export const MainPage = () => {
   const { accessToken, isLoggedIn } = useAppSelector(
     (state) => state.userStore,
   );
-  const { currentServerId, currentChannelId } = useAppSelector(
-    (state) => state.testServerStore,
-  );
+  const { currentServerId, currentChannelId, numberOfStarterMessage } =
+    useAppSelector((state) => state.testServerStore);
   const [sidebarOpened, { open, close }] = useDisclosure(false);
   const [
     detailsPanelOpened,
     { open: openDetailsPanel, close: closeDetailsPanel },
   ] = useDisclosure(false);
-  const { sendMessage, editMessage, deleteMessage } = useWebSocketHandler({
+  const {
+    sendMessage,
+    editMessage,
+    deleteMessage,
+    sendChatMessage,
+    editChatMessage,
+    deleteChatMessage,
+  } = useWebSocketHandler({
     accessToken,
     dispatch,
     serverId: currentServerId,
@@ -69,8 +76,8 @@ export const MainPage = () => {
         getChannelMessages({
           accessToken,
           channelId: currentChannelId,
-          numberOfMessages: 50,
-          fromStart: 0,
+          numberOfMessages: MAX_MESSAGE_NUMBER,
+          fromStart: numberOfStarterMessage,
         }),
       );
     }
@@ -81,7 +88,11 @@ export const MainPage = () => {
     <Box style={{ display: 'flex', height: '100dvh' }}>
       <ServerPanel />
       {isOpenHome ? (
-        <Profile />
+        <Profile
+          sendChatMessage={sendChatMessage}
+          editChatMessage={editChatMessage}
+          deleteChatMessage={deleteChatMessage}
+        />
       ) : (
         <>
           <SideBar onClose={close} />

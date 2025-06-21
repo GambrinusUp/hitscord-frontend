@@ -27,12 +27,14 @@ import {
 import {
   ChannelMessage,
   GetChannelSettings,
+  GetMessage,
   ServerData,
   ServerItem,
   ServerState,
   UserOnServer,
 } from './ServerStore.types';
 
+import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { LoadingState } from '~/shared';
 
 const initialState: ServerState = {
@@ -40,6 +42,7 @@ const initialState: ServerState = {
   serverData: {
     serverId: '',
     serverName: '',
+    icon: '',
     roles: [],
     userRoleId: '',
     userRole: '',
@@ -47,11 +50,19 @@ const initialState: ServerState = {
     channels: {
       textChannels: [],
       voiceChannels: [],
+      notificationChannels: [],
     },
     isCreator: false,
-    canChangeRole: false,
-    canDeleteUsers: false,
-    canWorkWithChannels: false,
+    permissions: {
+      canChangeRole: false,
+      canWorkChannels: false,
+      canDeleteUsers: false,
+      canMuteOther: false,
+      canDeleteOthersMessages: false,
+      canIgnoreMaxCount: false,
+      canCreateRoles: false,
+    },
+    isNotifiable: false,
   },
   currentServerId: null,
   currentChannelId: null,
@@ -68,6 +79,9 @@ const initialState: ServerState = {
     notificated: null,
   },
   isLoading: false,
+  numberOfStarterMessage: 0,
+  remainingMessagesCount: MAX_MESSAGE_NUMBER,
+  messageIsLoading: LoadingState.IDLE,
   error: '',
 };
 
@@ -133,6 +147,7 @@ const testServerSlice = createSlice({
       state.serverData = {
         serverId: '',
         serverName: '',
+        icon: '',
         roles: [],
         userRoleId: '',
         userRole: '',
@@ -140,11 +155,19 @@ const testServerSlice = createSlice({
         channels: {
           textChannels: [],
           voiceChannels: [],
+          notificationChannels: [],
         },
         isCreator: false,
-        canChangeRole: false,
-        canDeleteUsers: false,
-        canWorkWithChannels: false,
+        permissions: {
+          canChangeRole: false,
+          canWorkChannels: false,
+          canDeleteUsers: false,
+          canMuteOther: false,
+          canDeleteOthersMessages: false,
+          canIgnoreMaxCount: false,
+          canCreateRoles: false,
+        },
+        isNotifiable: false,
       };
       state.roleSettings = {
         canSee: null,
@@ -294,6 +317,7 @@ const testServerSlice = createSlice({
         state.serverData = {
           serverId: '',
           serverName: '',
+          icon: '',
           roles: [],
           userRoleId: '',
           userRole: '',
@@ -301,11 +325,19 @@ const testServerSlice = createSlice({
           channels: {
             textChannels: [],
             voiceChannels: [],
+            notificationChannels: [],
           },
           isCreator: false,
-          canChangeRole: false,
-          canDeleteUsers: false,
-          canWorkWithChannels: false,
+          permissions: {
+            canChangeRole: false,
+            canWorkChannels: false,
+            canDeleteUsers: false,
+            canMuteOther: false,
+            canDeleteOthersMessages: false,
+            canIgnoreMaxCount: false,
+            canCreateRoles: false,
+          },
+          isNotifiable: false,
         };
         state.error = '';
       })
@@ -324,6 +356,7 @@ const testServerSlice = createSlice({
           if (!currentChannel) {
             newCurrentChannelId =
               newChannels.length > 0 ? newChannels[0].channelId : null;
+            state.currentChannelId = newCurrentChannelId;
             state.messages = [];
           }
 
@@ -378,11 +411,16 @@ const testServerSlice = createSlice({
       })
       .addCase(
         getChannelMessages.fulfilled,
-        (state, action: PayloadAction<ChannelMessage[]>) => {
-          state.messages = action.payload;
+        (state, action: PayloadAction<GetMessage>) => {
+          state.messages = action.payload.messages;
           state.hasNewMessage = false;
           state.messagesStatus = LoadingState.FULFILLED;
           state.isLoading = false;
+          state.remainingMessagesCount = action.payload.remainingMessagesCount;
+
+          if (action.payload.remainingMessagesCount > 0) {
+            state.numberOfStarterMessage = MAX_MESSAGE_NUMBER;
+          }
           state.error = '';
         },
       )
@@ -392,19 +430,25 @@ const testServerSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(getMoreMessages.pending, (state) => {
-        state.isLoading = true;
+        state.messageIsLoading = LoadingState.PENDING;
         state.error = '';
       })
       .addCase(
         getMoreMessages.fulfilled,
-        (state, action: PayloadAction<ChannelMessage[]>) => {
-          state.messages = [...action.payload, ...state.messages];
-          state.isLoading = false;
+        (state, action: PayloadAction<GetMessage>) => {
+          state.messages = [...action.payload.messages, ...state.messages];
+          state.messageIsLoading = LoadingState.FULFILLED;
+          state.remainingMessagesCount = action.payload.remainingMessagesCount;
+
+          if (action.payload.remainingMessagesCount > 0) {
+            state.numberOfStarterMessage =
+              state.numberOfStarterMessage + MAX_MESSAGE_NUMBER;
+          }
           state.error = '';
         },
       )
       .addCase(getMoreMessages.rejected, (state, action) => {
-        state.isLoading = false;
+        state.messageIsLoading = LoadingState.REJECTED;
         state.error = action.payload as string;
       })
       .addCase(createMessage.pending, (state) => {

@@ -24,7 +24,7 @@ const App = () => {
             v7_relativeSplatPath: true,
           }}
         >
-          <MantineProvider>
+          <MantineProvider defaultColorScheme="dark">
             <Notifications />
             <ErrorsProvider>
               <Routes>

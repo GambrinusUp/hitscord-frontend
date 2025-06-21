@@ -1,17 +1,22 @@
 import { Box, Flex, Stack, Tabs, Text } from '@mantine/core';
 import { useState } from 'react';
 
+import { ProfileMessagesSectionProps } from './ProfileMessagesSection.types';
+
 import { useAppSelector } from '~/hooks';
 import {
   UserItem,
   UserType,
 } from '~/modules/Profile/components/ApplicationItem';
+import { Chats } from '~/modules/Profile/components/Chats';
+import { Settings } from '~/modules/Profile/components/Settings';
 
 export const ProfileMessagesSection = ({
   activeLink,
-}: {
-  activeLink: 'friends' | 'settings';
-}) => {
+  sendChatMessage,
+  editChatMessage,
+  deleteChatMessage,
+}: ProfileMessagesSectionProps) => {
   const [activeTab, setActiveTab] = useState<string | null>('friends');
   const { applicationFrom, applicationTo, friendshipList } = useAppSelector(
     (state) => state.userStore,
@@ -28,6 +33,14 @@ export const ProfileMessagesSection = ({
       }}
     >
       <Flex w="100%" h="100%" justify="center">
+        {activeLink === 'chats' && (
+          <Chats
+            sendChatMessage={sendChatMessage}
+            editChatMessage={editChatMessage}
+            deleteChatMessage={deleteChatMessage}
+          />
+        )}
+        {activeLink === 'settings' && <Settings />}
         {activeLink === 'friends' && (
           <Tabs
             value={activeTab}

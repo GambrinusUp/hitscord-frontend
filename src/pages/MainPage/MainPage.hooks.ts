@@ -3,8 +3,14 @@ import { useCallback, useEffect, useRef } from 'react';
 import { WebSocketHandlerProps } from './MainPage.types';
 
 import { formatMessage, formatUser } from '~/helpers';
+import { formatChatMessage } from '~/helpers/formatMessage';
 import { useAppSelector, useDisconnect } from '~/hooks';
 import { setOpenHome } from '~/store/AppStore';
+import {
+  addChatMessage,
+  deleteChatMessageWS,
+  editChatMessageWS,
+} from '~/store/ChatsStore';
 import {
   getServerData,
   addMessage,
@@ -52,6 +58,14 @@ export const useWebSocketHandler = ({
           }
         }
 
+        if (data.MessageType === 'New message in chat') {
+          const formattedMessage = formatChatMessage(data.Payload);
+
+          if (formattedMessage.id && formattedMessage.text) {
+            dispatch(addChatMessage(formattedMessage));
+          }
+        }
+
         if (data.MessageType === 'Deleted message') {
           dispatch(
             deleteMessageWs({
@@ -61,9 +75,23 @@ export const useWebSocketHandler = ({
           );
         }
 
+        if (data.MessageType === 'Deleted message in chat') {
+          dispatch(
+            deleteChatMessageWS({
+              chatId: data.Payload.ChatId,
+              messageId: data.Payload.MessageId,
+            }),
+          );
+        }
+
         if (data.MessageType === 'Updated message') {
           const formattedMessage = formatMessage(data.Payload);
           dispatch(editMessageWs(formattedMessage));
+        }
+
+        if (data.MessageType === 'Updated message in chat') {
+          const formattedMessage = formatChatMessage(data.Payload);
+          dispatch(editChatMessageWS(formattedMessage));
         }
 
         if (data.MessageType === 'User notified') {
@@ -102,6 +130,25 @@ export const useWebSocketHandler = ({
     }
   }, []);
 
+  const sendChatMessage = useCallback(
+    (message: CreateMessageWs) => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        const sendData = {
+          Type: 'New message chat',
+          Content: message,
+        };
+
+        wsRef.current.send(JSON.stringify(sendData));
+      } else {
+        console.error(
+          'WebSocket is not open. Ready state:',
+          wsRef.current?.readyState,
+        );
+      }
+    },
+    [wsRef],
+  );
+
   const editMessage = useCallback((message: EditMessageWs) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       const sendData = {
@@ -117,6 +164,25 @@ export const useWebSocketHandler = ({
       );
     }
   }, []);
+
+  const editChatMessage = useCallback(
+    (message: EditMessageWs) => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        const sendData = {
+          Type: 'Update message chat',
+          Content: message,
+        };
+
+        wsRef.current.send(JSON.stringify(sendData));
+      } else {
+        console.error(
+          'WebSocket is not open. Ready state:',
+          wsRef.current?.readyState,
+        );
+      }
+    },
+    [wsRef],
+  );
 
   const deleteMessage = useCallback((message: DeleteMessageWs) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -134,7 +200,33 @@ export const useWebSocketHandler = ({
     }
   }, []);
 
-  return { sendMessage, editMessage, deleteMessage };
+  const deleteChatMessage = useCallback(
+    (message: DeleteMessageWs) => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        const sendData = {
+          Type: 'Delete message chat',
+          Content: message,
+        };
+
+        wsRef.current.send(JSON.stringify(sendData));
+      } else {
+        console.error(
+          'WebSocket is not open. Ready state:',
+          wsRef.current?.readyState,
+        );
+      }
+    },
+    [wsRef],
+  );
+
+  return {
+    sendMessage,
+    editMessage,
+    deleteMessage,
+    sendChatMessage,
+    editChatMessage,
+    deleteChatMessage,
+  };
 };
 
 export const useApiWebSocketHandler = ({

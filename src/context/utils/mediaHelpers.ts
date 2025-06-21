@@ -176,7 +176,7 @@ const connectRecvTransport = async (
       const consumer = await consumerTransport.consume({
         ...consumerParams,
         appData: {
-          source, // 👈 передаём вручную
+          source,
         },
       });
 

@@ -5,6 +5,7 @@ import {
   Divider,
   Group,
   Indicator,
+  Loader,
   Paper,
   ScrollArea,
   Skeleton,
@@ -20,9 +21,14 @@ import { ChatSectionProps, MentionSuggestion } from './ChatSection.types';
 import { formatUserTagMessage } from './ChatSection.utils';
 
 import { MessageItem } from '~/components/MessageItem';
+import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
-import { clearHasNewMessage, UserOnServer } from '~/store/ServerStore';
+import {
+  clearHasNewMessage,
+  getMoreMessages,
+  UserOnServer,
+} from '~/store/ServerStore';
 
 export const ChatSection = ({
   openSidebar,
@@ -42,6 +48,9 @@ export const ChatSection = ({
     isLoading,
     messagesStatus,
     serverData,
+    remainingMessagesCount,
+    numberOfStarterMessage,
+    messageIsLoading,
   } = useAppSelector((state) => state.testServerStore);
   const users = serverData.users;
   const [newMessage, setNewMessage] = useState('');
@@ -57,6 +66,8 @@ export const ChatSection = ({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const firstMessageElementRef = useRef<HTMLDivElement | null>(null);
 
   const findMentionAtCursor = (
     text: string,
@@ -239,6 +250,42 @@ export const ChatSection = ({
     }
   }, [selectedSuggestionIndex, showSuggestions]);
 
+  useEffect(() => {
+    if (!firstMessageElementRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          console.log('moreMessages');
+
+          if (remainingMessagesCount > 0) {
+            dispatch(
+              getMoreMessages({
+                accessToken,
+                channelId: currentChannelId!,
+                numberOfMessages:
+                  remainingMessagesCount > MAX_MESSAGE_NUMBER
+                    ? MAX_MESSAGE_NUMBER
+                    : remainingMessagesCount,
+                fromStart: numberOfStarterMessage,
+              }),
+            );
+          }
+        }
+      },
+      {
+        root: scrollRef.current,
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(firstMessageElementRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [messages]);
+
   return (
     <Box
       style={{
@@ -281,18 +328,23 @@ export const ChatSection = ({
                 </Box>
               </Group>
             ))}
-          {messages.map((message) => (
-            <MessageItem
+          {messageIsLoading === LoadingState.PENDING && <Loader />}
+          {messages.map((message, index) => (
+            <div
+              ref={index === 0 ? firstMessageElementRef : null}
               key={message.id}
-              messageId={message.id}
-              content={message.text}
-              isOwnMessage={user.id === message.authorId}
-              time={message.createdAt}
-              modifiedAt={message.modifiedAt}
-              authorId={message.authorId}
-              editMessage={editMessage}
-              deleteMessage={deleteMessage}
-            />
+            >
+              <MessageItem
+                messageId={message.id}
+                content={message.text}
+                isOwnMessage={user.id === message.authorId}
+                time={message.createdAt}
+                modifiedAt={message.modifiedAt}
+                authorId={message.authorId}
+                editMessage={editMessage}
+                deleteMessage={deleteMessage}
+              />
+            </div>
           ))}
         </Stack>
       </ScrollArea>

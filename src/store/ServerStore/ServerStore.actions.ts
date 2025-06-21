@@ -6,10 +6,10 @@ import { ServerAPI } from './api/Server';
 import {
   ServerItem,
   ServerData,
-  ChannelMessage,
   ChannelType,
   ChannelSettings,
   GetChannelSettings,
+  GetMessage,
 } from './ServerStore.types';
 
 export const getUserServers = createAsyncThunk<
@@ -136,7 +136,7 @@ export const unsubscribeFromServer = createAsyncThunk<
 );
 
 export const getChannelMessages = createAsyncThunk<
-  ChannelMessage[],
+  GetMessage,
   {
     accessToken: string;
     channelId: string;
@@ -168,7 +168,7 @@ export const getChannelMessages = createAsyncThunk<
 );
 
 export const getMoreMessages = createAsyncThunk<
-  ChannelMessage[],
+  GetMessage,
   {
     accessToken: string;
     channelId: string;

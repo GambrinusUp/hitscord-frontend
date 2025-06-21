@@ -2,6 +2,8 @@ import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
 
 import {
   approveApplication,
+  changeSettings,
+  changeUserProfile,
   createApplication,
   declineApplication,
   deleteApplication,
@@ -15,7 +17,7 @@ import {
   refreshTokens,
   registerUser,
 } from './UserStore.actions';
-import { User, UserState, LoginResponse } from './UserStore.types';
+import { User, UserState, LoginResponse, SettingType } from './UserStore.types';
 
 enum TokenType {
   ACCESS = 'accessToken',
@@ -41,6 +43,10 @@ const initialState: UserState = {
     tag: '',
     mail: '',
     accontCreateDate: '',
+    notifiable: false,
+    friendshipApplication: false,
+    nonFriendMessage: false,
+    icon: null,
   },
   roomName: '11',
   accessToken: loadTokenFromLocalStorage(TokenType.ACCESS),
@@ -196,6 +202,31 @@ export const UserSlice = createSlice({
         );
         state.error = '';
       })
+      .addCase(changeSettings.fulfilled, (state, { meta }) => {
+        const { type } = meta.arg;
+
+        switch (type) {
+          case SettingType.FRIENDSHIP:
+            state.user.friendshipApplication =
+              !state.user.friendshipApplication;
+            break;
+          case SettingType.NONFRIEND:
+            state.user.nonFriendMessage = !state.user.nonFriendMessage;
+            break;
+          case SettingType.NOTIFIABLE:
+            state.user.notifiable = !state.user.notifiable;
+            break;
+        }
+      })
+
+      .addCase(
+        changeUserProfile.fulfilled,
+        (state, action: PayloadAction<User>) => {
+          state.error = '';
+          state.user = action.payload;
+        },
+      )
+
       .addMatcher(
         isAnyOf(
           getApplicationsFrom.pending,
@@ -205,6 +236,8 @@ export const UserSlice = createSlice({
           deleteApplication.pending,
           getFriendshipList.pending,
           deleteFriendship.pending,
+          changeSettings.pending,
+          changeUserProfile.pending,
         ),
         (state) => {
           state.error = '';
@@ -219,6 +252,8 @@ export const UserSlice = createSlice({
           deleteApplication.rejected,
           getFriendshipList.rejected,
           deleteFriendship.rejected,
+          changeSettings.rejected,
+          changeUserProfile.rejected,
         ),
         (state, action) => {
           state.error = action.payload as string;

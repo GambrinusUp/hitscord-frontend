@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import { AppReducer } from './AppStore';
+import { ChatsReducer } from './ChatsStore';
 import { ServerReducer } from './ServerStore';
 import { UserReducer } from './UserStore';
 
@@ -9,6 +10,7 @@ const store = configureStore({
     userStore: UserReducer,
     appStore: AppReducer,
     testServerStore: ServerReducer,
+    chatsStore: ChatsReducer,
   },
 });
 

@@ -1,12 +1,14 @@
 import { NavLink, Stack } from '@mantine/core';
-import { BookUser, ChevronRight, Settings } from 'lucide-react';
+import { BookUser, ChevronRight, MessagesSquare, Settings } from 'lucide-react';
 
 export const ProfileThreadsPanel = ({
   activeLink,
   setActiveLink,
 }: {
-  activeLink: 'friends' | 'settings';
-  setActiveLink: React.Dispatch<React.SetStateAction<'friends' | 'settings'>>;
+  activeLink: 'friends' | 'settings' | 'chats';
+  setActiveLink: React.Dispatch<
+    React.SetStateAction<'friends' | 'settings' | 'chats'>
+  >;
 }) => {
   return (
     <Stack
@@ -17,6 +19,13 @@ export const ProfileThreadsPanel = ({
       visibleFrom="sm"
       p={10}
     >
+      <NavLink
+        label="Чаты"
+        leftSection={<MessagesSquare size={16} />}
+        rightSection={<ChevronRight size={12} />}
+        active={activeLink === 'chats'}
+        onClick={() => setActiveLink('chats')}
+      />
       <NavLink
         label="Друзья"
         leftSection={<BookUser size={16} />}
