@@ -27,7 +27,8 @@ export const TextChannels = ({ onClose }: TextChannelsProps) => {
   const { serverData, currentServerId, currentChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
-  const isAdmin = serverData.isCreator || serverData.canWorkWithChannels;
+  const isAdmin =
+    serverData.isCreator || serverData.permissions.canWorkChannels;
 
   const handleOpenChannel = (channelId: string) => {
     dispatch(setCurrentChannelId(channelId));

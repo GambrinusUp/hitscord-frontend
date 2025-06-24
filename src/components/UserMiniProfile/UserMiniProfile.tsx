@@ -20,7 +20,10 @@ export const UserMiniProfile = ({
   userTag,
   roleName,
   userId,
-}: UserOnServer) => {
+}: Omit<
+  UserOnServer,
+  'icon' | 'mail' | 'notifiable' | 'friendshipApplication' | 'nonFriendMessage'
+>) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
   const { roles } = useAppSelector((state) => state.testServerStore.serverData);

@@ -11,7 +11,10 @@ export const UserItem = ({
   userName,
   userTag,
   roleName,
-}: UserOnServer) => {
+}: Omit<
+  UserOnServer,
+  'icon' | 'mail' | 'notifiable' | 'friendshipApplication' | 'nonFriendMessage'
+>) => {
   const [opened, setOpened] = useState(false);
   const { roles } = useAppSelector((state) => state.testServerStore.serverData);
   const badgeColor =

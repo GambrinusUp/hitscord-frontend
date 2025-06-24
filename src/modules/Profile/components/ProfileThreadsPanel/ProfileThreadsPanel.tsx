@@ -1,6 +1,9 @@
 import { NavLink, Stack } from '@mantine/core';
 import { BookUser, ChevronRight, MessagesSquare, Settings } from 'lucide-react';
 
+import { useAppDispatch } from '~/hooks';
+import { setActiveChat } from '~/store/ChatsStore';
+
 export const ProfileThreadsPanel = ({
   activeLink,
   setActiveLink,
@@ -10,6 +13,8 @@ export const ProfileThreadsPanel = ({
     React.SetStateAction<'friends' | 'settings' | 'chats'>
   >;
 }) => {
+  const dispatch = useAppDispatch();
+
   return (
     <Stack
       gap="xs"
@@ -24,21 +29,30 @@ export const ProfileThreadsPanel = ({
         leftSection={<MessagesSquare size={16} />}
         rightSection={<ChevronRight size={12} />}
         active={activeLink === 'chats'}
-        onClick={() => setActiveLink('chats')}
+        onClick={() => {
+          setActiveLink('chats');
+          dispatch(setActiveChat(null));
+        }}
       />
       <NavLink
         label="Друзья"
         leftSection={<BookUser size={16} />}
         rightSection={<ChevronRight size={12} />}
         active={activeLink === 'friends'}
-        onClick={() => setActiveLink('friends')}
+        onClick={() => {
+          setActiveLink('friends');
+          dispatch(setActiveChat(null));
+        }}
       />
       <NavLink
         label="Настройки"
         leftSection={<Settings size={16} />}
         rightSection={<ChevronRight size={12} />}
         active={activeLink === 'settings'}
-        onClick={() => setActiveLink('settings')}
+        onClick={() => {
+          setActiveLink('settings');
+          dispatch(setActiveChat(null));
+        }}
       />
     </Stack>
   );

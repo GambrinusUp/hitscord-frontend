@@ -154,8 +154,6 @@ export const ChatSection = ({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          console.log('moreMessages');
-
           if (remainingMessagesCount > 0) {
             dispatch(
               getMoreChatMessages({

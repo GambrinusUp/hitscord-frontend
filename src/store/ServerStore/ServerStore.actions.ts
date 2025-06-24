@@ -278,13 +278,23 @@ export const createChannel = createAsyncThunk<
     serverId: string;
     name: string;
     channelType: ChannelType;
+    maxCount?: number;
   },
   { rejectValue: string }
 >(
   'testServerSlice/createChannel',
-  async ({ accessToken, serverId, name, channelType }, { rejectWithValue }) => {
+  async (
+    { accessToken, serverId, name, channelType, maxCount },
+    { rejectWithValue },
+  ) => {
     try {
-      await ChannelsAPI.createChannel(accessToken, serverId, name, channelType);
+      await ChannelsAPI.createChannel(
+        accessToken,
+        serverId,
+        name,
+        channelType,
+        maxCount,
+      );
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',
@@ -522,6 +532,27 @@ export const unbanUser = createAsyncThunk<
   async ({ accessToken, userId, serverId }, { rejectWithValue }) => {
     try {
       await ServerAPI.unbanUser(accessToken, userId, serverId);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const changeVoiceChannelMaxCount = createAsyncThunk<
+  void,
+  { accessToken: string; voiceChannelId: string; maxCount: number },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeVoiceChannelMaxCount',
+  async ({ accessToken, voiceChannelId, maxCount }, { rejectWithValue }) => {
+    try {
+      await ChannelsAPI.changeVoiceChannelMaxCount(
+        accessToken,
+        voiceChannelId,
+        maxCount,
+      );
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',

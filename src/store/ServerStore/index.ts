@@ -57,4 +57,5 @@ export {
   getMoreMessages,
   getBannedUsers,
   unbanUser,
+  changeVoiceChannelMaxCount,
 } from './ServerStore.actions';

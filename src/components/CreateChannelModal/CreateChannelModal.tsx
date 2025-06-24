@@ -1,4 +1,11 @@
-import { Button, Group, Modal, Text, TextInput } from '@mantine/core';
+import {
+  Button,
+  Group,
+  Modal,
+  NumberInput,
+  Text,
+  TextInput,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect } from 'react';
 
@@ -27,12 +34,19 @@ export const CreateChannelModal = ({
   const form = useForm({
     initialValues: {
       name: isEdit.initialData,
+      maxCount: isEdit.initialData,
     },
     validate: {
       name: (value) =>
         value.trim().length < 3
           ? 'Название канала должно быть более 3 символов'
           : null,
+      maxCount: (value) =>
+        Number(value) < 1 && channelType === ChannelType.VOICE_CHANNEL
+          ? 'Кол-во пользователей должно быть больше 1'
+          : Number(value) > 999 && channelType === ChannelType.VOICE_CHANNEL
+            ? 'Кол-во пользователей должно быть меньше 999'
+            : null,
     },
   });
 
@@ -54,6 +68,10 @@ export const CreateChannelModal = ({
           channelType === ChannelType.TEXT_CHANNEL
             ? ChannelType.TEXT_CHANNEL
             : ChannelType.VOICE_CHANNEL,
+        maxCount:
+          channelType === ChannelType.VOICE_CHANNEL
+            ? Number(values.maxCount)
+            : undefined,
       }),
     );
 
@@ -134,6 +152,15 @@ export const CreateChannelModal = ({
             placeholder="Введите название канала"
             {...form.getInputProps('name')}
           />
+          {channelType === ChannelType.VOICE_CHANNEL && (
+            <NumberInput
+              label="Введите число"
+              placeholder="Число от 1 до 999"
+              {...form.getInputProps('maxCount')}
+              min={1}
+              max={999}
+            />
+          )}
           <Group justify="flex-end" mt="md">
             <Button variant="outline" onClick={onClose}>
               Отмена

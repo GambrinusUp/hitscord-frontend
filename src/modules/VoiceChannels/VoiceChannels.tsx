@@ -47,7 +47,17 @@ export const VoiceChannels = () => {
     channelId: '',
   });
 
-  const handleConnect = async (channelId: string) => {
+  const handleConnect = async (channelId: string, maxCount: number) => {
+    const currentCount = rooms
+      .filter((room) => room.roomName === channelId)
+      .flatMap((room) => Object.values(room.users)).length;
+
+    if (currentCount >= maxCount) {
+      console.warn('Максимальное количество участников в канале достигнуто');
+
+      return;
+    }
+
     if (!isConnected) {
       dispatch(setCurrentVoiceChannelId(channelId));
       connect(channelId, user.name, user.id, serverData.serverId, accessToken);
@@ -184,7 +194,7 @@ export const VoiceChannels = () => {
                         .flatMap((room) => Object.values(room.users)).length
                     }
                     isAdmin={isAdmin}
-                    handleConnect={() => handleConnect(channelId)}
+                    handleConnect={() => handleConnect(channelId, maxCount)}
                   />
                   <Stack gap="xs">
                     {rooms

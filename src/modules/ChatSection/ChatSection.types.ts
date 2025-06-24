@@ -2,7 +2,6 @@ import {
   CreateMessageWs,
   DeleteMessageWs,
   EditMessageWs,
-  UserOnServer,
 } from '~/store/ServerStore';
 
 export interface ChatSectionProps {
@@ -14,7 +13,10 @@ export interface ChatSectionProps {
 }
 
 export interface MentionSuggestion {
-  user: UserOnServer;
+  type: 'user' | 'role';
+  id: string;
+  display: string;
+  tag: string;
   startIndex: number;
   searchText: string;
 }

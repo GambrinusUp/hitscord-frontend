@@ -4,13 +4,20 @@ import {
   Group,
   Modal,
   NavLink,
+  NumberInput,
   ScrollArea,
   Select,
   Stack,
   Text,
   TextInput,
 } from '@mantine/core';
-import { Pencil, Trash2, UserRoundCog, UserRoundPen } from 'lucide-react';
+import {
+  Pencil,
+  Trash2,
+  UserRoundCog,
+  UserRoundPen,
+  UsersRound,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import './SettingsChannelModal.style.css';
@@ -24,6 +31,7 @@ import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import {
   changeChannelName,
   changeTextChannelSettings,
+  changeVoiceChannelMaxCount,
   changeVoiceChannelSettings,
   ChannelType,
   deleteChannel,
@@ -43,13 +51,15 @@ export const SettingsChannelModal = ({
     (state) => state.testServerStore,
   );
   const [activeSetting, setActiveSetting] = useState<
-    'name' | 'delete' | 'watchSettings' | 'settings'
+    'name' | 'delete' | 'watchSettings' | 'settings' | 'count'
   >('name');
   const [newChannelName, setNewChannelName] = useState(channelName);
   const [loading, setLoading] = useState(false);
   const { showSuccess } = useNotification();
   const [add, setAdd] = useState<string | null>(null);
   const [type, setType] = useState<string | null>(null);
+  const [count, setCount] = useState<string | number>(1);
+
   const [assignRoleId, setAssignRoleId] = useState<string | null>('');
 
   const canSee = roleSettings.canSee;
@@ -146,6 +156,33 @@ export const SettingsChannelModal = ({
     }
   };
 
+  const handleChangeChannelCount = async () => {
+    setLoading(true);
+    const result = await dispatch(
+      changeVoiceChannelMaxCount({
+        accessToken,
+        voiceChannelId: channelId,
+        maxCount: Number(count),
+      }),
+    );
+
+    if (result.meta.requestStatus === 'fulfilled') {
+      setLoading(false);
+      showSuccess('Настройки успешно обновлены');
+      onClose();
+    }
+  };
+
+  useEffect(() => {
+    const voiceChannelData = serverData.channels.voiceChannels.find(
+      (channel) => channel.channelId === channelId,
+    );
+
+    if (voiceChannelData) {
+      setCount(voiceChannelData?.maxCount);
+    }
+  }, [serverData]);
+
   useEffect(() => {
     if (accessToken && opened) {
       dispatch(getChannelSettings({ accessToken, channelId }));
@@ -190,6 +227,14 @@ export const SettingsChannelModal = ({
             active={activeSetting === 'settings'}
             onClick={() => setActiveSetting('settings')}
           />
+          {channelType === ChannelType.VOICE_CHANNEL && (
+            <NavLink
+              label="Настройка числа пользователей"
+              leftSection={<UsersRound size={16} />}
+              active={activeSetting === 'count'}
+              onClick={() => setActiveSetting('count')}
+            />
+          )}
         </Stack>
         <ScrollArea>
           {activeSetting === 'name' && (
@@ -336,6 +381,27 @@ export const SettingsChannelModal = ({
                 />
               </Group>
               <Button onClick={handleChangeChannelSettings} loading={loading}>
+                Изменить настройки
+              </Button>
+            </Stack>
+          )}
+
+          {activeSetting === 'count' && (
+            <Stack gap="md">
+              <Text size="lg" w={500}>
+                Смена кол-ва числа пользователей
+              </Text>
+              <Group align="center">
+                <NumberInput
+                  label="Введите число"
+                  placeholder="Число от 1 до 999"
+                  value={count}
+                  onChange={setCount}
+                  min={1}
+                  max={999}
+                />
+              </Group>
+              <Button onClick={handleChangeChannelCount} loading={loading}>
                 Изменить настройки
               </Button>
             </Stack>

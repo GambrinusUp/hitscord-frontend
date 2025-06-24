@@ -18,17 +18,13 @@ import { ArrowDown, Menu, Paperclip, Search, Send, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { ChatSectionProps, MentionSuggestion } from './ChatSection.types';
-import { formatUserTagMessage } from './ChatSection.utils';
+import { formatTagMessage } from './ChatSection.utils';
 
 import { MessageItem } from '~/components/MessageItem';
 import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
-import {
-  clearHasNewMessage,
-  getMoreMessages,
-  UserOnServer,
-} from '~/store/ServerStore';
+import { clearHasNewMessage, getMoreMessages } from '~/store/ServerStore';
 
 export const ChatSection = ({
   openSidebar,
@@ -53,13 +49,14 @@ export const ChatSection = ({
     messageIsLoading,
   } = useAppSelector((state) => state.testServerStore);
   const users = serverData.users;
+  const roles = serverData.roles;
   const [newMessage, setNewMessage] = useState('');
 
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showButton, setShowButton] = useState(false);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<UserOnServer[]>([]);
+  const [suggestions, setSuggestions] = useState<MentionSuggestion[]>([]);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
   const [currentMention, setCurrentMention] =
     useState<MentionSuggestion | null>(null);
@@ -73,42 +70,69 @@ export const ChatSection = ({
     text: string,
     cursorPosition: number,
   ): MentionSuggestion | null => {
-    const beforeCursor = text.slice(0, cursorPosition);
-    const mentionMatch = beforeCursor.match(/#(\w*)$/);
+    const before = text.slice(0, cursorPosition);
+    const match = before.match(/@([\w#-]*)$/);
 
-    if (mentionMatch) {
-      const searchText = mentionMatch[1];
-      const startIndex = beforeCursor.lastIndexOf('#');
+    if (match) {
+      const search = match[1];
+      const atIndex = before.lastIndexOf('@');
 
       return {
-        user: {} as UserOnServer,
-        startIndex,
-        searchText,
+        type: 'user',
+        id: '',
+        display: '',
+        tag: '',
+        startIndex: atIndex,
+        searchText: search,
       };
     }
 
     return null;
   };
 
-  const filterUsers = (searchText: string): UserOnServer[] => {
-    if (!searchText) return users.slice(0, 5);
+  const filterSuggestions = (
+    mention: MentionSuggestion,
+  ): MentionSuggestion[] => {
+    const text = mention.searchText.toLowerCase();
 
-    return users
+    const userMatches = users
+      .filter((u) => `${u.userName}#${u.userTag}`.toLowerCase().includes(text))
+      .slice(0, 5)
+      .map((u) => ({
+        type: 'user' as const,
+        id: u.userId,
+        display: u.userName,
+        tag: `${u.userTag}`,
+        startIndex: mention.startIndex,
+        searchText: mention.searchText,
+      }));
+
+    const roleMatches = roles
       .filter(
-        (user) =>
-          user.userName.toLowerCase().includes(searchText.toLowerCase()) ||
-          user.userTag.toLowerCase().includes(searchText.toLowerCase()),
+        (r) =>
+          r.name.toLowerCase().includes(text) ||
+          r.tag.toLowerCase().includes(text),
       )
-      .slice(0, 5);
+      .slice(0, 5)
+      .map((r) => ({
+        type: 'role' as const,
+        id: r.id,
+        display: r.name,
+        tag: r.tag,
+        startIndex: mention.startIndex,
+        searchText: mention.searchText,
+      }));
+
+    return [...userMatches, ...roleMatches];
   };
 
   const handleSendMessage = () => {
     if (newMessage.trim() && currentServerId && currentChannelId) {
-      console.log(formatUserTagMessage(newMessage.trim()));
+      console.log(formatTagMessage(newMessage.trim()));
       sendMessage({
         Token: accessToken,
         ChannelId: currentChannelId,
-        Text: formatUserTagMessage(newMessage.trim()),
+        Text: formatTagMessage(newMessage.trim()),
         NestedChannel: false,
       });
       setNewMessage('');
@@ -118,18 +142,16 @@ export const ChatSection = ({
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    const cursorPosition = e.target.selectionStart || 0;
-
-    setNewMessage(value);
-
-    const mention = findMentionAtCursor(value, cursorPosition);
+    const val = e.target.value;
+    const pos = e.target.selectionStart || 0;
+    setNewMessage(val);
+    const mention = findMentionAtCursor(val, pos);
 
     if (mention) {
-      const filteredUsers = filterUsers(mention.searchText);
-      setSuggestions(filteredUsers);
+      const list = filterSuggestions(mention);
+      setSuggestions(list);
       setCurrentMention(mention);
-      setShowSuggestions(filteredUsers.length > 0);
+      setShowSuggestions(list.length > 0);
       setSelectedSuggestionIndex(0);
     } else {
       setShowSuggestions(false);
@@ -137,29 +159,23 @@ export const ChatSection = ({
     }
   };
 
-  const insertMention = (user: UserOnServer) => {
+  const insertMention = (item: MentionSuggestion) => {
     if (!currentMention || !textareaRef.current) return;
 
-    const beforeMention = newMessage.slice(0, currentMention.startIndex);
-    const afterMention = newMessage.slice(
-      textareaRef.current.selectionStart || 0,
-    );
-    const mentionText = `#${user.userTag} `;
+    console.log('insertMention', item);
 
-    const newText = beforeMention + mentionText + afterMention;
-    setNewMessage(newText);
+    const before = newMessage.slice(0, currentMention.startIndex);
+    const after = newMessage.slice(textareaRef.current.selectionStart || 0);
+    const mentionText =
+      item.type === 'user' ? `@${item.tag} ` : `@${item.tag} `;
+    const updated = before + mentionText + after;
+    setNewMessage(updated);
     setShowSuggestions(false);
     setCurrentMention(null);
-
     setTimeout(() => {
-      if (textareaRef.current) {
-        const newCursorPosition = beforeMention.length + mentionText.length;
-        textareaRef.current.setSelectionRange(
-          newCursorPosition,
-          newCursorPosition,
-        );
-        textareaRef.current.focus();
-      }
+      const pos = before.length + mentionText.length;
+      textareaRef.current!.setSelectionRange(pos, pos);
+      textareaRef.current!.focus();
     }, 0);
   };
 
@@ -380,7 +396,6 @@ export const ChatSection = ({
       )}
 
       <Box pos="relative">
-        {/* Выпадающий список с предложениями */}
         {showSuggestions && suggestions.length > 0 && (
           <Paper
             ref={suggestionsRef}
@@ -396,9 +411,9 @@ export const ChatSection = ({
             style={{ overflow: 'auto', zIndex: 1000 }}
           >
             <Stack gap="xs">
-              {suggestions.map((user, index) => (
+              {suggestions.map((item, index) => (
                 <Group
-                  key={user.userId}
+                  key={item.id}
                   p="xs"
                   style={{
                     cursor: 'pointer',
@@ -408,18 +423,18 @@ export const ChatSection = ({
                         ? 'var(--mantine-color-blue-light)'
                         : 'transparent',
                   }}
-                  onClick={() => insertMention(user)}
+                  onClick={() => insertMention(item)}
                   onMouseEnter={() => setSelectedSuggestionIndex(index)}
                 >
                   <Avatar size="sm" color="blue">
-                    {user.userName.charAt(0).toUpperCase()}
+                    {item.display.charAt(0).toUpperCase()}
                   </Avatar>
                   <Box>
                     <Text size="sm" fw={500}>
-                      {user.userName}
+                      {item.display}
                     </Text>
                     <Text size="xs" c="dimmed">
-                      #{user.userTag} • {user.roleName}
+                      @{item.tag} • {item.type}
                     </Text>
                   </Box>
                 </Group>

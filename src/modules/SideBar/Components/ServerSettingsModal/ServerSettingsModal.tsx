@@ -15,6 +15,8 @@ import { useEffect, useState } from 'react';
 import { ServerSettingsModalProps } from './ServerSettingsModal.types';
 
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { LoadingState } from '~/shared';
+import { getRoles } from '~/store/RolesStore';
 import {
   changeRole,
   changeServerName,
@@ -30,6 +32,9 @@ export const ServerSettingsModal = ({
   const dispatch = useAppDispatch();
   const { serverData, currentServerId, error } = useAppSelector(
     (state) => state.testServerStore,
+  );
+  const { rolesList, rolesLoading } = useAppSelector(
+    (state) => state.rolesStore,
   );
   const { accessToken, user } = useAppSelector((state) => state.userStore);
   const [activeSetting, setActiveSetting] = useState<
@@ -112,6 +117,12 @@ export const ServerSettingsModal = ({
   }, [canDeleteUsers, currentServerId]);
 
   useEffect(() => {
+    if (rolesLoading === LoadingState.IDLE && currentServerId) {
+      dispatch(getRoles({ accessToken, serverId: currentServerId }));
+    }
+  }, [rolesLoading, currentServerId]);
+
+  useEffect(() => {
     if (error) {
       setLoading(false);
     }
@@ -171,9 +182,9 @@ export const ServerSettingsModal = ({
               <Select
                 label="Выбор роли"
                 placeholder="Выберите роль"
-                data={serverData.roles.map((role) => ({
-                  value: role.id,
-                  label: role.name,
+                data={rolesList.map((role) => ({
+                  value: role.role.id,
+                  label: role.role.name,
                 }))}
                 value={assignRoleId}
                 onChange={setAssignRoleId}

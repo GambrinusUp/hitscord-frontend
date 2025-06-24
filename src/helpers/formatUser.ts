@@ -6,4 +6,9 @@ export const formatUser = (rawMessage: any): UserOnServer => ({
   userName: rawMessage.UserName,
   userTag: rawMessage.UserId,
   roleName: rawMessage.RoleName,
+  icon: rawMessage.Icon,
+  mail: rawMessage.Mail,
+  notifiable: rawMessage.Notifiable,
+  friendshipApplication: rawMessage.FriendshipApplication,
+  nonFriendMessage: rawMessage.NonFriendMessage,
 });

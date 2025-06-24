@@ -42,6 +42,7 @@ export const createChannel = async (
   serverId: string,
   name: string,
   channelType: ChannelType,
+  maxCount?: number,
 ) => {
   try {
     const response = await fetch(`${API_URL}/api/channel/create`, {
@@ -51,9 +52,10 @@ export const createChannel = async (
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        serverId: serverId,
-        name: name,
-        channelType: channelType,
+        serverId,
+        name,
+        channelType,
+        maxCount,
       }),
     });
 
@@ -275,6 +277,34 @@ export const getChannelSettings = async (
     return data;
   } catch (error) {
     console.error('Error get channel settings:', error);
+    throw error;
+  }
+};
+
+export const changeVoiceChannelMaxCount = async (
+  accessToken: string,
+  voiceChannelId: string,
+  maxCount: number,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/channel/settings/maxcount`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        voiceChannelId,
+        maxCount,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change voice channel max count:', error);
     throw error;
   }
 };

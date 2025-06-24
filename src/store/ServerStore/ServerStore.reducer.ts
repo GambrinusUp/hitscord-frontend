@@ -6,6 +6,7 @@ import {
   changeRole,
   changeServerName,
   changeTextChannelSettings,
+  changeVoiceChannelMaxCount,
   changeVoiceChannelSettings,
   createChannel,
   createMessage,
@@ -573,6 +574,23 @@ const testServerSlice = createSlice({
         },
       )
 
+      .addCase(changeVoiceChannelMaxCount.fulfilled, (state, { meta }) => {
+        const { voiceChannelId, maxCount } = meta.arg;
+
+        const channelIndex = state.serverData.channels.voiceChannels.findIndex(
+          (channel) => channel.channelId === voiceChannelId,
+        );
+
+        if (channelIndex !== -1) {
+          state.serverData.channels.voiceChannels[channelIndex] = {
+            ...state.serverData.channels.voiceChannels[channelIndex],
+            maxCount: maxCount,
+          };
+        }
+
+        state.error = '';
+      })
+
       .addMatcher(
         isAnyOf(getChannelSettings.fulfilled),
         (state, action: PayloadAction<GetChannelSettings>) => {
@@ -587,6 +605,7 @@ const testServerSlice = createSlice({
           changeVoiceChannelSettings.pending,
           getBannedUsers.pending,
           unbanUser.pending,
+          changeVoiceChannelMaxCount.pending,
         ),
         (state) => {
           state.error = '';
@@ -608,6 +627,7 @@ const testServerSlice = createSlice({
           changeVoiceChannelSettings.rejected,
           getBannedUsers.rejected,
           unbanUser.rejected,
+          changeVoiceChannelMaxCount.rejected,
         ),
         (state, action) => {
           state.error = action.payload as string;
