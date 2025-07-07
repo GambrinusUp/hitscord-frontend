@@ -4,21 +4,27 @@ import { MicOff, Unplug, User, Video, Volume2 } from 'lucide-react';
 import { UserItemProps } from './UserItem.types';
 
 import { useAppSelector } from '~/hooks';
+import { MuteStatus } from '~/store/ServerStore';
 
 export const UserItem = ({
   socketId,
   isSpeaking,
   userName,
   producerIds,
-  isAdmin,
   userVolume,
   handleVolumeChange,
   handleOpenStream,
   handleKickUser,
   channelId,
   userId,
-  handleMuteUser,
+  //handleMuteUser,
 }: UserItemProps) => {
+  const roleType = useAppSelector(
+    (state) => state.testServerStore.serverData.userRoleType,
+  );
+  const canWorkChannels = useAppSelector(
+    (state) => state.testServerStore.serverData.permissions.canWorkChannels,
+  );
   const { voiceChannels } = useAppSelector(
     (state) => state.testServerStore.serverData.channels,
   );
@@ -26,8 +32,15 @@ export const UserItem = ({
     (channel) => channel.channelId === channelId,
   )?.users;
   const { user } = useAppSelector((state) => state.userStore);
+  const userRoleType = useAppSelector((state) =>
+    state.testServerStore.serverData.users.find(
+      (user) => user.userId === userId,
+    ),
+  )?.roleType;
 
-  const isMuted = users?.find((user) => user.userId === userId)?.isMuted;
+  const isMuted =
+    users?.find((user) => user.userId === userId)?.muteStatus ===
+      MuteStatus.Muted || MuteStatus.SelfMuted;
 
   return (
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>
@@ -88,22 +101,26 @@ export const UserItem = ({
             Открыть стрим
           </Menu.Item>
         )}
-        {isAdmin && userId !== user.id && (
-          <Menu.Item
-            leftSection={<Unplug />}
-            onClick={() => handleKickUser(socketId)}
-          >
-            Отключить пользователя
-          </Menu.Item>
-        )}
-        {isAdmin && userId !== user.id && (
-          <Menu.Item
-            leftSection={<MicOff />}
-            onClick={() => handleMuteUser(userId!, isMuted)}
-          >
-            Оключить звук пользователя
-          </Menu.Item>
-        )}
+        {canWorkChannels &&
+          Number(roleType) <= Number(userRoleType) &&
+          userId !== user.id && (
+            <Menu.Item
+              leftSection={<Unplug />}
+              onClick={() => handleKickUser(socketId)}
+            >
+              Отключить пользователя
+            </Menu.Item>
+          )}
+        {/*canWorkChannels &&
+          Number(roleType) <= Number(userRoleType) &&
+          userId !== user.id && (
+            <Menu.Item
+              leftSection={<MicOff />}
+              onClick={() => handleMuteUser(userId!, isMuted)}
+            >
+              Оключить звук пользователя
+            </Menu.Item>
+          )*/}
       </Menu.Dropdown>
     </Menu>
   );

@@ -3,6 +3,6 @@ export interface ChannelItemProps {
   channelName: string;
   currentCount: number;
   maxCount: number;
-  isAdmin: boolean;
+  canWorkChannels: boolean;
   handleConnect: () => void;
 }

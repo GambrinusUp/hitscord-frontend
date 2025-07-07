@@ -22,7 +22,13 @@ export const UserMiniProfile = ({
   userId,
 }: Omit<
   UserOnServer,
-  'icon' | 'mail' | 'notifiable' | 'friendshipApplication' | 'nonFriendMessage'
+  | 'icon'
+  | 'mail'
+  | 'notifiable'
+  | 'friendshipApplication'
+  | 'nonFriendMessage'
+  | 'roleId'
+  | 'serverId'
 >) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
@@ -74,6 +80,7 @@ export const UserMiniProfile = ({
       <Badge
         color={badgeColor}
         radius="sm"
+        variant="light"
         style={{
           maxWidth: 100,
           overflow: 'hidden',

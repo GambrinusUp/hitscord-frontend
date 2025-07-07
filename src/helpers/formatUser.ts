@@ -2,10 +2,13 @@ import { UserOnServer } from '~/store/ServerStore/ServerStore.types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatUser = (rawMessage: any): UserOnServer => ({
+  serverId: rawMessage.ServerId,
   userId: rawMessage.UserId,
   userName: rawMessage.UserName,
   userTag: rawMessage.UserId,
+  roleId: rawMessage.RoleId,
   roleName: rawMessage.RoleName,
+  roleType: rawMessage.RoleType,
   icon: rawMessage.Icon,
   mail: rawMessage.Mail,
   notifiable: rawMessage.Notifiable,

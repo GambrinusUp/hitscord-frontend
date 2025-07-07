@@ -11,9 +11,16 @@ export const UserItem = ({
   userName,
   userTag,
   roleName,
+  roleType,
 }: Omit<
   UserOnServer,
-  'icon' | 'mail' | 'notifiable' | 'friendshipApplication' | 'nonFriendMessage'
+  | 'icon'
+  | 'mail'
+  | 'notifiable'
+  | 'friendshipApplication'
+  | 'nonFriendMessage'
+  | 'roleId'
+  | 'serverId'
 >) => {
   const [opened, setOpened] = useState(false);
   const { roles } = useAppSelector((state) => state.testServerStore.serverData);
@@ -75,6 +82,7 @@ export const UserItem = ({
           userName={userName}
           userTag={userTag}
           roleName={roleName}
+          roleType={roleType}
         />
       </Popover.Dropdown>
     </Popover>

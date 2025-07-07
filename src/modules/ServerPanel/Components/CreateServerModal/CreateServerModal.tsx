@@ -58,7 +58,7 @@ export const CreateServerModal = ({
     const result = await dispatch(
       subscribeToServer({
         accessToken,
-        serverId: values.serverId,
+        serverId: values.serverId.trim(),
         userName: user.name,
       }),
     );

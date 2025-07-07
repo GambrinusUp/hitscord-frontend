@@ -1,6 +1,6 @@
 import { API_URL } from '~/constants';
 import {
-  BannedUser,
+  BannedUserResponse,
   GetServersResponse,
   ServerData,
 } from '~/store/ServerStore';
@@ -249,6 +249,7 @@ export const deleteUserFromServer = async (
   accessToken: string,
   serverId: string,
   userId: string,
+  banReason?: string,
 ) => {
   try {
     const response = await fetch(`${API_URL}/api/server/deleteuser`, {
@@ -260,6 +261,7 @@ export const deleteUserFromServer = async (
       body: JSON.stringify({
         serverId,
         userId,
+        banReason,
       }),
     });
 
@@ -304,10 +306,12 @@ export const creatorUnsubscribeFromServer = async (
 export const getBannedUsers = async (
   accessToken: string,
   serverId: string,
-): Promise<BannedUser[]> => {
+  page: number,
+  size: number,
+): Promise<BannedUserResponse> => {
   try {
     const response = await fetch(
-      `${API_URL}/api/server/banned/list?serverId=${serverId}`,
+      `${API_URL}/api/server/banned/list?serverId=${serverId}&Page=${page}&Size=${size}`,
       {
         method: 'GET',
         headers: {
@@ -323,7 +327,7 @@ export const getBannedUsers = async (
       throw new Error(data.message || `Error: ${response.status}`);
     }
 
-    return data.bannedList;
+    return data;
   } catch (error) {
     console.error('Error get banned users:', error);
     throw error;

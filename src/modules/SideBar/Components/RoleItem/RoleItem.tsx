@@ -14,13 +14,16 @@ import { RoleItemProps } from './RoleItem.types';
 
 import { SETTINGS_NAMES } from '~/constants';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
-import { deleteRole } from '~/store/RolesStore';
+import { deleteRole, RoleType } from '~/store/RolesStore';
 
 export const RoleItem = ({ role, editRole, editSettings }: RoleItemProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const { currentServerId } = useAppSelector((state) => state.testServerStore);
+  const { currentServerId, serverData } = useAppSelector(
+    (state) => state.testServerStore,
+  );
+  const canChangeRole = serverData.permissions.canChangeRole;
 
   const handleDelete = async () => {
     if (accessToken && currentServerId) {
@@ -55,6 +58,7 @@ export const RoleItem = ({ role, editRole, editSettings }: RoleItemProps) => {
               radius="md"
               leftSection={<UserRoundCog />}
               onClick={() => editSettings(role)}
+              disabled={!(role.role.type === RoleType.Custom) || !canChangeRole}
             >
               Настройки
             </Button>
@@ -63,6 +67,7 @@ export const RoleItem = ({ role, editRole, editSettings }: RoleItemProps) => {
               radius="md"
               leftSection={<Pencil />}
               onClick={() => editRole(role)}
+              disabled={!canChangeRole}
             >
               Изменить
             </Button>
@@ -71,6 +76,7 @@ export const RoleItem = ({ role, editRole, editSettings }: RoleItemProps) => {
               radius="md"
               leftSection={<Trash2 />}
               onClick={handleDelete}
+              disabled={!(role.role.type === RoleType.Custom) || !canChangeRole}
             >
               Удалить
             </Button>

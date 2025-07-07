@@ -6,7 +6,7 @@ import { CollapseButtonProps } from './CollapseButton.types';
 export const CollapseButton = ({
   opened,
   toggle,
-  isAdmin,
+  canWorkChannels,
   handleAddChannel,
 }: CollapseButtonProps) => {
   return (
@@ -26,7 +26,7 @@ export const CollapseButton = ({
       >
         Голосовые каналы
       </Button>
-      {isAdmin && (
+      {canWorkChannels && (
         <ActionIcon variant="transparent" onClick={handleAddChannel}>
           <Plus color="#ffffff" />
         </ActionIcon>

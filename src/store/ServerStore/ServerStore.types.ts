@@ -1,4 +1,5 @@
 import { LoadingState } from '~/shared';
+import { RoleType } from '~/store/RolesStore';
 
 export interface ServerState {
   serversList: ServerItem[];
@@ -11,6 +12,8 @@ export interface ServerState {
   messagesStatus: LoadingState;
   roleSettings: GetChannelSettings;
   bannedUsers: BannedUser[];
+  pageBannedUsers: number;
+  totalPagesBannedUsers: number;
   isLoading: boolean;
   messageIsLoading: LoadingState;
   numberOfStarterMessage: number;
@@ -49,14 +52,18 @@ export interface Role {
   name: string;
   tag: string;
   color: string;
+  type: RoleType;
 }
 
 export interface UserOnServer {
+  serverId: string;
   userId: string;
   userName: string;
   userTag: string;
   icon: string | null;
+  roleId: string;
   roleName: string;
+  roleType: RoleType;
   mail: string;
   notifiable: boolean;
   friendshipApplication: boolean;
@@ -71,9 +78,15 @@ export interface TextChannel {
   isNotifiable: true;
 }
 
+export enum MuteStatus {
+  NotMuted,
+  SelfMuted,
+  Muted,
+}
+
 export interface UserInVoiceChannel {
   userId: string;
-  isMuted: boolean;
+  muteStatus: MuteStatus;
 }
 
 export interface VoiceChannel {
@@ -99,6 +112,7 @@ export interface ServerData {
   roles: Role[];
   userRoleId: string;
   userRole: string;
+  userRoleType: RoleType;
   isCreator: boolean;
   permissions: {
     canChangeRole: boolean;
@@ -167,5 +181,12 @@ export interface BannedUser {
   userTag: string;
   mail: string;
   banReason?: string;
-  banTime: Date;
+  banTime: string;
+}
+
+export interface BannedUserResponse {
+  bannedList: BannedUser[];
+  page: number;
+  size: number;
+  total: number;
 }

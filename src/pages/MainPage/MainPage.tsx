@@ -29,8 +29,12 @@ export const MainPage = () => {
   const { accessToken, isLoggedIn } = useAppSelector(
     (state) => state.userStore,
   );
-  const { currentServerId, currentChannelId, numberOfStarterMessage } =
-    useAppSelector((state) => state.testServerStore);
+  const {
+    currentServerId,
+    currentChannelId,
+    numberOfStarterMessage,
+    serverData,
+  } = useAppSelector((state) => state.testServerStore);
   const [sidebarOpened, { open, close }] = useDisclosure(false);
   const [
     detailsPanelOpened,
@@ -54,6 +58,7 @@ export const MainPage = () => {
     accessToken,
     dispatch,
     serverId: currentServerId,
+    userId: serverData.userRoleId,
   });
 
   useEffect(() => {

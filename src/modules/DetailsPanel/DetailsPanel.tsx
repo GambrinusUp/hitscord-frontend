@@ -26,6 +26,7 @@ export const DetailsPanel = () => {
                 userName={user.userName}
                 userTag={user.userTag}
                 roleName={user.roleName}
+                roleType={user.roleType}
               />
             ))}
           </Stack>

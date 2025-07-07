@@ -4,7 +4,7 @@ import { WebSocketHandlerProps } from './MainPage.types';
 
 import { formatMessage, formatUser } from '~/helpers';
 import { formatChatMessage } from '~/helpers/formatMessage';
-import { useAppSelector, useDisconnect } from '~/hooks';
+import { useAppSelector, useDisconnect, useNotification } from '~/hooks';
 import { setOpenHome } from '~/store/AppStore';
 import {
   addChatMessage,
@@ -38,6 +38,7 @@ export const useWebSocketHandler = ({
   showMessage,
 }: WebSocketHandlerProps) => {
   const wsRef = useRef<WebSocket | null>(null);
+  const { showError } = useNotification();
 
   useEffect(() => {
     if (accessToken) {
@@ -98,6 +99,11 @@ export const useWebSocketHandler = ({
           if (showMessage) {
             showMessage(data.Payload.Text);
           }
+        }
+
+        if (data.MessageType === 'ErrorWithMessage') {
+          const message = `${data.Payload.Object}: ${data.Payload.Message}`;
+          showError(message);
         }
       };
 
@@ -233,15 +239,16 @@ export const useApiWebSocketHandler = ({
   accessToken,
   dispatch,
   serverId,
+  userId,
 }: WebSocketHandlerProps) => {
   const disconnect = useDisconnect();
   const wsRef = useRef<WebSocket | null>(null);
-  const { currentServerId, currentVoiceChannelId, serverData } = useAppSelector(
+  const { currentServerId, currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
 
   useEffect(() => {
-    if (accessToken) {
+    if (accessToken && userId) {
       const ws = new WebSocket(
         `wss://hitscord-backend.online/api/ws?accessToken=${accessToken}`,
       );
@@ -373,7 +380,7 @@ export const useApiWebSocketHandler = ({
         if (data.MessageType === 'Text channel settings edited') {
           const { ServerId, RoleId } = data.Payload;
 
-          if (serverData.userRoleId && serverData.userRoleId === RoleId) {
+          if (userId === RoleId) {
             if (serverId && serverId === ServerId) {
               dispatch(getServerData({ accessToken, serverId }));
             }
@@ -383,7 +390,47 @@ export const useApiWebSocketHandler = ({
         if (data.MessageType === 'Voice channel settings edited') {
           const { ServerId, RoleId } = data.Payload;
 
-          if (serverData.userRoleId && serverData.userRoleId === RoleId) {
+          if (userId === RoleId) {
+            if (serverId && serverId === ServerId) {
+              dispatch(getServerData({ accessToken, serverId }));
+            }
+          }
+        }
+
+        if (data.MessageType === 'New role') {
+          const { ServerId } = data.Payload;
+
+          if (serverId && serverId === ServerId) {
+            dispatch(getServerData({ accessToken, serverId }));
+          }
+        }
+
+        if (data.MessageType === 'Updated role settings') {
+          const { ServerId, Id } = data.Payload.Role;
+
+          console.log(`Id:${Id}, serverData: ${userId}`);
+
+          if (userId === Id) {
+            if (serverId && serverId === ServerId) {
+              dispatch(getServerData({ accessToken, serverId }));
+            }
+          }
+        }
+
+        if (data.MessageType === 'Voice channel settings edited') {
+          const { ServerId, RoleId } = data.Payload;
+
+          if (userId === RoleId) {
+            if (serverId && serverId === ServerId) {
+              dispatch(getServerData({ accessToken, serverId }));
+            }
+          }
+        }
+
+        if (data.MessageType === 'Text channel settings edited') {
+          const { ServerId, RoleId } = data.Payload;
+
+          if (userId === RoleId) {
             if (serverId && serverId === ServerId) {
               dispatch(getServerData({ accessToken, serverId }));
             }
@@ -402,5 +449,5 @@ export const useApiWebSocketHandler = ({
         ws.close();
       };
     }
-  }, [accessToken, serverId, dispatch]);
+  }, [accessToken, serverId, userId, dispatch]);
 };

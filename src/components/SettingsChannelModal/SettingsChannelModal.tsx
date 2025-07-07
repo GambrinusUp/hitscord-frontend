@@ -28,6 +28,7 @@ import {
 } from './SettingsChannelModal.utils';
 
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { RoleType } from '~/store/RolesStore';
 import {
   changeChannelName,
   changeTextChannelSettings,
@@ -247,8 +248,13 @@ export const SettingsChannelModal = ({
                 value={newChannelName}
                 onChange={(e) => setNewChannelName(e.target.value)}
                 placeholder={channelName}
+                disabled={loading}
               />
-              <Button onClick={handleChangeChannelName} loading={loading}>
+              <Button
+                onClick={handleChangeChannelName}
+                disabled={loading}
+                loading={loading}
+              >
                 Изменить название
               </Button>
             </Stack>
@@ -361,6 +367,7 @@ export const SettingsChannelModal = ({
                   ]}
                   value={add}
                   onChange={setAdd}
+                  disabled={loading}
                 />
                 <Select
                   label="Возможность"
@@ -368,19 +375,27 @@ export const SettingsChannelModal = ({
                   data={getOptionsForChannelType(channelType)}
                   value={type}
                   onChange={setType}
+                  disabled={loading}
                 />
                 <Select
                   label="Выбор роли"
                   placeholder="Выберите роль"
-                  data={serverData.roles.map((role) => ({
-                    value: role.id,
-                    label: role.name,
-                  }))}
+                  data={serverData.roles
+                    .filter((role) => role.type !== RoleType.Creator)
+                    .map((role) => ({
+                      value: role.id,
+                      label: role.name,
+                    }))}
                   value={assignRoleId}
                   onChange={setAssignRoleId}
+                  disabled={loading}
                 />
               </Group>
-              <Button onClick={handleChangeChannelSettings} loading={loading}>
+              <Button
+                onClick={handleChangeChannelSettings}
+                disabled={loading}
+                loading={loading}
+              >
                 Изменить настройки
               </Button>
             </Stack>

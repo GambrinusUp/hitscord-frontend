@@ -39,7 +39,7 @@ export const ChangeRoleSettings = ({
   const handleSave = async () => {
     if (accessToken && currentServerId && role) {
       const values = form.getValues();
-      const updates = [];
+      //const updates = [];
       let isSettingsChange = false;
 
       setLoading(true);
@@ -61,7 +61,22 @@ export const ChangeRoleSettings = ({
         const oldValue = role.settings[key];
 
         if (newValue !== oldValue) {
-          updates.push(
+          const result = await dispatch(
+            updateRoleSettings({
+              accessToken,
+              updatedRoleSettings: {
+                serverId: currentServerId,
+                roleId: role.role.id,
+                setting: Number(setting),
+                add: newValue,
+              },
+            }),
+          );
+
+          if (result.meta.requestStatus === 'fulfilled') {
+            isSettingsChange = true;
+          }
+          /*updates.push(
             dispatch(
               updateRoleSettings({
                 accessToken,
@@ -73,17 +88,17 @@ export const ChangeRoleSettings = ({
                 },
               }),
             ),
-          );
+          );*/
         }
       }
 
-      const results = await Promise.allSettled(updates);
+      //const results = await Promise.allSettled(updates);
 
-      isSettingsChange = results.some(
+      /*isSettingsChange = results.some(
         (res) =>
           res.status === 'fulfilled' &&
           res.value?.meta?.requestStatus === 'fulfilled',
-      );
+      );*/
 
       if (isSettingsChange) {
         showSuccess('Настройки успешно изменены');

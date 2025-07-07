@@ -1,4 +1,13 @@
-import { Box, Divider, ScrollArea, Stack, Text } from '@mantine/core';
+import {
+  Avatar,
+  Box,
+  Card,
+  Divider,
+  Group,
+  ScrollArea,
+  Stack,
+  Text,
+} from '@mantine/core';
 
 import { useAppSelector } from '~/hooks';
 
@@ -16,7 +25,18 @@ export const ChatUsers = () => {
         <Text c="white">Пользователи</Text>
         <Divider color="gray" />
         <ScrollArea.Autosize mah="100%" maw="100%">
-          <Stack gap="xs">{chat.users.map((user) => user.mail)}</Stack>
+          <Stack gap="xs">
+            {chat.users.map((user) => (
+              <Card key={user.userId} radius="md">
+                <Group>
+                  <Avatar size="md" color="blue">
+                    {user.userName ? user.userName[0] : '?'}
+                  </Avatar>
+                  <Text>{user.userName}</Text>
+                </Group>
+              </Card>
+            ))}
+          </Stack>
         </ScrollArea.Autosize>
       </Stack>
     </Box>

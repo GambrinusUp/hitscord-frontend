@@ -14,7 +14,7 @@ export const ChannelItem = ({
   channelName,
   currentCount,
   maxCount,
-  isAdmin,
+  canWorkChannels,
   handleConnect,
 }: ChannelItemProps) => {
   const [opened, { open, close }] = useDisclosure(false);
@@ -58,7 +58,7 @@ export const ChannelItem = ({
         >
           {channelName}
         </Button>
-        {isAdmin && isHovered === channelId && (
+        {canWorkChannels && isHovered === channelId && (
           <Button
             variant="subtle"
             p={0}

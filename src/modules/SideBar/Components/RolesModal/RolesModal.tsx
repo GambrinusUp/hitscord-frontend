@@ -10,7 +10,6 @@ import { ChangeRole } from '~/modules/SideBar/components/ChangeRole';
 import { ChangeRoleSettings } from '~/modules/SideBar/components/ChangeRoleSettings';
 import { CreateRole } from '~/modules/SideBar/components/CreateRole';
 import { RoleItem } from '~/modules/SideBar/components/RoleItem';
-import { LoadingState } from '~/shared';
 import { getRoles, setEditedRole } from '~/store/RolesStore';
 
 export const RolesModal = ({ opened, onClose }: RolesModalProps) => {
@@ -28,16 +27,17 @@ export const RolesModal = ({ opened, onClose }: RolesModalProps) => {
     { open: openChangeRoleModal, close: closeChangeRoleModal },
   ] = useDisclosure(false);
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const { currentServerId } = useAppSelector((state) => state.testServerStore);
-  const { rolesList, rolesLoading } = useAppSelector(
-    (state) => state.rolesStore,
+  const { currentServerId, serverData } = useAppSelector(
+    (state) => state.testServerStore,
   );
+  const { rolesList } = useAppSelector((state) => state.rolesStore);
+  const canCreateRoles = serverData.permissions.canCreateRoles;
 
   useEffect(() => {
-    if (accessToken && currentServerId && rolesLoading === LoadingState.IDLE) {
+    if (accessToken && currentServerId) {
       dispatch(getRoles({ accessToken, serverId: currentServerId }));
     }
-  }, [dispatch, rolesLoading, accessToken, currentServerId]);
+  }, [accessToken, currentServerId]);
 
   return (
     <>
@@ -45,14 +45,17 @@ export const RolesModal = ({ opened, onClose }: RolesModalProps) => {
         <Stack>
           <Group justify="space-between">
             <Title order={3}>Настройки ролей</Title>
-            <Button
-              leftSection={<Plus />}
-              variant="light"
-              radius="md"
-              onClick={() => openCreateRoleModal()}
-            >
-              Создать роль
-            </Button>
+            {canCreateRoles && (
+              <Button
+                leftSection={<Plus />}
+                variant="light"
+                radius="md"
+                onClick={() => openCreateRoleModal()}
+                disabled={!serverData.permissions.canCreateRoles}
+              >
+                Создать роль
+              </Button>
+            )}
           </Group>
           <ScrollArea.Autosize mah="800px" maw="100%">
             <Stack>

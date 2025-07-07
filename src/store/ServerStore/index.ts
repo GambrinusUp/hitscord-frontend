@@ -9,8 +9,9 @@ export type {
   ChannelSettings,
   GetChannelSettings,
   BannedUser,
+  BannedUserResponse,
 } from './ServerStore.types';
-export { ChannelType } from './ServerStore.types';
+export { ChannelType, MuteStatus } from './ServerStore.types';
 
 export {
   ServerReducer,

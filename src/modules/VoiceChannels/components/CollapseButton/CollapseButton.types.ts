@@ -1,6 +1,6 @@
 export interface CollapseButtonProps {
   opened: boolean;
   toggle: () => void;
-  isAdmin: boolean;
+  canWorkChannels: boolean;
   handleAddChannel: () => void;
 }

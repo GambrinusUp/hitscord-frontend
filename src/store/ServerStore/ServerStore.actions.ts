@@ -10,7 +10,7 @@ import {
   ChannelSettings,
   GetChannelSettings,
   GetMessage,
-  BannedUser,
+  BannedUserResponse,
 } from './ServerStore.types';
 
 export const getUserServers = createAsyncThunk<
@@ -359,13 +359,18 @@ export const changeNameOnServer = createAsyncThunk<
 
 export const deleteUserFromServer = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; userId: string },
+  { accessToken: string; serverId: string; userId: string; banReason?: string },
   { rejectValue: string }
 >(
   'testServerSlice/deleteUserFromServer',
-  async ({ accessToken, serverId, userId }, { rejectWithValue }) => {
+  async ({ accessToken, serverId, userId, banReason }, { rejectWithValue }) => {
     try {
-      await ServerAPI.deleteUserFromServer(accessToken, serverId, userId);
+      await ServerAPI.deleteUserFromServer(
+        accessToken,
+        serverId,
+        userId,
+        banReason,
+      );
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',
@@ -505,14 +510,19 @@ export const changeVoiceChannelSettings = createAsyncThunk<
 );
 
 export const getBannedUsers = createAsyncThunk<
-  BannedUser[],
-  { accessToken: string; serverId: string },
+  BannedUserResponse,
+  { accessToken: string; serverId: string; page: number; size: number },
   { rejectValue: string }
 >(
   'testServerSlice/getBannedUsers',
-  async ({ accessToken, serverId }, { rejectWithValue }) => {
+  async ({ accessToken, serverId, page, size }, { rejectWithValue }) => {
     try {
-      const response = await ServerAPI.getBannedUsers(accessToken, serverId);
+      const response = await ServerAPI.getBannedUsers(
+        accessToken,
+        serverId,
+        page,
+        size,
+      );
 
       return response;
     } catch (e) {

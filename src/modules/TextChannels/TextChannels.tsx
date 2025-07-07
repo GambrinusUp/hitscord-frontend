@@ -27,8 +27,7 @@ export const TextChannels = ({ onClose }: TextChannelsProps) => {
   const { serverData, currentServerId, currentChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
-  const isAdmin =
-    serverData.isCreator || serverData.permissions.canWorkChannels;
+  const canWorkChannels = serverData.permissions.canWorkChannels;
 
   const handleOpenChannel = (channelId: string) => {
     dispatch(setCurrentChannelId(channelId));
@@ -68,7 +67,7 @@ export const TextChannels = ({ onClose }: TextChannelsProps) => {
           >
             Текстовые каналы
           </Button>
-          {isAdmin && (
+          {canWorkChannels && (
             <ActionIcon
               variant="transparent"
               onClick={() => {
@@ -89,7 +88,7 @@ export const TextChannels = ({ onClose }: TextChannelsProps) => {
                   channelId={channelId}
                   currentChannelId={currentChannelId}
                   channelName={channelName}
-                  isAdmin={isAdmin}
+                  canWorkChannels={canWorkChannels}
                   handleOpenChannel={() => handleOpenChannel(channelId)}
                   handleEditChannel={() =>
                     handleEditChannel(channelName, channelId)

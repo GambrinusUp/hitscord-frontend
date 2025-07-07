@@ -2,7 +2,7 @@ export interface ChannelItemProps {
   channelId: string;
   currentChannelId: string | null;
   channelName: string;
-  isAdmin: boolean;
+  canWorkChannels: boolean;
   handleOpenChannel: () => void;
   handleEditChannel: () => void;
 }

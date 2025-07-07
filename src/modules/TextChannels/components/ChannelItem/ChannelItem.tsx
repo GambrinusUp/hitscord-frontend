@@ -14,7 +14,7 @@ export const ChannelItem = ({
   channelId,
   currentChannelId,
   channelName,
-  isAdmin,
+  canWorkChannels,
   handleOpenChannel,
 }: ChannelItemProps) => {
   const { hasNewMessage } = useAppSelector((state) => state.testServerStore);
@@ -59,7 +59,7 @@ export const ChannelItem = ({
         >
           {channelName}
         </Button>
-        {isAdmin && isHovered === channelId && (
+        {canWorkChannels && isHovered === channelId && (
           <Button
             variant="subtle"
             p={0}

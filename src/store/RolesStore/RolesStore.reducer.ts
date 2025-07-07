@@ -7,7 +7,13 @@ import {
   updateRole,
   updateRoleSettings,
 } from './RolesStore.actions';
-import { GetRoles, Role, RolesState, Setting } from './RolesStore.types';
+import {
+  CreateRoleResponse,
+  GetRoles,
+  Role,
+  RolesState,
+  Setting,
+} from './RolesStore.types';
 
 import { LoadingState } from '~/shared';
 
@@ -49,6 +55,28 @@ export const RolesSlice = createSlice({
         );
         state.error = '';
       })
+
+      .addCase(
+        createRole.fulfilled,
+        (state, action: PayloadAction<CreateRoleResponse>) => {
+          const newRole = {
+            role: action.payload,
+            settings: {
+              canChangeRole: false,
+              canWorkChannels: false,
+              canDeleteUsers: false,
+              canMuteOther: false,
+              canDeleteOthersMessages: false,
+              canIgnoreMaxCount: false,
+              canCreateRoles: false,
+              canCreateLessons: false,
+              canCheckAttendance: false,
+            },
+          } as Role;
+          state.rolesList.push(newRole);
+          state.error = '';
+        },
+      )
 
       .addCase(updateRoleSettings.fulfilled, (state, { meta }) => {
         const { updatedRoleSettings } = meta.arg;
@@ -182,9 +210,9 @@ export const RolesSlice = createSlice({
           state.error = '';
         },
       )
-      .addMatcher(isAnyOf(createRole.fulfilled), (state) => {
+      /*.addMatcher(isAnyOf(createRole.fulfilled), (state) => {
         state.error = '';
-      })
+      })*/
       .addMatcher(
         isAnyOf(
           createRole.rejected,

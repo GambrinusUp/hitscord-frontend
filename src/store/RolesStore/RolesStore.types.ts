@@ -6,6 +6,7 @@ export interface RoleInfo {
   name: string;
   tag: string;
   color: string;
+  type: RoleType;
 }
 
 export enum Setting {
@@ -48,11 +49,12 @@ export interface CreateRoleRequest {
 }
 
 export interface CreateRoleResponse {
-  roleId: string;
+  id: string;
   serverId: string;
   name: string;
   tag: string;
   color: string;
+  type: RoleType;
 }
 
 export interface UpdateRole {
@@ -74,4 +76,11 @@ export interface RolesState {
   rolesLoading: LoadingState;
   role: Role | null;
   error: string;
+}
+
+export enum RoleType {
+  Creator,
+  Admin,
+  Custom,
+  Uncertain,
 }

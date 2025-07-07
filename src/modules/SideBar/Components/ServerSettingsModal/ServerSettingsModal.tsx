@@ -1,28 +1,34 @@
 import {
+  Avatar,
+  Badge,
   Button,
+  Card,
   Group,
   Modal,
   NavLink,
+  Pagination,
   ScrollArea,
   Select,
   Stack,
   Text,
   TextInput,
 } from '@mantine/core';
-import { Plus, UserMinus } from 'lucide-react';
+import { Calendar, Mail, Plus, UserCheck, UserMinus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { ServerSettingsModalProps } from './ServerSettingsModal.types';
 
+import { formatDateTime } from '~/helpers';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { LoadingState } from '~/shared';
-import { getRoles } from '~/store/RolesStore';
+import { getRoles, RoleType } from '~/store/RolesStore';
 import {
   changeRole,
   changeServerName,
   deleteUserFromServer,
   getBannedUsers,
   getServerData,
+  unbanUser,
 } from '~/store/ServerStore';
 
 export const ServerSettingsModal = ({
@@ -30,15 +36,20 @@ export const ServerSettingsModal = ({
   onClose,
 }: ServerSettingsModalProps) => {
   const dispatch = useAppDispatch();
-  const { serverData, currentServerId, error } = useAppSelector(
-    (state) => state.testServerStore,
-  );
+  const {
+    serverData,
+    currentServerId,
+    error,
+    bannedUsers,
+    pageBannedUsers,
+    totalPagesBannedUsers,
+  } = useAppSelector((state) => state.testServerStore);
   const { rolesList, rolesLoading } = useAppSelector(
     (state) => state.rolesStore,
   );
   const { accessToken, user } = useAppSelector((state) => state.userStore);
   const [activeSetting, setActiveSetting] = useState<
-    'name' | 'roles' | 'deleteUser'
+    'name' | 'roles' | 'deleteUser' | 'unbanUser'
   >('roles');
   const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
   const [assignRoleId, setAssignRoleId] = useState<string | null>('');
@@ -46,8 +57,10 @@ export const ServerSettingsModal = ({
   const [newServerName, setNewServerName] = useState(serverData.serverName);
   const { showSuccess } = useNotification();
   const [deletedUserId, setDeletedUserId] = useState<string | null>('');
+  const [banReason, setBanReason] = useState<string>('');
   const isCreator = serverData.isCreator;
   const canDeleteUsers = serverData.permissions.canDeleteUsers;
+  const canChangeRole = serverData.permissions.canChangeRole;
 
   const assignRole = async () => {
     if (!assignRoleUserId || !assignRoleId) return;
@@ -98,6 +111,7 @@ export const ServerSettingsModal = ({
           accessToken,
           serverId: currentServerId,
           userId: deletedUserId,
+          banReason: banReason.trim() !== '' ? banReason : undefined,
         }),
       );
 
@@ -105,16 +119,57 @@ export const ServerSettingsModal = ({
         setLoading(false);
         showSuccess('Пользователь успешно удалён');
         setDeletedUserId(null);
+        setBanReason('');
         onClose();
       }
     }
   };
 
-  useEffect(() => {
-    if (canDeleteUsers && accessToken && currentServerId) {
-      dispatch(getBannedUsers({ accessToken, serverId: currentServerId }));
+  const handleUnbanUser = async (userId: string) => {
+    if (currentServerId) {
+      setLoading(true);
+
+      const result = await dispatch(
+        unbanUser({
+          accessToken,
+          serverId: currentServerId,
+          userId: userId,
+        }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        setLoading(false);
+        showSuccess('Пользователь успешно разблокирован');
+        onClose();
+      }
     }
-  }, [canDeleteUsers, currentServerId]);
+  };
+
+  const handleChangePage = () => {
+    if (pageBannedUsers < totalPagesBannedUsers && currentServerId) {
+      dispatch(
+        getBannedUsers({
+          accessToken,
+          serverId: currentServerId,
+          page: pageBannedUsers + 1,
+          size: 5,
+        }),
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (canDeleteUsers && accessToken && currentServerId && opened) {
+      dispatch(
+        getBannedUsers({
+          accessToken,
+          serverId: currentServerId,
+          page: 1,
+          size: 5,
+        }),
+      );
+    }
+  }, [canDeleteUsers, currentServerId, opened]);
 
   useEffect(() => {
     if (rolesLoading === LoadingState.IDLE && currentServerId) {
@@ -138,12 +193,14 @@ export const ServerSettingsModal = ({
     >
       <Group align="flex-start" gap="md">
         <Stack gap="xs" style={{ width: 200 }}>
-          <NavLink
-            label="Роли"
-            leftSection={<Plus size={16} />}
-            active={activeSetting === 'roles'}
-            onClick={() => setActiveSetting('roles')}
-          />
+          {canChangeRole && (
+            <NavLink
+              label="Роли"
+              leftSection={<Plus size={16} />}
+              active={activeSetting === 'roles'}
+              onClick={() => setActiveSetting('roles')}
+            />
+          )}
           {isCreator && (
             <NavLink
               label="Название сервера"
@@ -160,6 +217,14 @@ export const ServerSettingsModal = ({
               onClick={() => setActiveSetting('deleteUser')}
             />
           )}
+          {canDeleteUsers && (
+            <NavLink
+              label="Разблокирование пользователя"
+              leftSection={<UserCheck size={16} />}
+              active={activeSetting === 'unbanUser'}
+              onClick={() => setActiveSetting('unbanUser')}
+            />
+          )}
         </Stack>
         <ScrollArea>
           {activeSetting === 'roles' && (
@@ -172,6 +237,15 @@ export const ServerSettingsModal = ({
                 placeholder="Выберите пользователя"
                 data={serverData.users
                   .filter((userOnServer) => userOnServer.userId !== user.id)
+                  .filter(
+                    (userOnServer) =>
+                      userOnServer.roleType !== RoleType.Creator,
+                  )
+                  .filter(
+                    (userOnServer) =>
+                      Number(userOnServer.roleType) >=
+                      Number(serverData.userRoleType),
+                  )
                   .map((userOnServer) => ({
                     value: userOnServer.userId,
                     label: userOnServer.userName,
@@ -182,10 +256,15 @@ export const ServerSettingsModal = ({
               <Select
                 label="Выбор роли"
                 placeholder="Выберите роль"
-                data={rolesList.map((role) => ({
-                  value: role.role.id,
-                  label: role.role.name,
-                }))}
+                data={rolesList
+                  .filter(
+                    (role) =>
+                      Number(role.role.type) >= Number(serverData.userRoleType),
+                  )
+                  .map((role) => ({
+                    value: role.role.id,
+                    label: role.role.name,
+                  }))}
                 value={assignRoleId}
                 onChange={setAssignRoleId}
               />
@@ -220,6 +299,15 @@ export const ServerSettingsModal = ({
                 placeholder="Выберите пользователя"
                 data={serverData.users
                   .filter((userOnServer) => userOnServer.userId !== user.id)
+                  .filter(
+                    (userOnServer) =>
+                      userOnServer.roleType !== RoleType.Creator,
+                  )
+                  .filter(
+                    (userOnServer) =>
+                      Number(userOnServer.roleType) >=
+                      Number(serverData.userRoleType),
+                  )
                   .map((userOnServer) => ({
                     value: userOnServer.userId,
                     label: userOnServer.userName,
@@ -227,9 +315,65 @@ export const ServerSettingsModal = ({
                 value={deletedUserId}
                 onChange={setDeletedUserId}
               />
+              <TextInput
+                label="Введите причину бана (необязательно)"
+                placeholder="Причина бана"
+                value={banReason}
+                onChange={(event) => setBanReason(event.currentTarget.value)}
+              />
               <Button onClick={handleDeleteUser} loading={loading}>
                 Удалить
               </Button>
+            </Stack>
+          )}
+          {activeSetting === 'unbanUser' && canDeleteUsers && (
+            <Stack gap="md">
+              <Text size="lg" w={500}>
+                Разблокировать пользователя
+              </Text>
+              {bannedUsers.length < 1 && (
+                <Text>Нет заблокированных пользователей</Text>
+              )}
+              {bannedUsers &&
+                bannedUsers.map((user) => (
+                  <Card key={user.userId} withBorder>
+                    <Group gap="md">
+                      <Group>
+                        <Avatar radius="xl" size="lg" color="blue">
+                          {user.userName[0]}
+                        </Avatar>
+                        <Stack gap={0}>
+                          <Text>{user.userName}</Text>
+                          <Text c="dimmed">{user.userTag}</Text>
+                        </Stack>
+                      </Group>
+                      <Group>
+                        <Mail />
+                        <Text>{user.mail}</Text>
+                      </Group>
+                      {user.banReason && <Badge>{user.banReason}</Badge>}
+                      <Group>
+                        <Calendar />
+                        <Text>{formatDateTime(user.banTime)}</Text>
+                      </Group>
+                      <Button
+                        variant="light"
+                        onClick={() => handleUnbanUser(user.userId)}
+                        loading={loading}
+                        disabled={loading}
+                      >
+                        Разблокировать
+                      </Button>
+                    </Group>
+                  </Card>
+                ))}
+              {bannedUsers.length > 0 && (
+                <Pagination
+                  total={totalPagesBannedUsers}
+                  value={pageBannedUsers}
+                  onChange={handleChangePage}
+                />
+              )}
             </Stack>
           )}
         </ScrollArea>

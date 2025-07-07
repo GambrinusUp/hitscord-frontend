@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react';
-import fs from 'fs';
+//import fs from 'fs';
 import path from 'path';
 import { defineConfig } from 'vite';
 
@@ -19,12 +19,12 @@ export default defineConfig({
     },
   },
   base: '/hitscord-frontend',
-  server: {
+  /*server: {
     https: {
       key: fs.readFileSync('key.pem'),
       cert: fs.readFileSync('cert.pem'),
     },
     host: '192.168.0.12',
     port: 5173,
-  },
+  },*/
 });

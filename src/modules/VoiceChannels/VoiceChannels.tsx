@@ -40,7 +40,8 @@ export const VoiceChannels = () => {
   const activeUsers = useActiveUsers();
   const { setVolume, userVolumes } = useAudioContext();
   const rooms = getUserGroups(users);
-  const isAdmin = serverData.isCreator;
+  const canWorkChannels = serverData.permissions.canWorkChannels;
+  const canIgnoreMaxCount = serverData.permissions.canIgnoreMaxCount;
   const [isEditing, setIsEditing] = useState<EditModal>({
     isEdit: false,
     initialData: '',
@@ -52,9 +53,7 @@ export const VoiceChannels = () => {
       .filter((room) => room.roomName === channelId)
       .flatMap((room) => Object.values(room.users)).length;
 
-    if (currentCount >= maxCount) {
-      console.warn('Максимальное количество участников в канале достигнуто');
-
+    if (!canIgnoreMaxCount && currentCount >= maxCount) {
       return;
     }
 
@@ -176,7 +175,7 @@ export const VoiceChannels = () => {
         <CollapseButton
           opened={opened}
           toggle={toggle}
-          isAdmin={isAdmin}
+          canWorkChannels={canWorkChannels}
           handleAddChannel={handleAddChannel}
         />
         <Collapse in={opened} w="100%">
@@ -193,7 +192,7 @@ export const VoiceChannels = () => {
                         .filter((room) => room.roomName === channelId)
                         .flatMap((room) => Object.values(room.users)).length
                     }
-                    isAdmin={isAdmin}
+                    canWorkChannels={canWorkChannels}
                     handleConnect={() => handleConnect(channelId, maxCount)}
                   />
                   <Stack gap="xs">
@@ -217,7 +216,6 @@ export const VoiceChannels = () => {
                                 isSpeaking={isSpeaking}
                                 userName={userName}
                                 producerIds={producerIds}
-                                isAdmin={isAdmin}
                                 userVolume={userVolume}
                                 handleOpenStream={handleOpenStream}
                                 handleVolumeChange={handleVolumeChange}

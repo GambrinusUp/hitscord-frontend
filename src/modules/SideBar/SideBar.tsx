@@ -61,6 +61,7 @@ export const SideBar = ({ onClose }: SideBarProps) => {
   );
   const { accessToken } = useAppSelector((state) => state.userStore);
   const canChangeRole = serverData.permissions.canChangeRole;
+  const canDeleteUsers = serverData.permissions.canDeleteUsers;
   const isCreator = serverData.isCreator;
 
   const copyToClipboard = (text: string) => {
@@ -107,19 +108,17 @@ export const SideBar = ({ onClose }: SideBarProps) => {
             </Group>
           </Menu.Target>
           <Menu.Dropdown>
-            {(canChangeRole || isCreator) && (
+            {(canChangeRole || isCreator || canDeleteUsers) && (
               <Menu.Item leftSection={<Settings size={16} />} onClick={open}>
                 Настройки сервера
               </Menu.Item>
             )}
-            {canChangeRole && (
-              <Menu.Item
-                onClick={() => openRolesModal()}
-                leftSection={<Users size={16} />}
-              >
-                Настройки ролей
-              </Menu.Item>
-            )}
+            <Menu.Item
+              onClick={() => openRolesModal()}
+              leftSection={<Users size={16} />}
+            >
+              Настройки ролей
+            </Menu.Item>
             <Menu.Item
               onClick={openChangeNameModalOpened}
               leftSection={<UserPen size={16} />}

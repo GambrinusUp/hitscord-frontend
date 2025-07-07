@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { ChangeRoleProps } from './ChangeRole.types';
 
 import { useAppDispatch, useNotification, useAppSelector } from '~/hooks';
-import { setEditedRole, updateRole } from '~/store/RolesStore';
+import { RoleType, setEditedRole, updateRole } from '~/store/RolesStore';
 
 export const ChangeRole = ({ opened, onClose }: ChangeRoleProps) => {
   const dispatch = useAppDispatch();
@@ -65,6 +65,7 @@ export const ChangeRole = ({ opened, onClose }: ChangeRoleProps) => {
           placeholder="Введите название роли"
           value={roleName}
           onChange={(event) => setRoleName(event.currentTarget.value)}
+          disabled={!(role?.role.type === RoleType.Custom)}
         />
         <ColorInput
           withEyeDropper={false}

@@ -5,6 +5,7 @@ import {
   Card,
   Divider,
   Group,
+  ScrollArea,
   Stack,
   Switch,
   Text,
@@ -139,34 +140,36 @@ export const Settings = () => {
           </Stack>
         </Group>
         <Divider mt="md" />
-        <Stack mt="md">
-          <TextInput
-            leftSection={<User />}
-            radius="md"
-            label="Имя"
-            placeholder="Введите имя"
-            key={form.key('name')}
-            {...form.getInputProps('name')}
-            disabled={!isEdit}
-          />
-          <TextInput
-            leftSection={<Mail />}
-            radius="md"
-            label="Электронная почта"
-            placeholder="Введите электронную почту"
-            key={form.key('email')}
-            {...form.getInputProps('email')}
-            disabled={!isEdit}
-          />
-          <TextInput
-            leftSection={<Tag />}
-            radius="md"
-            label="Тег пользователя"
-            placeholder="Введите тег пользователя"
-            value={user.tag}
-            disabled
-          />
-        </Stack>
+        <ScrollArea.Autosize w="100%" h="100%s">
+          <Stack mt="md">
+            <TextInput
+              leftSection={<User />}
+              radius="md"
+              label="Имя"
+              placeholder="Введите имя"
+              key={form.key('name')}
+              {...form.getInputProps('name')}
+              disabled={!isEdit}
+            />
+            <TextInput
+              leftSection={<Mail />}
+              radius="md"
+              label="Электронная почта"
+              placeholder="Введите электронную почту"
+              key={form.key('email')}
+              {...form.getInputProps('email')}
+              disabled={!isEdit}
+            />
+            <TextInput
+              leftSection={<Tag />}
+              radius="md"
+              label="Тег пользователя"
+              placeholder="Введите тег пользователя"
+              value={user.tag}
+              disabled
+            />
+          </Stack>
+        </ScrollArea.Autosize>
       </Card>
       <Card
         withBorder
@@ -178,54 +181,56 @@ export const Settings = () => {
         <Text c="dimmed">
           Управляйте тем, как другие пользователи могут взаимодействовать с вами
         </Text>
-        <Group justify="space-between" mt="lg">
-          <Stack gap={0}>
-            <Text>Уведомления</Text>
-            <Text c="dimmed">Получать уведомления о новых сообщениях</Text>
-          </Stack>
-          <Switch
-            disabled={!isEdit}
-            defaultChecked
-            size="lg"
-            key={form.key('notifiable')}
-            {...form.getInputProps('notifiable', { type: 'checkbox' })}
-          />
-        </Group>
-        <Divider mt="lg" />
-        <Group justify="space-between" mt="lg">
-          <Stack gap={0}>
-            <Text>Заявки в друзья</Text>
-            <Text c="dimmed">
-              Разрешить другим пользователям отправлять заявки в друзья
-            </Text>
-          </Stack>
-          <Switch
-            disabled={!isEdit}
-            defaultChecked
-            size="lg"
-            key={form.key('friendshipApplication')}
-            {...form.getInputProps('friendshipApplication', {
-              type: 'checkbox',
-            })}
-          />
-        </Group>
-        <Divider mt="lg" />
-        <Group justify="space-between" mt="lg">
-          <Stack gap={0}>
-            <Text>Сообщения от незнакомцев</Text>
-            <Text c="dimmed">
-              Разрешить получать сообщения от пользователей, которые не в списке
-              друзей
-            </Text>
-          </Stack>
-          <Switch
-            disabled={!isEdit}
-            defaultChecked
-            size="lg"
-            key={form.key('nonFriendMessage')}
-            {...form.getInputProps('nonFriendMessage', { type: 'checkbox' })}
-          />
-        </Group>
+        <ScrollArea.Autosize w="100%" h="100%s">
+          <Group justify="space-between" mt="lg">
+            <Stack gap={0}>
+              <Text>Уведомления</Text>
+              <Text c="dimmed">Получать уведомления о новых сообщениях</Text>
+            </Stack>
+            <Switch
+              disabled={!isEdit}
+              defaultChecked
+              size="lg"
+              key={form.key('notifiable')}
+              {...form.getInputProps('notifiable', { type: 'checkbox' })}
+            />
+          </Group>
+          <Divider mt="lg" />
+          <Group justify="space-between" mt="lg">
+            <Stack gap={0}>
+              <Text>Заявки в друзья</Text>
+              <Text c="dimmed">
+                Разрешить другим пользователям отправлять заявки в друзья
+              </Text>
+            </Stack>
+            <Switch
+              disabled={!isEdit}
+              defaultChecked
+              size="lg"
+              key={form.key('friendshipApplication')}
+              {...form.getInputProps('friendshipApplication', {
+                type: 'checkbox',
+              })}
+            />
+          </Group>
+          <Divider mt="lg" />
+          <Group justify="space-between" mt="lg">
+            <Stack gap={0}>
+              <Text>Сообщения от незнакомцев</Text>
+              <Text c="dimmed">
+                Разрешить получать сообщения от пользователей, которые не в
+                списке друзей
+              </Text>
+            </Stack>
+            <Switch
+              disabled={!isEdit}
+              defaultChecked
+              size="lg"
+              key={form.key('nonFriendMessage')}
+              {...form.getInputProps('nonFriendMessage', { type: 'checkbox' })}
+            />
+          </Group>
+        </ScrollArea.Autosize>
       </Card>
       <Group justify="flex-end">
         {!isEdit ? (

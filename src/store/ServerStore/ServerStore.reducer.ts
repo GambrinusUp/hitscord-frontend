@@ -28,10 +28,11 @@ import {
   unsubscribeFromServer,
 } from './ServerStore.actions';
 import {
-  BannedUser,
+  BannedUserResponse,
   ChannelMessage,
   GetChannelSettings,
   GetMessage,
+  MuteStatus,
   ServerData,
   ServerItem,
   ServerState,
@@ -40,6 +41,7 @@ import {
 
 import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { LoadingState } from '~/shared';
+import { RoleType } from '~/store/RolesStore';
 
 const initialState: ServerState = {
   serversList: [],
@@ -50,6 +52,7 @@ const initialState: ServerState = {
     roles: [],
     userRoleId: '',
     userRole: '',
+    userRoleType: RoleType.Uncertain,
     users: [],
     channels: {
       textChannels: [],
@@ -83,6 +86,8 @@ const initialState: ServerState = {
     notificated: null,
   },
   bannedUsers: [],
+  pageBannedUsers: 1,
+  totalPagesBannedUsers: 1,
   isLoading: false,
   numberOfStarterMessage: 0,
   remainingMessagesCount: MAX_MESSAGE_NUMBER,
@@ -156,6 +161,7 @@ const testServerSlice = createSlice({
         roles: [],
         userRoleId: '',
         userRole: '',
+        userRoleType: RoleType.Uncertain,
         users: [],
         channels: {
           textChannels: [],
@@ -257,7 +263,7 @@ const testServerSlice = createSlice({
 
       if (voiceChannel) {
         if (!voiceChannel.users.some((user) => user.userId === userId)) {
-          voiceChannel.users.push({ userId, isMuted: false });
+          voiceChannel.users.push({ userId, muteStatus: MuteStatus.NotMuted });
         }
       }
     },
@@ -326,6 +332,7 @@ const testServerSlice = createSlice({
           roles: [],
           userRoleId: '',
           userRole: '',
+          userRoleType: RoleType.Uncertain,
           users: [],
           channels: {
             textChannels: [],
@@ -568,8 +575,11 @@ const testServerSlice = createSlice({
 
       .addCase(
         getBannedUsers.fulfilled,
-        (state, action: PayloadAction<BannedUser[]>) => {
-          state.bannedUsers = action.payload;
+        (state, action: PayloadAction<BannedUserResponse>) => {
+          console.log(action.payload);
+          state.bannedUsers = action.payload.bannedList;
+          state.pageBannedUsers = action.payload.page;
+          state.totalPagesBannedUsers = action.payload.total;
           state.error = '';
         },
       )
