@@ -12,6 +12,7 @@ import {
   ChevronDown,
   Copy,
   DoorOpen,
+  ListChecks,
   Settings,
   UserPen,
   Users,
@@ -21,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChangeNameModal } from './components/ChangeNameModal';
 import { Panel } from './components/Panel';
 import { RolesModal } from './components/RolesModal';
+import { RolesPermissionsModal } from './components/RolesPermissionsModal';
 import { ServerSettingsModal } from './components/ServerSettingsModal';
 import { UnsubscribeModal } from './components/UnsubscribeModal';
 import { SideBarProps } from './SideBarProps.types';
@@ -56,12 +58,17 @@ export const SideBar = ({ onClose }: SideBarProps) => {
   ] = useDisclosure(false);
   const [rolesModalOpened, { open: openRolesModal, close: closeRolesModal }] =
     useDisclosure(false);
+  const [
+    rolesPermissionsModalOpened,
+    { open: openRolesPermissionsModal, close: closeRolesPermissionsModal },
+  ] = useDisclosure(false);
   const { serverData, isLoading, currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
   const { accessToken } = useAppSelector((state) => state.userStore);
   const canChangeRole = serverData.permissions.canChangeRole;
   const canDeleteUsers = serverData.permissions.canDeleteUsers;
+  const canCreateRole = serverData.permissions.canCreateRoles;
   const isCreator = serverData.isCreator;
 
   const copyToClipboard = (text: string) => {
@@ -113,11 +120,19 @@ export const SideBar = ({ onClose }: SideBarProps) => {
                 Настройки сервера
               </Menu.Item>
             )}
+            {(canChangeRole || canCreateRole) && (
+              <Menu.Item
+                onClick={() => openRolesModal()}
+                leftSection={<Users size={16} />}
+              >
+                Настройки ролей
+              </Menu.Item>
+            )}
             <Menu.Item
-              onClick={() => openRolesModal()}
-              leftSection={<Users size={16} />}
+              onClick={() => openRolesPermissionsModal()}
+              leftSection={<ListChecks size={16} />}
             >
-              Настройки ролей
+              Просмотр разрешений
             </Menu.Item>
             <Menu.Item
               onClick={openChangeNameModalOpened}
@@ -166,6 +181,10 @@ export const SideBar = ({ onClose }: SideBarProps) => {
         onClose={closeUnsubscribeModal}
       />
       <RolesModal opened={rolesModalOpened} onClose={closeRolesModal} />
+      <RolesPermissionsModal
+        opened={rolesPermissionsModalOpened}
+        onClose={closeRolesPermissionsModal}
+      />
     </>
   );
 };

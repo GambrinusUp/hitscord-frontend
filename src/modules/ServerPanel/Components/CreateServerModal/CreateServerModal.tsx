@@ -24,10 +24,19 @@ export const CreateServerModal = ({
       name: '',
     },
     validate: {
-      name: (value) =>
-        value.trim().length < 3
-          ? 'Название сервера должно быть более 3 символов'
-          : null,
+      name: (value) => {
+        const length = value.trim().length;
+
+        if (length < 6) {
+          return 'Название сервера должно содержать минимум 6 символов';
+        }
+
+        if (length > 50) {
+          return 'Название сервера не должно превышать 50 символов';
+        }
+
+        return null;
+      },
     },
   });
 
@@ -108,6 +117,8 @@ export const CreateServerModal = ({
             <TextInput
               label="Название сервера"
               placeholder="Введите название сервера"
+              description="от 6 до 50 символов"
+              maxLength={50}
               {...form.getInputProps('name')}
             />
             <Group justify="flex-end" mt="md">

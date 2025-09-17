@@ -151,6 +151,11 @@ export const UserSlice = createSlice({
       .addCase(refreshTokens.rejected, (state, action) => {
         state.error = action.payload as string;
         state.isLoading = false;
+        state.accessToken = '';
+        state.refreshToken = '';
+        localStorage.setItem('accessToken', '');
+        localStorage.setItem('refreshToken', '');
+        state.isLoggedIn = false;
       })
       .addCase(createApplication.pending, (state) => {
         state.error = '';

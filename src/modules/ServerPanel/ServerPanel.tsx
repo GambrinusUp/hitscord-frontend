@@ -1,4 +1,4 @@
-import { ActionIcon, Divider, Flex, Stack } from '@mantine/core';
+import { ActionIcon, Divider, Flex, ScrollArea, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { CirclePlus, Home, LogOut } from 'lucide-react';
 import { useEffect } from 'react';
@@ -34,6 +34,7 @@ export const ServerPanel = () => {
   return (
     <Flex
       w="100%"
+      h="100%"
       maw={50}
       bg="#0E0E10"
       align="center"
@@ -41,7 +42,7 @@ export const ServerPanel = () => {
       justify="space-between"
       p="10px 0"
     >
-      <Flex direction="column" align="center">
+      <Flex direction="column" align="center" h="calc(100% - 40px)">
         <ActionIcon
           size="lg"
           variant="transparent"
@@ -50,15 +51,17 @@ export const ServerPanel = () => {
           <Home size={24} color="#fff" />
         </ActionIcon>
         <Divider my="sm" />
-        <Stack gap="sm" align="center">
-          {serversList.map((server) => (
-            <ServerItem
-              key={server.serverId}
-              serverId={server.serverId}
-              serverName={server.serverName}
-            />
-          ))}
-        </Stack>
+        <ScrollArea.Autosize mah="100%">
+          <Stack gap="sm" align="center">
+            {serversList.map((server) => (
+              <ServerItem
+                key={server.serverId}
+                serverId={server.serverId}
+                serverName={server.serverName}
+              />
+            ))}
+          </Stack>
+        </ScrollArea.Autosize>
         <Divider my="sm" />
         <ActionIcon size="lg" variant="transparent" onClick={open}>
           <CirclePlus size={24} color="#fff" />

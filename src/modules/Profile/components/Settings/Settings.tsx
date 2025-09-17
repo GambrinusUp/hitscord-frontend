@@ -12,7 +12,7 @@ import {
   TextInput,
   Title,
 } from '@mantine/core';
-import { hasLength, isEmail, useForm } from '@mantine/form';
+import { useForm } from '@mantine/form';
 import {
   Ban,
   Calendar,
@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 
+import { formatDateWithDots } from '~/helpers';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import {
   changeSettings,
@@ -50,8 +51,36 @@ export const Settings = () => {
     },
 
     validate: {
-      email: isEmail('Неправильный Email'),
-      name: hasLength({ min: 2 }, 'Имя должно быть длиннее 2 символов'),
+      email: (value) => {
+        const length = value.trim().length;
+
+        if (length < 6) {
+          return 'Email должен содержать минимум 6 символов';
+        }
+
+        if (length > 50) {
+          return 'Email не должен превышать 50 символов';
+        }
+
+        if (!/^\S+@\S+$/.test(value)) {
+          return 'Неверный формат email';
+        }
+
+        return null;
+      },
+      name: (value) => {
+        const length = value.trim().length;
+
+        if (length < 6) {
+          return 'Имя должно содержать минимум 6 символов';
+        }
+
+        if (length > 50) {
+          return 'Имя не должно превышать 50 символов';
+        }
+
+        return null;
+      },
     },
   });
 
@@ -132,7 +161,9 @@ export const Settings = () => {
             </Group>
             <Group>
               <Calendar />
-              <Text c="dimmed">Аккаунт создан: {user.accontCreateDate}</Text>
+              <Text c="dimmed">
+                Аккаунт создан: {formatDateWithDots(user.accontCreateDate)}
+              </Text>
             </Group>
             <Button variant="light" radius="md" leftSection={<Upload />}>
               Загрузить фото
@@ -147,8 +178,10 @@ export const Settings = () => {
               radius="md"
               label="Имя"
               placeholder="Введите имя"
+              description="от 5 до 50 символов"
               key={form.key('name')}
               {...form.getInputProps('name')}
+              maxLength={50}
               disabled={!isEdit}
             />
             <TextInput
@@ -158,6 +191,7 @@ export const Settings = () => {
               placeholder="Введите электронную почту"
               key={form.key('email')}
               {...form.getInputProps('email')}
+              maxLength={50}
               disabled={!isEdit}
             />
             <TextInput

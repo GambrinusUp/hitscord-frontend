@@ -38,6 +38,7 @@ import {
   goOutFromChat,
   setActiveChat,
 } from '~/store/ChatsStore';
+import { MessageType } from '~/store/ServerStore/ServerStore.types';
 
 export const ChatSection = ({
   chatId,
@@ -76,8 +77,9 @@ export const ChatSection = ({
       sendChatMessage({
         Token: accessToken,
         ChannelId: chat.chatId,
-        Text: newMessage.trim(),
-        NestedChannel: false,
+        Classic: { Text: newMessage.trim(), NestedChannel: false },
+
+        MessageType: MessageType.Classic,
       });
       setNewMessage('');
     }

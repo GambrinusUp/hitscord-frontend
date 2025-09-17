@@ -34,10 +34,10 @@ export const RolesModal = ({ opened, onClose }: RolesModalProps) => {
   const canCreateRoles = serverData.permissions.canCreateRoles;
 
   useEffect(() => {
-    if (accessToken && currentServerId) {
+    if (accessToken && currentServerId && canCreateRoles) {
       dispatch(getRoles({ accessToken, serverId: currentServerId }));
     }
-  }, [accessToken, currentServerId]);
+  }, [accessToken, currentServerId, canCreateRoles]);
 
   return (
     <>
@@ -57,7 +57,7 @@ export const RolesModal = ({ opened, onClose }: RolesModalProps) => {
               </Button>
             )}
           </Group>
-          <ScrollArea.Autosize mah="800px" maw="100%">
+          <ScrollArea.Autosize mah="700px" maw="100%">
             <Stack>
               {rolesList.map((role) => (
                 <RoleItem

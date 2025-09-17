@@ -16,7 +16,7 @@ export const getOptionsForChannelType = (type: ChannelType) => {
     case ChannelType.VOICE_CHANNEL:
       return [
         { value: '0', label: 'Видеть' },
-        { value: '1', label: 'Могут присоединиться' },
+        { value: '1', label: 'Присоединиться' },
       ];
 
     default:

@@ -32,7 +32,7 @@ export function useNotification() {
       position: 'top-right',
       color: 'yellow',
       radius: 'md',
-      autoClose: 2000,
+      autoClose: 5000,
       icon: <MessageSquareWarning />,
     });
   };

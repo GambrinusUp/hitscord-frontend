@@ -155,9 +155,9 @@ export const CreateChannelModal = ({
           {channelType === ChannelType.VOICE_CHANNEL && (
             <NumberInput
               label="Введите число"
-              placeholder="Число от 1 до 999"
+              placeholder="Число от 2 до 999"
               {...form.getInputProps('maxCount')}
-              min={1}
+              min={2}
               max={999}
             />
           )}

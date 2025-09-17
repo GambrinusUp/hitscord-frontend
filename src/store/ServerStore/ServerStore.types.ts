@@ -31,6 +31,7 @@ export interface ChannelMessage {
   modifiedAt: string | null;
   nestedChannelId: boolean | null;
   replyToMessage: string | null;
+  messageType: MessageType;
 }
 
 export interface GetMessage {
@@ -87,6 +88,7 @@ export enum MuteStatus {
 export interface UserInVoiceChannel {
   userId: string;
   muteStatus: MuteStatus;
+  isMuted: boolean;
 }
 
 export interface VoiceChannel {
@@ -141,11 +143,21 @@ export interface GetServersResponse {
   serversList: ServerItem[];
 }
 
+export enum MessageType {
+  Classic,
+  Vote,
+}
+
 export interface CreateMessageWs {
   Token: string;
   ChannelId: string;
-  Text: string;
-  NestedChannel: boolean;
+  ReplyToMessageId?: string;
+  MessageType: MessageType;
+  Classic: {
+    Text: string;
+    NestedChannel: boolean;
+    Files?: string[];
+  };
 }
 
 export interface EditMessageWs {

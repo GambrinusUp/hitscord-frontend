@@ -1,5 +1,6 @@
 import { Avatar, Box, Stack, Text, Title, Tooltip } from '@mantine/core';
 
+import { formatDateWithDots } from '~/helpers';
 import { useAppSelector } from '~/hooks';
 
 export const ProfileSideBar = () => {
@@ -55,7 +56,9 @@ export const ProfileSideBar = () => {
             E-mail: {user.mail}
           </Text>
         </Tooltip>
-        <Text c="gray">Аккаунт создан: {user.accontCreateDate}</Text>
+        <Text c="gray">
+          Аккаунт создан: {formatDateWithDots(user.accontCreateDate)}
+        </Text>
       </Stack>
     </Box>
   );

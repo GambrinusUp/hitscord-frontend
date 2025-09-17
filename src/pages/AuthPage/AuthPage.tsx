@@ -1,4 +1,5 @@
 import {
+  ActionIcon,
   Button,
   Card,
   Flex,
@@ -9,6 +10,7 @@ import {
   TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { ArrowLeft } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,12 +29,27 @@ export const AuthPage = () => {
     },
 
     validate: {
-      mail: (value) =>
-        /^\S+@\S+$/.test(value) ? null : 'Неверный формат email',
+      mail: (value) => {
+        const length = value.trim().length;
+
+        if (length < 6) {
+          return 'Email должен содержать минимум 6 символов';
+        }
+
+        if (length > 50) {
+          return 'Email не должен превышать 50 символов';
+        }
+
+        if (!/^\S+@\S+$/.test(value)) {
+          return 'Неверный формат email';
+        }
+
+        return null;
+      },
       password: (value) =>
         value.trim().length > 5
           ? null
-          : 'Введите пароль (пароль должен содержать больше 6 символов',
+          : 'Введите пароль (пароль должен содержать больше 6 символов)',
     },
   });
 
@@ -42,6 +59,10 @@ export const AuthPage = () => {
     if (result.meta.requestStatus === 'fulfilled') {
       navigate('/main');
     }
+  };
+
+  const handleBack = () => {
+    navigate('/');
   };
 
   useEffect(() => {
@@ -69,15 +90,19 @@ export const AuthPage = () => {
         w="30vw"
         miw="300px"
       >
-        <Text fw={500} mb="md">
-          Войти в учётную запись
-        </Text>
+        <Group justify="space-between" align="center" mb="md">
+          <Text fw={500}>Войти в учётную запись</Text>
+          <ActionIcon variant="subtle" onClick={handleBack}>
+            <ArrowLeft size={24} />
+          </ActionIcon>
+        </Group>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="md">
             <TextInput
               label="Email"
               placeholder="Введите email"
               {...form.getInputProps('mail')}
+              maxLength={50}
               required
             />
             <PasswordInput

@@ -3,6 +3,8 @@ import {
   Badge,
   Button,
   Card,
+  Flex,
+  Grid,
   Group,
   Modal,
   NavLink,
@@ -13,7 +15,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { Calendar, Mail, Plus, UserCheck, UserMinus } from 'lucide-react';
+import { Calendar, Plus, UserCheck, UserMinus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { ServerSettingsModalProps } from './ServerSettingsModal.types';
@@ -61,6 +63,7 @@ export const ServerSettingsModal = ({
   const isCreator = serverData.isCreator;
   const canDeleteUsers = serverData.permissions.canDeleteUsers;
   const canChangeRole = serverData.permissions.canChangeRole;
+  const canCreateRoles = serverData.permissions.canCreateRoles;
 
   const assignRole = async () => {
     if (!assignRoleUserId || !assignRoleId) return;
@@ -83,6 +86,10 @@ export const ServerSettingsModal = ({
   };
 
   const handleChangeServerName = async () => {
+    if (newServerName.length < 6) {
+      return;
+    }
+
     if (currentServerId) {
       setLoading(true);
 
@@ -172,7 +179,12 @@ export const ServerSettingsModal = ({
   }, [canDeleteUsers, currentServerId, opened]);
 
   useEffect(() => {
-    if (rolesLoading === LoadingState.IDLE && currentServerId) {
+    if (
+      canCreateRoles &&
+      rolesLoading === LoadingState.IDLE &&
+      currentServerId
+    ) {
+      console.log(canCreateRoles);
       dispatch(getRoles({ accessToken, serverId: currentServerId }));
     }
   }, [rolesLoading, currentServerId]);
@@ -283,6 +295,8 @@ export const ServerSettingsModal = ({
                 value={newServerName}
                 onChange={(e) => setNewServerName(e.target.value)}
                 placeholder={serverData.serverName}
+                description="от 6 до 50 символов"
+                maxLength={50}
               />
               <Button onClick={handleChangeServerName} loading={loading}>
                 Изменить название
@@ -338,42 +352,60 @@ export const ServerSettingsModal = ({
                 bannedUsers.map((user) => (
                   <Card key={user.userId} withBorder>
                     <Group gap="md">
-                      <Group>
-                        <Avatar radius="xl" size="lg" color="blue">
-                          {user.userName[0]}
-                        </Avatar>
-                        <Stack gap={0}>
-                          <Text>{user.userName}</Text>
-                          <Text c="dimmed">{user.userTag}</Text>
-                        </Stack>
-                      </Group>
-                      <Group>
-                        <Mail />
-                        <Text>{user.mail}</Text>
-                      </Group>
-                      {user.banReason && <Badge>{user.banReason}</Badge>}
-                      <Group>
-                        <Calendar />
-                        <Text>{formatDateTime(user.banTime)}</Text>
-                      </Group>
-                      <Button
-                        variant="light"
-                        onClick={() => handleUnbanUser(user.userId)}
-                        loading={loading}
-                        disabled={loading}
-                      >
-                        Разблокировать
-                      </Button>
+                      <Grid>
+                        <Grid.Col span={2}>
+                          <Group>
+                            <Avatar radius="xl" size="lg" color="blue">
+                              {user.userName[0]}
+                            </Avatar>
+                            <Stack gap={0}>
+                              <Text>{user.userName}</Text>
+                              <Text c="dimmed">{user.userTag}</Text>
+                            </Stack>
+                          </Group>
+                        </Grid.Col>
+                        <Grid.Col span={8}>
+                          {user.banReason && (
+                            <Badge
+                              style={{
+                                wordWrap: 'break-word',
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                              }}
+                            >
+                              {user.banReason}
+                            </Badge>
+                          )}
+                        </Grid.Col>
+                        <Grid.Col span={1}>
+                          <Group>
+                            <Calendar />
+                            <Text>{formatDateTime(user.banTime)}</Text>
+                          </Group>
+                        </Grid.Col>
+                        <Grid.Col span={1}>
+                          <Button
+                            variant="light"
+                            onClick={() => handleUnbanUser(user.userId)}
+                            loading={loading}
+                            disabled={loading}
+                          >
+                            Разблокировать
+                          </Button>
+                        </Grid.Col>
+                      </Grid>
                     </Group>
                   </Card>
                 ))}
-              {bannedUsers.length > 0 && (
-                <Pagination
-                  total={totalPagesBannedUsers}
-                  value={pageBannedUsers}
-                  onChange={handleChangePage}
-                />
-              )}
+              <Flex w="100%" justify="center">
+                {bannedUsers.length > 0 && (
+                  <Pagination
+                    total={totalPagesBannedUsers}
+                    value={pageBannedUsers}
+                    onChange={handleChangePage}
+                  />
+                )}
+              </Flex>
             </Stack>
           )}
         </ScrollArea>

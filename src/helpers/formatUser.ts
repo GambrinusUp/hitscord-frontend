@@ -5,7 +5,7 @@ export const formatUser = (rawMessage: any): UserOnServer => ({
   serverId: rawMessage.ServerId,
   userId: rawMessage.UserId,
   userName: rawMessage.UserName,
-  userTag: rawMessage.UserId,
+  userTag: rawMessage.UserTag,
   roleId: rawMessage.RoleId,
   roleName: rawMessage.RoleName,
   roleType: rawMessage.RoleType,

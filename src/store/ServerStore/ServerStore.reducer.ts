@@ -263,7 +263,11 @@ const testServerSlice = createSlice({
 
       if (voiceChannel) {
         if (!voiceChannel.users.some((user) => user.userId === userId)) {
-          voiceChannel.users.push({ userId, muteStatus: MuteStatus.NotMuted });
+          voiceChannel.users.push({
+            userId,
+            muteStatus: MuteStatus.NotMuted,
+            isMuted: false,
+          });
         }
       }
     },
@@ -303,6 +307,9 @@ const testServerSlice = createSlice({
         );
       }
     },
+    /*updatedRole: (state, action: PayloadAction<UpdateRole>) => {
+      console.log(updateRole);
+    },*/
   },
   extraReducers: (builder) => {
     builder
@@ -665,6 +672,7 @@ export const {
   addUserOnVoiceChannel,
   removeUserFromVoiceChannel,
   toggleUserMuteStatus,
+  //updatedRole,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

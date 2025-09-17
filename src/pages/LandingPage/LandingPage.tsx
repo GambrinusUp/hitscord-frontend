@@ -1,7 +1,19 @@
 import { Button, Flex, Group, Title } from '@mantine/core';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+
+import { useAppSelector } from '~/hooks';
 
 export const LandingPage = () => {
+  const { accessToken } = useAppSelector((state) => state.userStore);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (accessToken) {
+      navigate('/main');
+    }
+  }, [accessToken, navigate]);
+
   return (
     <Flex
       w="100vw"

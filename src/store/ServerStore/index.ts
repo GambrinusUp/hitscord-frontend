@@ -33,6 +33,7 @@ export {
   addUserOnVoiceChannel,
   removeUserFromVoiceChannel,
   toggleUserMuteStatus,
+  //updatedRole,
 } from './ServerStore.reducer';
 
 export {

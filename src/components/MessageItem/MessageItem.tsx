@@ -89,8 +89,8 @@ export const MessageItem = ({
         <Box
           style={{
             position: 'relative',
-            backgroundColor: isOwnMessage ? '#4A90E2' : '#36393F',
-            color: isOwnMessage ? 'white' : 'gray',
+            backgroundColor: isOwnMessage ? '#4A90E2' : '#454950',
+            color: 'white',
             padding: '8px 12px',
             borderRadius: '10px',
             maxWidth: '75%',

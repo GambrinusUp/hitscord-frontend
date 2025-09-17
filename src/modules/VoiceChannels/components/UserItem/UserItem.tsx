@@ -4,7 +4,6 @@ import { MicOff, Unplug, User, Video, Volume2 } from 'lucide-react';
 import { UserItemProps } from './UserItem.types';
 
 import { useAppSelector } from '~/hooks';
-import { MuteStatus } from '~/store/ServerStore';
 
 export const UserItem = ({
   socketId,
@@ -38,9 +37,15 @@ export const UserItem = ({
     ),
   )?.roleType;
 
-  const isMuted =
+  /* const isMuted =
     users?.find((user) => user.userId === userId)?.muteStatus ===
-      MuteStatus.Muted || MuteStatus.SelfMuted;
+      MuteStatus.Muted || MuteStatus.SelfMuted;*/
+
+  const isMuted = users?.find((user) => user.userId === userId)?.isMuted;
+
+  /*useEffect(() => {
+    console.log(isMuted, userId);
+  }, [isMuted, userId]);*/
 
   return (
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>

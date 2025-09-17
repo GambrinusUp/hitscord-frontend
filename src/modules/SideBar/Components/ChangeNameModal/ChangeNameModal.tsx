@@ -1,5 +1,5 @@
 import { Button, Group, Modal, Stack, TextInput } from '@mantine/core';
-import { useState } from 'react';
+import { useForm } from '@mantine/form';
 
 import { ChangeNameModalProps } from './ChangeNameModal.types';
 
@@ -10,22 +10,44 @@ export const ChangeNameModal = ({ opened, onClose }: ChangeNameModalProps) => {
   const dispatch = useAppDispatch();
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
-  const [newName, setNewName] = useState('');
+  //const [newName, setNewName] = useState('');
   const { showSuccess } = useNotification();
 
-  const handleChange = async () => {
+  const form = useForm({
+    initialValues: {
+      newName: '',
+    },
+
+    validate: {
+      newName: (value) => {
+        const length = value.trim().length;
+
+        if (length < 6) {
+          return 'Имя должно содержать минимум 6 символов';
+        }
+
+        if (length > 50) {
+          return 'Имя не должно превышать 50 символов';
+        }
+
+        return null;
+      },
+    },
+  });
+
+  const handleSubmit = async (values: typeof form.values) => {
     if (currentServerId) {
       const result = await dispatch(
         changeNameOnServer({
           accessToken,
           serverId: currentServerId,
-          name: newName,
+          name: values.newName,
         }),
       );
 
       if (result.meta.requestStatus === 'fulfilled') {
         showSuccess('Имя успешно изменено');
-        setNewName('');
+        form.setValues({ newName: '' });
         onClose();
       }
     }
@@ -47,19 +69,23 @@ export const ChangeNameModal = ({ opened, onClose }: ChangeNameModalProps) => {
         },
       }}
     >
-      <Stack gap="xs">
-        <TextInput
-          label="Новое имя"
-          placeholder="Введите новое имя"
-          value={newName}
-          onChange={(event) => setNewName(event.currentTarget.value)}
-        />
-        <Group justify="flex-end" mt="md">
-          <Button variant="filled" onClick={handleChange}>
-            Изменить
-          </Button>
-        </Group>
-      </Stack>
+      <form onSubmit={form.onSubmit(handleSubmit)}>
+        {' '}
+        <Stack gap="xs">
+          <TextInput
+            label="Новое имя"
+            placeholder="Введите новое имя"
+            description="от 6 до 50 символов"
+            {...form.getInputProps('newName')}
+            maxLength={50}
+          />
+          <Group justify="flex-end" mt="md">
+            <Button variant="filled" type="submit">
+              Изменить
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Modal>
   );
 };

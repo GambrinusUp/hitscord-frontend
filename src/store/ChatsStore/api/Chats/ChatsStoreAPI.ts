@@ -25,10 +25,7 @@ export const createChat = async (
     const data = await response.json();
 
     if (!response.ok) {
-      throw {
-        message: data.message || 'Unknown error',
-        status: response.status,
-      };
+      throw new Error(data.message || `Error: ${response.status}`);
     }
 
     return data;

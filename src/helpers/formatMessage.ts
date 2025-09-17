@@ -1,5 +1,6 @@
 import { ChatMessage } from '~/store/ChatsStore';
 import { ChannelMessage } from '~/store/ServerStore';
+import { MessageType } from '~/store/ServerStore/ServerStore.types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatMessage = (rawMessage: any): ChannelMessage => ({
@@ -12,6 +13,7 @@ export const formatMessage = (rawMessage: any): ChannelMessage => ({
   modifiedAt: rawMessage.ModifiedAt || null,
   nestedChannelId: rawMessage.NestedChannelId || null,
   replyToMessage: rawMessage.ReplyToMessage || null,
+  messageType: MessageType.Classic,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

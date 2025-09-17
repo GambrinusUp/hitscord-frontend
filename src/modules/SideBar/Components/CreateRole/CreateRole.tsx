@@ -13,7 +13,7 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
   const [roleName, setRoleName] = useState('');
-  const [color, setColor] = useState('');
+  const [color, setColor] = useState('#ffffff');
 
   const handleCreateRole = async () => {
     if (
@@ -31,6 +31,8 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
 
       if (result.meta.requestStatus === 'fulfilled') {
         showSuccess('Роль успешно создана');
+        setRoleName('');
+        setColor('#ffffff');
         onClose();
       }
     }

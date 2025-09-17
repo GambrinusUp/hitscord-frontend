@@ -48,7 +48,7 @@ export const SettingsChannelModal = ({
 }: SettingsChannelModalProps) => {
   const dispatch = useAppDispatch();
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const { serverData, roleSettings } = useAppSelector(
+  const { serverData, roleSettings, error } = useAppSelector(
     (state) => state.testServerStore,
   );
   const [activeSetting, setActiveSetting] = useState<
@@ -155,6 +155,8 @@ export const SettingsChannelModal = ({
         onClose();
       }
     }
+
+    setLoading(false);
   };
 
   const handleChangeChannelCount = async () => {
@@ -189,6 +191,12 @@ export const SettingsChannelModal = ({
       dispatch(getChannelSettings({ accessToken, channelId }));
     }
   }, [accessToken, opened]);
+
+  useEffect(() => {
+    if (error !== '') {
+      setLoading(false);
+    }
+  }, [error]);
 
   return (
     <Modal
@@ -280,7 +288,13 @@ export const SettingsChannelModal = ({
               </Text>
               {canSee && (
                 <>
-                  <Text>Могут читать:</Text>
+                  <Text>
+                    Могут{' '}
+                    {channelType === ChannelType.TEXT_CHANNEL
+                      ? 'читать'
+                      : 'видеть'}
+                    :
+                  </Text>
                   <Stack gap="xs">
                     {canSee.map((role) => (
                       <Badge
@@ -409,10 +423,10 @@ export const SettingsChannelModal = ({
               <Group align="center">
                 <NumberInput
                   label="Введите число"
-                  placeholder="Число от 1 до 999"
+                  placeholder="Число от 2 до 999"
                   value={count}
                   onChange={setCount}
-                  min={1}
+                  min={2}
                   max={999}
                 />
               </Group>

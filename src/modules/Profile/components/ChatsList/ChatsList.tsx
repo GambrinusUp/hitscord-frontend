@@ -1,4 +1,12 @@
-import { Button, Card, Group, Loader, Stack, Title } from '@mantine/core';
+import {
+  Button,
+  Card,
+  Group,
+  Loader,
+  ScrollArea,
+  Stack,
+  Title,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { MessageCircle, Plus } from 'lucide-react';
 import { useEffect } from 'react';
@@ -33,33 +41,35 @@ export const ChatsList = () => {
             Создать чат
           </Button>
         </Group>
-        <Stack gap="xs">
-          {chatsLoading === LoadingState.PENDING && <Loader />}
-          {chatsList.map((chat) => (
-            <Card
-              key={chat.chatId}
-              bg="#1a1b1e"
-              padding="xs"
-              radius="md"
-              c="#fff"
-              p="md"
-            >
-              <Stack>
-                <Group wrap="nowrap">
-                  <MessageCircle size={24} style={{ flexShrink: 0 }} />
-                  <Title order={3}>{chat.chatName}</Title>
-                </Group>
-                <Button
-                  variant="light"
-                  radius="md"
-                  onClick={() => handleOpenChat(chat.chatId)}
-                >
-                  Открыть чат
-                </Button>
-              </Stack>
-            </Card>
-          ))}
-        </Stack>
+        <ScrollArea style={{ flex: 1, maxHeight: '100%' }}>
+          <Stack gap="xs">
+            {chatsLoading === LoadingState.PENDING && <Loader />}
+            {chatsList.map((chat) => (
+              <Card
+                key={chat.chatId}
+                bg="#1a1b1e"
+                padding="xs"
+                radius="md"
+                c="#fff"
+                p="md"
+              >
+                <Stack>
+                  <Group wrap="nowrap">
+                    <MessageCircle size={24} style={{ flexShrink: 0 }} />
+                    <Title order={3}>{chat.chatName}</Title>
+                  </Group>
+                  <Button
+                    variant="light"
+                    radius="md"
+                    onClick={() => handleOpenChat(chat.chatId)}
+                  >
+                    Открыть чат
+                  </Button>
+                </Stack>
+              </Card>
+            ))}
+          </Stack>
+        </ScrollArea>
       </Stack>
       <CreateChat opened={opened} close={close} />
     </>

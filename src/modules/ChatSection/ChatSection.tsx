@@ -25,6 +25,7 @@ import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import { clearHasNewMessage, getMoreMessages } from '~/store/ServerStore';
+import { MessageType } from '~/store/ServerStore/ServerStore.types';
 
 export const ChatSection = ({
   openSidebar,
@@ -50,6 +51,10 @@ export const ChatSection = ({
   } = useAppSelector((state) => state.testServerStore);
   const users = serverData.users;
   const roles = serverData.roles;
+  const channelSettings = serverData.channels.textChannels.find(
+    (channel) => channel.channelId === currentChannelId,
+  );
+  const canWrite = channelSettings?.canWrite;
   const [newMessage, setNewMessage] = useState('');
 
   const [isAtBottom, setIsAtBottom] = useState(true);
@@ -132,8 +137,9 @@ export const ChatSection = ({
       sendMessage({
         Token: accessToken,
         ChannelId: currentChannelId,
-        Text: formatTagMessage(newMessage.trim()),
-        NestedChannel: false,
+        Classic: { Text: newMessage.trim(), NestedChannel: false },
+
+        MessageType: MessageType.Classic,
       });
       setNewMessage('');
       setShowSuggestions(false);
@@ -444,9 +450,11 @@ export const ChatSection = ({
         )}
 
         <Group mt="auto" align="center" wrap="nowrap" gap={0}>
-          <ActionIcon size="xl" variant="transparent">
-            <Paperclip size={20} />
-          </ActionIcon>
+          {canWrite && (
+            <ActionIcon size="xl" variant="transparent">
+              <Paperclip size={20} />
+            </ActionIcon>
+          )}
           <Textarea
             ref={textareaRef}
             w="100%"
@@ -455,16 +463,19 @@ export const ChatSection = ({
             onChange={handleTextChange}
             onKeyDown={handleKeyDown}
             autosize
+            disabled={!canWrite}
             minRows={1}
             maxRows={3}
           />
-          <ActionIcon
-            size="xl"
-            variant="transparent"
-            onClick={handleSendMessage}
-          >
-            <Send size={20} />
-          </ActionIcon>
+          {canWrite && (
+            <ActionIcon
+              size="xl"
+              variant="transparent"
+              onClick={handleSendMessage}
+            >
+              <Send size={20} />
+            </ActionIcon>
+          )}
         </Group>
       </Box>
     </Box>
