@@ -1,18 +1,23 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import { AppReducer } from './AppStore';
-import { ChatsReducer } from './ChatsStore';
 import { RolesReducer } from './RolesStore';
 import { ServerReducer } from './ServerStore';
-import { UserReducer } from './UserStore';
+
+import { chatsReducer } from '~/entities/chat';
+import { filesReducer } from '~/entities/files';
+import { friendshipReducer } from '~/entities/friendship';
+import { userReducer } from '~/entities/user';
 
 const store = configureStore({
   reducer: {
-    userStore: UserReducer,
+    userStore: userReducer,
     appStore: AppReducer,
     testServerStore: ServerReducer,
-    chatsStore: ChatsReducer,
+    chatsStore: chatsReducer,
     rolesStore: RolesReducer,
+    filesStore: filesReducer,
+    friendshipStore: friendshipReducer,
   },
 });
 

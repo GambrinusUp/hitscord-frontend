@@ -28,6 +28,12 @@ import { useState } from 'react';
 import { formatDateWithDots } from '~/helpers';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import {
+  combineValidators,
+  isEmail,
+  maxLength,
+  minLength,
+} from '~/shared/lib/validators';
+import {
   changeSettings,
   changeUserProfile,
   SettingType,
@@ -51,36 +57,12 @@ export const Settings = () => {
     },
 
     validate: {
-      email: (value) => {
-        const length = value.trim().length;
-
-        if (length < 6) {
-          return 'Email должен содержать минимум 6 символов';
-        }
-
-        if (length > 50) {
-          return 'Email не должен превышать 50 символов';
-        }
-
-        if (!/^\S+@\S+$/.test(value)) {
-          return 'Неверный формат email';
-        }
-
-        return null;
-      },
-      name: (value) => {
-        const length = value.trim().length;
-
-        if (length < 6) {
-          return 'Имя должно содержать минимум 6 символов';
-        }
-
-        if (length > 50) {
-          return 'Имя не должно превышать 50 символов';
-        }
-
-        return null;
-      },
+      email: combineValidators(
+        minLength(6, 'Email'),
+        maxLength(50, 'Email'),
+        isEmail,
+      ),
+      name: combineValidators(minLength(6, 'Имя'), maxLength(50, 'Имя')),
     },
   });
 

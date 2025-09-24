@@ -1,4 +1,5 @@
 import { LoadingState } from '~/shared';
+import { MessageType } from '~/store/ServerStore/ServerStore.types';
 
 export interface Chat {
   chatId: string;
@@ -27,14 +28,17 @@ export interface ChatInfo {
 }
 
 export interface ChatMessage {
-  chatId: string;
-  id: string;
   text: string;
+  modifiedAt: string | null;
+  nestedChannel: string | null;
+  files: unknown[] | null;
+  messageType: MessageType;
+  serverId: string | null;
+  channelId: string;
+  id: string;
   authorId: string;
   createdAt: string;
-  modifiedAt: string | null;
   replyToMessage: string | null;
-  files: string | null;
 }
 
 export interface ChatsState {

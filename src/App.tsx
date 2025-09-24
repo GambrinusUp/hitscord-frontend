@@ -13,29 +13,32 @@ import { LandingPage } from './pages/LandingPage';
 import { MainPage } from './pages/MainPage';
 import { RegistrationPage } from './pages/RegistrationPage';
 import { ErrorsProvider } from './providers/errors';
+import { WebSocketProvider } from './shared/providers/websocket';
 
 const App = () => {
   return (
     <MediaProvider>
       <AudioProvider>
-        <Router
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <MantineProvider defaultColorScheme="dark">
-            <Notifications />
-            <ErrorsProvider>
-              <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/main" element={<MainPage />} />
-                <Route path="/login" element={<AuthPage />} />
-                <Route path="/register" element={<RegistrationPage />} />
-              </Routes>
-            </ErrorsProvider>
-          </MantineProvider>
-        </Router>
+        <WebSocketProvider>
+          <Router
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <MantineProvider defaultColorScheme="dark">
+              <Notifications />
+              <ErrorsProvider>
+                <Routes>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/main" element={<MainPage />} />
+                  <Route path="/login" element={<AuthPage />} />
+                  <Route path="/register" element={<RegistrationPage />} />
+                </Routes>
+              </ErrorsProvider>
+            </MantineProvider>
+          </Router>
+        </WebSocketProvider>
       </AudioProvider>
     </MediaProvider>
   );

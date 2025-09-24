@@ -1,0 +1,5 @@
+const BASE_PATH = '/files';
+
+export const GET_FILE = (channelId: string, fileId: string) =>
+  `${BASE_PATH}/item?channelId=${channelId}&FileId=${fileId}`;
+export const ATTACH_FILE = `${BASE_PATH}/message`;

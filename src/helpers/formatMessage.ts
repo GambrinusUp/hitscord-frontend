@@ -11,19 +11,22 @@ export const formatMessage = (rawMessage: any): ChannelMessage => ({
   authorId: rawMessage.AuthorId,
   createdAt: rawMessage.CreatedAt,
   modifiedAt: rawMessage.ModifiedAt || null,
-  nestedChannelId: rawMessage.NestedChannelId || null,
+  nestedChannel: rawMessage.NestedChannelId || null,
   replyToMessage: rawMessage.ReplyToMessage || null,
   messageType: MessageType.Classic,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatChatMessage = (rawMessage: any): ChatMessage => ({
-  chatId: rawMessage.ChatId,
-  id: rawMessage.Id,
   text: rawMessage.Text,
+  modifiedAt: rawMessage.ModifiedAt || null,
+  id: rawMessage.Id,
   authorId: rawMessage.AuthorId,
   createdAt: rawMessage.CreatedAt,
-  modifiedAt: rawMessage.ModifiedAt || null,
   replyToMessage: rawMessage.ReplyToMessage || null,
   files: rawMessage.Files || null,
+  nestedChannel: rawMessage.NestedChannelId || null,
+  messageType: MessageType.Classic,
+  serverId: rawMessage.ServerId,
+  channelId: rawMessage.ChannelId,
 });

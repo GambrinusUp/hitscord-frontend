@@ -6,18 +6,18 @@ import { useNavigate } from 'react-router-dom';
 import { useApiWebSocketHandler, useWebSocketHandler } from './MainPage.hooks';
 
 import { MAX_MESSAGE_NUMBER } from '~/constants';
+import { getUserProfile } from '~/entities/user';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { ChatSection } from '~/modules/ChatSection/ChatSection';
 import { ChatSectionWithUsers } from '~/modules/ChatSectionWithUsers';
 import { DetailsPanel, DetailsPanelMobile } from '~/modules/DetailsPanel';
-import { Profile } from '~/modules/Profile';
+import { ProfilePage } from '~/modules/Profile';
 import { ServerPanel } from '~/modules/ServerPanel';
 import { SideBar, SideBarMobile } from '~/modules/SideBar';
 import {
   getChannelMessages,
   getServerData,
 } from '~/store/ServerStore/ServerStore.actions';
-import { getUserProfile } from '~/store/UserStore/UserStore.actions';
 
 export const MainPage = () => {
   const navigate = useNavigate();
@@ -40,14 +40,7 @@ export const MainPage = () => {
     detailsPanelOpened,
     { open: openDetailsPanel, close: closeDetailsPanel },
   ] = useDisclosure(false);
-  const {
-    sendMessage,
-    editMessage,
-    deleteMessage,
-    sendChatMessage,
-    editChatMessage,
-    deleteChatMessage,
-  } = useWebSocketHandler({
+  const { sendMessage, editMessage, deleteMessage } = useWebSocketHandler({
     accessToken,
     dispatch,
     serverId: currentServerId,
@@ -66,7 +59,7 @@ export const MainPage = () => {
   }, [isLoggedIn, navigate]);
 
   useEffect(() => {
-    if (accessToken) dispatch(getUserProfile({ accessToken }));
+    if (accessToken) dispatch(getUserProfile());
   }, [accessToken, dispatch]);
 
   useEffect(() => {
@@ -93,11 +86,7 @@ export const MainPage = () => {
     <Box style={{ display: 'flex', height: '100dvh' }}>
       <ServerPanel />
       {isOpenHome ? (
-        <Profile
-          sendChatMessage={sendChatMessage}
-          editChatMessage={editChatMessage}
-          deleteChatMessage={deleteChatMessage}
-        />
+        <ProfilePage />
       ) : (
         <>
           <SideBar onClose={close} />

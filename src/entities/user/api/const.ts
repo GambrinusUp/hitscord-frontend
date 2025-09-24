@@ -1,0 +1,12 @@
+import { SettingType } from '~/entities/user/model/types';
+
+const BASE_PATH = '/auth';
+
+export const REGISTER_USER = `${BASE_PATH}/registration`;
+export const LOGIN_USER = `${BASE_PATH}/login`;
+export const GET_PROFILE = `${BASE_PATH}/profile/get`;
+export const LOGOUT = `${BASE_PATH}/logout`;
+export const REFRESH = `${BASE_PATH}/refresh`;
+export const CHANGE_SETTINGS = (type: SettingType) =>
+  `${BASE_PATH}/settings/${type}`;
+export const CHANGE_PROFILE = `${BASE_PATH}/profile/change`;

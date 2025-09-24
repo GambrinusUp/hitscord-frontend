@@ -29,7 +29,7 @@ export interface ChannelMessage {
   authorId: string;
   createdAt: string;
   modifiedAt: string | null;
-  nestedChannelId: boolean | null;
+  nestedChannel: boolean | null;
   replyToMessage: string | null;
   messageType: MessageType;
 }

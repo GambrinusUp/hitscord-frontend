@@ -1,0 +1,60 @@
+import { LoadingState } from '~/shared/types';
+
+export interface Chat {
+  chatId: string;
+  chatName: string;
+}
+
+export interface GetChats {
+  chatsList: Chat[];
+}
+
+export interface UserInChat {
+  userId: string;
+  userName: string;
+  userTag: string;
+  mail: string;
+  icon: Base64URLString | null;
+  notifiable: boolean;
+  friendshipApplication: boolean;
+  nonFriendMessage: boolean;
+}
+
+export interface ChatInfo {
+  chatId: string;
+  chatName: string;
+  users: UserInChat[];
+}
+
+export interface ChatMessage {
+  chatId: string;
+  id: string;
+  text: string;
+  authorId: string;
+  createdAt: string;
+  modifiedAt: string | null;
+  replyToMessage: string | null;
+  files: string | null;
+}
+
+export interface ChatsState {
+  chatsList: Chat[];
+  chatsLoading: LoadingState;
+  chat: ChatInfo;
+  activeChat: string | null;
+  chatLoading: LoadingState;
+  messages: ChatMessage[];
+  messagesStatus: LoadingState;
+  messageIsLoading: LoadingState;
+  numberOfStarterMessage: number;
+  remainingMessagesCount: number;
+  error: string;
+}
+
+export interface GetChatMessages {
+  messages: ChatMessage[];
+  numberOfMessages: number;
+  numberOfStarterMessage: number;
+  remainingMessagesCount: number;
+  allMessagesCount: number;
+}

@@ -1,0 +1,67 @@
+import { NavLink, Stack } from '@mantine/core';
+import { BookUser, ChevronRight, MessagesSquare, Settings } from 'lucide-react';
+
+import { setActiveChat } from '~/entities/chat';
+import { useAppDispatch } from '~/hooks';
+
+interface ProfileMenuProps {
+  activeLink: 'friends' | 'settings' | 'chats';
+  setActiveLink: React.Dispatch<
+    React.SetStateAction<'friends' | 'settings' | 'chats'>
+  >;
+}
+
+export const ProfileMenu = ({
+  activeLink,
+  setActiveLink,
+}: ProfileMenuProps) => {
+  const dispatch = useAppDispatch();
+
+  const handleOpenChats = () => {
+    setActiveLink('chats');
+    dispatch(setActiveChat(null));
+  };
+
+  const handleOpenFriends = () => {
+    setActiveLink('friends');
+    dispatch(setActiveChat(null));
+  };
+
+  const handleOpenSettings = () => {
+    setActiveLink('settings');
+    dispatch(setActiveChat(null));
+  };
+
+  return (
+    <Stack
+      gap="xs"
+      bg="#1A1B1E"
+      w={{ base: 150, lg: 250 }}
+      h="100%"
+      visibleFrom="sm"
+      p={10}
+    >
+      <NavLink
+        label="Чаты"
+        leftSection={<MessagesSquare size={16} />}
+        rightSection={<ChevronRight size={12} />}
+        active={activeLink === 'chats'}
+        onClick={handleOpenChats}
+      />
+      <NavLink
+        label="Друзья"
+        leftSection={<BookUser size={16} />}
+        rightSection={<ChevronRight size={12} />}
+        active={activeLink === 'friends'}
+        onClick={handleOpenFriends}
+      />
+      <NavLink
+        label="Настройки"
+        leftSection={<Settings size={16} />}
+        rightSection={<ChevronRight size={12} />}
+        active={activeLink === 'settings'}
+        onClick={handleOpenSettings}
+      />
+    </Stack>
+  );
+};
