@@ -2,14 +2,11 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { WebSocketContext } from './WebSocketContext';
 
+import { addChatMessage } from '~/entities/chat';
 import { formatMessage } from '~/helpers';
 import { formatChatMessage } from '~/helpers/formatMessage';
 import { useAppDispatch, useNotification, useAppSelector } from '~/hooks';
-import {
-  addChatMessage,
-  deleteChatMessageWS,
-  editChatMessageWS,
-} from '~/store/ChatsStore';
+import { deleteChatMessageWS, editChatMessageWS } from '~/store/ChatsStore';
 import {
   addMessage,
   deleteMessageWs,

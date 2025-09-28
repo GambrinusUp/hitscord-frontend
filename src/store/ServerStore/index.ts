@@ -11,7 +11,7 @@ export type {
   BannedUser,
   BannedUserResponse,
 } from './ServerStore.types';
-export { ChannelType, MuteStatus } from './ServerStore.types';
+export { ChannelType, MuteStatus, MessageType } from './ServerStore.types';
 
 export {
   ServerReducer,
@@ -33,7 +33,7 @@ export {
   addUserOnVoiceChannel,
   removeUserFromVoiceChannel,
   toggleUserMuteStatus,
-  //updatedRole,
+  updatedRole,
 } from './ServerStore.reducer';
 
 export {

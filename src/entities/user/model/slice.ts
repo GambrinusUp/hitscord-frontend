@@ -38,7 +38,13 @@ const initialState: UserState = {
 export const UserSlice = createSlice({
   name: USER_SLICE_NAME,
   initialState,
-  reducers: {},
+  reducers: {
+    clearTokens: (state) => {
+      state.accessToken = '';
+      state.refreshToken = '';
+      state.isLoggedIn = false;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(
@@ -164,6 +170,6 @@ export const UserSlice = createSlice({
   },
 });
 
-//export const { } = UserSlice.actions;
+export const { clearTokens } = UserSlice.actions;
 
 export const userReducer = UserSlice.reducer;

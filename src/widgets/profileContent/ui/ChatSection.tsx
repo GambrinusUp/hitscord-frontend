@@ -10,11 +10,13 @@ import {
 } from '@mantine/core';
 import { ArrowLeft, ArrowDown } from 'lucide-react';
 
+import { MessagesList } from './MessagesList';
+
 import { setActiveChat } from '~/entities/chat';
+import { MessageType } from '~/entities/message';
 import { AddUserToChat } from '~/features/addUserToChat';
 import { AttachedFilesList } from '~/features/attachedFilesList';
 import { ChangeChatName } from '~/features/changeChatName';
-import { MessagesList } from '~/features/getChatMessages';
 import { LeaveChat } from '~/features/leaveChat';
 import { SendMessageForm } from '~/features/sendMessageToChat';
 import { useAppDispatch, useAppSelector } from '~/hooks';
@@ -68,7 +70,7 @@ export const ChatSection = () => {
         style={{ flex: 1, padding: 10 }}
         onScrollPositionChange={handleScroll}
       >
-        <MessagesList scrollRef={scrollRef} />
+        <MessagesList scrollRef={scrollRef} type={MessageType.CHAT} />
       </ScrollArea>
       {!isAtBottom && showButton && (
         <Box

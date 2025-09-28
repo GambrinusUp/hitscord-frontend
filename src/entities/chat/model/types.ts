@@ -26,15 +26,30 @@ export interface ChatInfo {
   users: UserInChat[];
 }
 
+export enum MessageType {
+  Classic,
+  Vote,
+}
+
+export interface MessageFile {
+  fileId: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+}
+
 export interface ChatMessage {
-  chatId: string;
-  id: string;
   text: string;
+  modifiedAt: string | null;
+  nestedChannel: string | null;
+  files: MessageFile[] | null;
+  messageType: MessageType;
+  serverId: string | null;
+  channelId: string;
+  id: string;
   authorId: string;
   createdAt: string;
-  modifiedAt: string | null;
   replyToMessage: string | null;
-  files: string | null;
 }
 
 export interface ChatsState {

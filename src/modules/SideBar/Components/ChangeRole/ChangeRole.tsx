@@ -6,6 +6,7 @@ import { ChangeRoleProps } from './ChangeRole.types';
 
 import { useAppDispatch, useNotification, useAppSelector } from '~/hooks';
 import { RoleType, setEditedRole, updateRole } from '~/store/RolesStore';
+import { updatedRole } from '~/store/ServerStore';
 
 export const ChangeRole = ({ opened, onClose }: ChangeRoleProps) => {
   const dispatch = useAppDispatch();
@@ -38,6 +39,14 @@ export const ChangeRole = ({ opened, onClose }: ChangeRoleProps) => {
 
       if (result.meta.requestStatus === 'fulfilled') {
         showSuccess('Роль успешно изменена');
+        dispatch(
+          updatedRole({
+            serverId: currentServerId,
+            roleId: role.role.id,
+            name: roleName.trim(),
+            color: color.trim(),
+          }),
+        );
         dispatch(setEditedRole(null));
         onClose();
       }

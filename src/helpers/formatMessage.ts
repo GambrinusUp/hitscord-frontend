@@ -1,4 +1,4 @@
-import { ChatMessage } from '~/store/ChatsStore';
+import { ChatMessage } from '~/entities/chat';
 import { ChannelMessage } from '~/store/ServerStore';
 import { MessageType } from '~/store/ServerStore/ServerStore.types';
 
@@ -14,6 +14,7 @@ export const formatMessage = (rawMessage: any): ChannelMessage => ({
   nestedChannel: rawMessage.NestedChannelId || null,
   replyToMessage: rawMessage.ReplyToMessage || null,
   messageType: MessageType.Classic,
+  files: rawMessage.Files || null,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

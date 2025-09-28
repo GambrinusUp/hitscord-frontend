@@ -49,9 +49,9 @@ export const ChatsSlice = createSlice({
       state.error = '';
     },
     addChatMessage: (state, action: PayloadAction<ChatMessage>) => {
-      const { chatId } = action.payload;
+      const { channelId } = action.payload;
 
-      if (chatId === state.activeChat) {
+      if (channelId === state.activeChat) {
         state.messages.push(action.payload);
         //state.hasNewMessage = true;
       }
@@ -67,7 +67,7 @@ export const ChatsSlice = createSlice({
       }
     },
     editChatMessageWS: (state, action: PayloadAction<ChatMessage>) => {
-      if (state.activeChat === action.payload.chatId) {
+      if (state.activeChat === action.payload.channelId) {
         const index = state.messages.findIndex(
           (message) => message.id === action.payload.id,
         );
@@ -158,13 +158,15 @@ export const ChatsSlice = createSlice({
 
       .addCase(getChatMessages.pending, (state) => {
         state.messagesStatus = LoadingState.PENDING;
+        state.numberOfStarterMessage = 0;
+        state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
+        state.messages = [];
         state.error = '';
       })
       .addCase(
         getChatMessages.fulfilled,
         (state, action: PayloadAction<GetChatMessages>) => {
           state.messages = action.payload.messages;
-          // state.hasNewMessage = false;
           state.messagesStatus = LoadingState.FULFILLED;
           state.remainingMessagesCount = action.payload.remainingMessagesCount;
 

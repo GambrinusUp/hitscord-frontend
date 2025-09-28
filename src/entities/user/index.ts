@@ -1,4 +1,4 @@
-export { userReducer } from './model/slice';
+export { userReducer, clearTokens } from './model/slice';
 
 export type { SettingsForm } from './model/types';
 export { SettingType } from './model/types';
@@ -8,4 +8,6 @@ export {
   changeUserProfile,
   loginUser,
   getUserProfile,
+  logoutUser,
+  refreshTokens,
 } from './model/actions';

@@ -42,6 +42,7 @@ import {
 import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { LoadingState } from '~/shared';
 import { RoleType } from '~/store/RolesStore';
+import { UpdateRole } from '~/store/RolesStore/RolesStore.types';
 
 const initialState: ServerState = {
   serversList: [],
@@ -188,6 +189,8 @@ const testServerSlice = createSlice({
         canUse: null,
         notificated: null,
       };
+      state.numberOfStarterMessage = 0;
+      state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
     },
     clearHasNewMessage: (state) => {
       state.hasNewMessage = false;
@@ -307,9 +310,29 @@ const testServerSlice = createSlice({
         );
       }
     },
-    /*updatedRole: (state, action: PayloadAction<UpdateRole>) => {
-      console.log(updateRole);
-    },*/
+    updatedRole: (state, action: PayloadAction<UpdateRole>) => {
+      const { roleId, name, color } = action.payload;
+
+      const roleIndex = state.serverData.roles.findIndex(
+        (role) => role.id === roleId,
+      );
+
+      if (roleIndex !== -1) {
+        state.serverData.roles[roleIndex] = {
+          ...state.serverData.roles[roleIndex],
+          name: name,
+          color: color,
+        };
+      }
+
+      state.serverData.users = state.serverData.users.map((user) => {
+        if (user.roleId === roleId) {
+          user.roleName = name;
+        }
+
+        return user;
+      });
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -358,6 +381,8 @@ const testServerSlice = createSlice({
           },
           isNotifiable: false,
         };
+        state.numberOfStarterMessage = 0;
+        state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
         state.error = '';
       })
       .addCase(
@@ -425,6 +450,8 @@ const testServerSlice = createSlice({
       })
       .addCase(getChannelMessages.pending, (state) => {
         state.messagesStatus = LoadingState.PENDING;
+        state.numberOfStarterMessage = 0;
+        state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
         state.isLoading = true;
         state.error = '';
       })
@@ -672,7 +699,7 @@ export const {
   addUserOnVoiceChannel,
   removeUserFromVoiceChannel,
   toggleUserMuteStatus,
-  //updatedRole,
+  updatedRole,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

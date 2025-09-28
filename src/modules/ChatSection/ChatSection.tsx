@@ -5,10 +5,8 @@ import {
   Divider,
   Group,
   Indicator,
-  Loader,
   Paper,
   ScrollArea,
-  Skeleton,
   Stack,
   Text,
   Textarea,
@@ -20,45 +18,48 @@ import { useEffect, useRef, useState } from 'react';
 import { ChatSectionProps, MentionSuggestion } from './ChatSection.types';
 import { formatTagMessage } from './ChatSection.utils';
 
-import { MessageItem } from '~/components/MessageItem';
-import { MAX_MESSAGE_NUMBER } from '~/constants';
+import { attachFile, clearFiles } from '~/entities/files';
+import { MessageType } from '~/entities/message';
+import { AttachedFilesList } from '~/features/attachedFilesList';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
-import { clearHasNewMessage, getMoreMessages } from '~/store/ServerStore';
-import { MessageType } from '~/store/ServerStore/ServerStore.types';
+import { useScrollToBottom } from '~/shared/lib/hooks';
+import { useWebSocket } from '~/shared/lib/websocket';
+import { MessageType as ServerMessageType } from '~/store/ServerStore';
+import { MessagesList } from '~/widgets/messagesList';
 
 export const ChatSection = ({
   openSidebar,
   openDetailsPanel,
-  sendMessage,
-  editMessage,
-  deleteMessage,
 }: ChatSectionProps) => {
   const dispatch = useAppDispatch();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const { user, accessToken } = useAppSelector((state) => state.userStore);
+  const { sendMessage } = useWebSocket();
+  const { accessToken } = useAppSelector((state) => state.userStore);
   const {
     currentServerId,
     currentChannelId,
     messages,
     hasNewMessage,
-    isLoading,
     messagesStatus,
     serverData,
-    remainingMessagesCount,
-    numberOfStarterMessage,
-    messageIsLoading,
   } = useAppSelector((state) => state.testServerStore);
+  const { uploadedFiles, loading } = useAppSelector(
+    (state) => state.filesStore,
+  );
   const users = serverData.users;
   const roles = serverData.roles;
   const channelSettings = serverData.channels.textChannels.find(
     (channel) => channel.channelId === currentChannelId,
   );
+  const { scrollRef, isAtBottom, showButton, handleScroll, scrollToBottom } =
+    useScrollToBottom({
+      messagesStatus,
+      dependencies: [messages],
+      type: 'channel',
+    });
+
   const canWrite = channelSettings?.canWrite;
   const [newMessage, setNewMessage] = useState('');
-
-  const [isAtBottom, setIsAtBottom] = useState(true);
-  const [showButton, setShowButton] = useState(false);
 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<MentionSuggestion[]>([]);
@@ -68,8 +69,6 @@ export const ChatSection = ({
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
-
-  const firstMessageElementRef = useRef<HTMLDivElement | null>(null);
 
   const findMentionAtCursor = (
     text: string,
@@ -137,13 +136,18 @@ export const ChatSection = ({
       sendMessage({
         Token: accessToken,
         ChannelId: currentChannelId,
-        Classic: { Text: newMessage.trim(), NestedChannel: false },
+        Classic: {
+          Text: newMessage.trim(),
+          NestedChannel: false,
+          Files: uploadedFiles.map((file) => file.fileId),
+        },
 
-        MessageType: MessageType.Classic,
+        MessageType: ServerMessageType.Classic,
       });
       setNewMessage('');
       setShowSuggestions(false);
       setCurrentMention(null);
+      dispatch(clearFiles());
     }
   };
 
@@ -227,38 +231,17 @@ export const ChatSection = ({
     }
   };
 
-  const handleScroll = () => {
-    if (scrollRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-      const atBottom = scrollTop + clientHeight >= scrollHeight - 1;
-      setIsAtBottom(atBottom);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !currentChannelId) return;
 
-      if (atBottom) {
-        setShowButton(false);
-      }
+    for (const file of Array.from(e.target.files)) {
+      await dispatch(
+        attachFile({ channelId: currentChannelId, file }),
+      ).unwrap();
     }
+
+    e.target.value = '';
   };
-
-  useEffect(() => {
-    if (!isAtBottom) {
-      setShowButton(true);
-    } else if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-      dispatch(clearHasNewMessage());
-    }
-  }, [messages, isAtBottom]);
-
-  useEffect(() => {
-    if (messagesStatus === LoadingState.FULFILLED && scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'instant',
-      });
-    }
-  }, [messagesStatus]);
 
   useEffect(() => {
     if (suggestionsRef.current && showSuggestions) {
@@ -271,42 +254,6 @@ export const ChatSection = ({
       }
     }
   }, [selectedSuggestionIndex, showSuggestions]);
-
-  useEffect(() => {
-    if (!firstMessageElementRef.current) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          console.log('moreMessages');
-
-          if (remainingMessagesCount > 0) {
-            dispatch(
-              getMoreMessages({
-                accessToken,
-                channelId: currentChannelId!,
-                numberOfMessages:
-                  remainingMessagesCount > MAX_MESSAGE_NUMBER
-                    ? MAX_MESSAGE_NUMBER
-                    : remainingMessagesCount,
-                fromStart: numberOfStarterMessage,
-              }),
-            );
-          }
-        }
-      },
-      {
-        root: scrollRef.current,
-        threshold: 0.1,
-      },
-    );
-
-    observer.observe(firstMessageElementRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [messages]);
 
   return (
     <Box
@@ -337,38 +284,7 @@ export const ChatSection = ({
         style={{ flex: 1, padding: 10 }}
         onScrollPositionChange={handleScroll}
       >
-        <Stack gap="sm">
-          {isLoading &&
-            messages.length < 1 &&
-            Array.from({ length: 5 }).map((_, index) => (
-              // eslint-disable-next-line react/no-array-index-key
-              <Group align="flex-start" gap="xs" key={index}>
-                <Skeleton height={40} width={40} circle />
-                <Box style={{ flex: 1 }}>
-                  <Skeleton height={12} width="60%" radius="md" />
-                  <Skeleton height={10} width="40%" mt={8} radius="md" />
-                </Box>
-              </Group>
-            ))}
-          {messageIsLoading === LoadingState.PENDING && <Loader />}
-          {messages.map((message, index) => (
-            <div
-              ref={index === 0 ? firstMessageElementRef : null}
-              key={message.id}
-            >
-              <MessageItem
-                messageId={message.id}
-                content={message.text}
-                isOwnMessage={user.id === message.authorId}
-                time={message.createdAt}
-                modifiedAt={message.modifiedAt}
-                authorId={message.authorId}
-                editMessage={editMessage}
-                deleteMessage={deleteMessage}
-              />
-            </div>
-          ))}
-        </Stack>
+        <MessagesList scrollRef={scrollRef} type={MessageType.CHANNEL} />
       </ScrollArea>
 
       {!isAtBottom && showButton && (
@@ -384,16 +300,7 @@ export const ChatSection = ({
             <ActionIcon
               size="lg"
               variant="filled"
-              onClick={() => {
-                if (scrollRef.current) {
-                  scrollRef.current.scrollTo({
-                    top: scrollRef.current.scrollHeight,
-                    behavior: 'smooth',
-                  });
-                  setShowButton(false);
-                  dispatch(clearHasNewMessage());
-                }
-              }}
+              onClick={() => scrollToBottom()}
             >
               <ArrowDown size={20} />
             </ActionIcon>
@@ -402,6 +309,8 @@ export const ChatSection = ({
       )}
 
       <Box pos="relative">
+        <AttachedFilesList />
+
         {showSuggestions && suggestions.length > 0 && (
           <Paper
             ref={suggestionsRef}
@@ -451,8 +360,14 @@ export const ChatSection = ({
 
         <Group mt="auto" align="center" wrap="nowrap" gap={0}>
           {canWrite && (
-            <ActionIcon size="xl" variant="transparent">
+            <ActionIcon
+              component="label"
+              size="xl"
+              variant="transparent"
+              disabled={loading === LoadingState.PENDING}
+            >
               <Paperclip size={20} />
+              <input type="file" hidden multiple onChange={handleFileChange} />
             </ActionIcon>
           )}
           <Textarea

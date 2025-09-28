@@ -1,3 +1,4 @@
+import { MessageFile } from '~/entities/chat';
 import { LoadingState } from '~/shared';
 import { RoleType } from '~/store/RolesStore';
 
@@ -22,16 +23,17 @@ export interface ServerState {
 }
 
 export interface ChannelMessage {
-  serverId: string;
+  text: string;
+  modifiedAt: string | null;
+  nestedChannel: string | null;
+  files: MessageFile[] | null;
+  messageType: MessageType;
+  serverId: string | null;
   channelId: string;
   id: string;
-  text: string;
   authorId: string;
   createdAt: string;
-  modifiedAt: string | null;
-  nestedChannel: boolean | null;
   replyToMessage: string | null;
-  messageType: MessageType;
 }
 
 export interface GetMessage {

@@ -44,8 +44,16 @@ export const logout = async (): Promise<void> => {
   await api.delete(LOGOUT);
 };
 
-export const refresh = async (): Promise<LoginResponse> => {
-  const { data } = await api.post(REFRESH);
+export const refresh = async (refreshToken: string): Promise<LoginResponse> => {
+  const { data } = await api.post(
+    REFRESH,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    },
+  );
 
   return data;
 };

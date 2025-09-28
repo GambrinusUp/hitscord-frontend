@@ -1,19 +1,45 @@
 import { Flex, Stack, Title, Tabs, Box, Group } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 
-import { ApplicationFromList } from './ApplicationFromList';
-import { ApplicationToList } from './ApplicationToList';
-import { ChatSwitcher } from './ChatSwitcher';
-import { FriendshipList } from './FriendshipList';
-import { Settings } from './Settings';
-
-import { AddFriend } from '~/features/friendship/addFriend';
+import { MessageType } from '~/entities/message';
+import { useAppSelector } from '~/hooks';
 
 interface ProfileContentProps {
   activeLink: 'friends' | 'settings' | 'chats';
+  ChatSection: React.ComponentType<{
+    MessagesList: React.ComponentType<{
+      scrollRef: React.RefObject<HTMLDivElement>;
+      type: MessageType;
+    }>;
+  }>;
+  MessagesList: React.ComponentType<{
+    scrollRef: React.RefObject<HTMLDivElement>;
+    type: MessageType;
+  }>;
+  Settings: React.ComponentType;
+  FriendshipList: React.ComponentType;
+  ApplicationFromList: React.ComponentType;
+  ApplicationToList: React.ComponentType;
+  ChatsList: React.ComponentType<{ onCreateChatClick: () => void }>;
+  CreateChat: React.ComponentType<{ opened: boolean; onClose: () => void }>;
+  AddFriend: React.ComponentType;
 }
 
-export const ProfileContent = ({ activeLink }: ProfileContentProps) => {
+export const ProfileContent = ({
+  activeLink,
+  ChatSection,
+  MessagesList,
+  Settings,
+  FriendshipList,
+  ApplicationFromList,
+  ApplicationToList,
+  ChatsList,
+  CreateChat,
+  AddFriend,
+}: ProfileContentProps) => {
+  const [opened, { open, close }] = useDisclosure(false);
+  const { activeChat } = useAppSelector((state) => state.chatsStore);
   const [activeTab, setActiveTab] = useState<string | null>('friends');
 
   return (
@@ -27,7 +53,18 @@ export const ProfileContent = ({ activeLink }: ProfileContentProps) => {
       }}
     >
       <Flex w="100%" h="100%" justify="center">
-        {activeLink === 'chats' && <ChatSwitcher />}
+        {activeLink === 'chats' && (
+          <>
+            {!activeChat ? (
+              <>
+                <ChatsList onCreateChatClick={open} />
+                <CreateChat opened={opened} onClose={close} />
+              </>
+            ) : (
+              <ChatSection MessagesList={MessagesList} />
+            )}
+          </>
+        )}
         {activeLink === 'settings' && <Settings />}
         {activeLink === 'friends' && (
           <Stack gap="xs" w="100%" h="100%" p={10}>

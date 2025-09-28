@@ -1,16 +1,21 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
+import { useAppDispatch } from '~/hooks';
 import { LoadingState } from '~/shared/types';
+import { clearHasNewMessage } from '~/store/ServerStore';
 
 interface UseScrollToBottomProps {
   messagesStatus: LoadingState;
   dependencies?: unknown[];
+  type?: 'chat' | 'channel';
 }
 
 export const useScrollToBottom = ({
   messagesStatus,
   dependencies = [],
+  type = 'chat',
 }: UseScrollToBottomProps) => {
+  const dispatch = useAppDispatch();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showButton, setShowButton] = useState(false);
@@ -49,6 +54,10 @@ export const useScrollToBottom = ({
         top: scrollRef.current.scrollHeight,
         behavior: 'smooth',
       });
+
+      if (type === 'channel') {
+        dispatch(clearHasNewMessage());
+      }
     }
   }, [...dependencies, isAtBottom, scrollToBottom]);
 

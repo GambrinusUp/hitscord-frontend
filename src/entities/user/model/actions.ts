@@ -101,11 +101,11 @@ export const logoutUser = createAsyncThunk<void, void, { rejectValue: string }>(
 
 export const refreshTokens = createAsyncThunk<
   LoginResponse,
-  void,
+  { refreshToken: string },
   { rejectValue: string }
->(REFRESH_ACTION_NAME, async (_, { rejectWithValue }) => {
+>(REFRESH_ACTION_NAME, async ({ refreshToken }, { rejectWithValue }) => {
   try {
-    const response = await UserAPI.refresh();
+    const response = await UserAPI.refresh(refreshToken);
 
     return response;
   } catch (e) {
