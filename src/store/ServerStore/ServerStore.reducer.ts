@@ -50,10 +50,9 @@ const initialState: ServerState = {
     serverId: '',
     serverName: '',
     icon: '',
+    isClosed: false,
     roles: [],
-    userRoleId: '',
-    userRole: '',
-    userRoleType: RoleType.Uncertain,
+    userRoles: [],
     users: [],
     channels: {
       textChannels: [],
@@ -90,8 +89,10 @@ const initialState: ServerState = {
   pageBannedUsers: 1,
   totalPagesBannedUsers: 1,
   isLoading: false,
-  numberOfStarterMessage: 0,
-  remainingMessagesCount: MAX_MESSAGE_NUMBER,
+  numberOfMessages: MAX_MESSAGE_NUMBER,
+  startMessageId: 0,
+  remainingMessagesCount: 0,
+  allMessagesCount: 0,
   messageIsLoading: LoadingState.IDLE,
   error: '',
 };
@@ -105,7 +106,24 @@ const testServerSlice = createSlice({
       state.error = '';
     },
     setCurrentChannelId: (state, action: PayloadAction<string | null>) => {
-      state.currentChannelId = action.payload;
+      const channelId = action.payload;
+      state.currentChannelId = channelId;
+
+      if (channelId) {
+        const textChannel = state.serverData.channels.textChannels.find(
+          (channel) => channel.channelId === channelId,
+        );
+
+        /*
+                        "nonReadedCount": 0,
+                "nonReadedTaggedCount": 0,
+                "lastReadedMessageId": 1
+        */
+
+        if (textChannel) {
+          state.startMessageId = textChannel.lastReadedMessageId;
+        }
+      }
     },
     setCurrentVoiceChannelId: (state, action: PayloadAction<string | null>) => {
       state.currentVoiceChannelId = action.payload;
@@ -120,7 +138,7 @@ const testServerSlice = createSlice({
     },
     deleteMessageWs: (
       state,
-      action: PayloadAction<{ channelId: string; messageId: string }>,
+      action: PayloadAction<{ channelId: string; messageId: number }>,
     ) => {
       state.messages = state.messages.filter(
         (message) => message.id !== action.payload.messageId,
@@ -159,10 +177,9 @@ const testServerSlice = createSlice({
         serverId: '',
         serverName: '',
         icon: '',
+        isClosed: false,
         roles: [],
-        userRoleId: '',
-        userRole: '',
-        userRoleType: RoleType.Uncertain,
+        userRoles: [],
         users: [],
         channels: {
           textChannels: [],
@@ -189,7 +206,10 @@ const testServerSlice = createSlice({
         canUse: null,
         notificated: null,
       };
-      state.numberOfStarterMessage = 0;
+      state.numberOfMessages = 0;
+      state.startMessageId = 0;
+      state.remainingMessagesCount = 0;
+      state.allMessagesCount = 0;
       state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
     },
     clearHasNewMessage: (state) => {
@@ -359,10 +379,9 @@ const testServerSlice = createSlice({
           serverId: '',
           serverName: '',
           icon: '',
+          isClosed: false,
           roles: [],
-          userRoleId: '',
-          userRole: '',
-          userRoleType: RoleType.Uncertain,
+          userRoles: [],
           users: [],
           channels: {
             textChannels: [],
@@ -381,8 +400,10 @@ const testServerSlice = createSlice({
           },
           isNotifiable: false,
         };
-        state.numberOfStarterMessage = 0;
-        state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
+        state.numberOfMessages = 0;
+        state.startMessageId = 0;
+        state.remainingMessagesCount = 0;
+        state.allMessagesCount = 0;
         state.error = '';
       })
       .addCase(
@@ -401,6 +422,17 @@ const testServerSlice = createSlice({
             newCurrentChannelId =
               newChannels.length > 0 ? newChannels[0].channelId : null;
             state.currentChannelId = newCurrentChannelId;
+
+            /* Брать данные из канала */
+            const channelData = action.payload.channels.textChannels.find(
+              (channel) => channel.channelId === newCurrentChannelId,
+            );
+
+            if (channelData) {
+              state.startMessageId = channelData.lastReadedMessageId;
+              /* Можно добавить state.remaining = data.nonReadedCount */
+            }
+
             state.messages = [];
           }
 
@@ -450,8 +482,10 @@ const testServerSlice = createSlice({
       })
       .addCase(getChannelMessages.pending, (state) => {
         state.messagesStatus = LoadingState.PENDING;
-        state.numberOfStarterMessage = 0;
-        state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
+        state.numberOfMessages = 0;
+        state.startMessageId = 0;
+        state.remainingMessagesCount = 0;
+        state.allMessagesCount = 0;
         state.isLoading = true;
         state.error = '';
       })
@@ -463,10 +497,13 @@ const testServerSlice = createSlice({
           state.messagesStatus = LoadingState.FULFILLED;
           state.isLoading = false;
           state.remainingMessagesCount = action.payload.remainingMessagesCount;
+          state.allMessagesCount = action.payload.allMessagesCount;
 
-          if (action.payload.remainingMessagesCount > 0) {
+          state.startMessageId = action.payload.startMessageId;
+          /*if (action.payload.remainingMessagesCount > 0) {
             state.numberOfStarterMessage = MAX_MESSAGE_NUMBER;
-          }
+          }*/
+
           state.error = '';
         },
       )
@@ -479,7 +516,7 @@ const testServerSlice = createSlice({
         state.messageIsLoading = LoadingState.PENDING;
         state.error = '';
       })
-      .addCase(
+      /*.addCase(
         getMoreMessages.fulfilled,
         (state, action: PayloadAction<GetMessage>) => {
           state.messages = [...action.payload.messages, ...state.messages];
@@ -492,7 +529,38 @@ const testServerSlice = createSlice({
           }
           state.error = '';
         },
-      )
+      )*/
+      /*{
+            "messages": [],
+            "numberOfMessages": 0,
+            "startMessageId": 0,
+            "remainingMessagesCount": 6,
+            "allMessagesCount": 6
+          }*/
+      .addCase(getMoreMessages.fulfilled, (state, action) => {
+        const { payload, meta } = action;
+        const {
+          messages,
+          remainingMessagesCount,
+          allMessagesCount,
+          startMessageId,
+        } = payload;
+        const { down } = meta.arg;
+
+        if (!down) {
+          state.messages = [...messages, ...state.messages];
+        } else {
+          state.messages = [...state.messages, ...messages];
+        }
+
+        state.messageIsLoading = LoadingState.FULFILLED;
+        state.remainingMessagesCount = remainingMessagesCount;
+        state.allMessagesCount = allMessagesCount;
+        state.startMessageId = startMessageId;
+
+        state.error = '';
+      })
+
       .addCase(getMoreMessages.rejected, (state, action) => {
         state.messageIsLoading = LoadingState.REJECTED;
         state.error = action.payload as string;

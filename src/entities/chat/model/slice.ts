@@ -30,14 +30,21 @@ const initialState: ChatsState = {
     chatId: '',
     chatName: '',
     users: [],
+    nonReadedCount: 0,
+    nonReadedTaggedCount: 0,
+    lastReadedMessageId: 0,
+    nonNotifiable: false,
+    icon: null,
   },
   activeChat: null,
   chatLoading: LoadingState.IDLE,
   messages: [],
   messagesStatus: LoadingState.IDLE,
   messageIsLoading: LoadingState.IDLE,
-  numberOfStarterMessage: 0,
   remainingMessagesCount: MAX_MESSAGE_NUMBER,
+  numberOfMessages: 0,
+  startMessageId: 0,
+  allMessagesCount: 0,
 };
 
 export const ChatsSlice = createSlice({
@@ -53,7 +60,6 @@ export const ChatsSlice = createSlice({
 
       if (channelId === state.activeChat) {
         state.messages.push(action.payload);
-        //state.hasNewMessage = true;
       }
     },
     deleteChatMessageWS: (
@@ -127,6 +133,11 @@ export const ChatsSlice = createSlice({
           chatId: '',
           chatName: '',
           users: [],
+          nonReadedCount: 0,
+          nonReadedTaggedCount: 0,
+          lastReadedMessageId: 0,
+          nonNotifiable: false,
+          icon: null,
         };
         state.error = action.payload as string;
       })
@@ -137,9 +148,16 @@ export const ChatsSlice = createSlice({
           chatId: '',
           chatName: '',
           users: [],
+          nonReadedCount: 0,
+          nonReadedTaggedCount: 0,
+          lastReadedMessageId: 0,
+          nonNotifiable: false,
+          icon: null,
         };
-        state.numberOfStarterMessage = 0;
         state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
+        state.numberOfMessages = 0;
+        state.startMessageId = 0;
+        state.allMessagesCount = 0;
         state.messages = [];
         state.chatLoading = LoadingState.PENDING;
       })
@@ -158,8 +176,10 @@ export const ChatsSlice = createSlice({
 
       .addCase(getChatMessages.pending, (state) => {
         state.messagesStatus = LoadingState.PENDING;
-        state.numberOfStarterMessage = 0;
         state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
+        state.numberOfMessages = 0;
+        state.startMessageId = 0;
+        state.allMessagesCount = 0;
         state.messages = [];
         state.error = '';
       })

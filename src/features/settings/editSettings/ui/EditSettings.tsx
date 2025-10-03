@@ -4,6 +4,7 @@ import { Ban, Pencil, Save } from 'lucide-react';
 import { useState } from 'react';
 
 import {
+  changeNotificationLifetime,
   changeSettings,
   changeUserProfile,
   SettingType,
@@ -89,6 +90,18 @@ export const EditSettings = ({
       const result = await dispatch(
         changeUserProfile({
           newProfile: { name: values.name, mail: values.email },
+        }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        showSuccess('Профиль успешно изменен');
+      }
+    }
+
+    if (values.notificationLifeTime !== user.notificationLifeTime) {
+      const result = await dispatch(
+        changeNotificationLifetime({
+          time: values.notificationLifeTime,
         }),
       );
 

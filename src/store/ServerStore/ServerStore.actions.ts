@@ -141,22 +141,24 @@ export const getChannelMessages = createAsyncThunk<
   {
     accessToken: string;
     channelId: string;
-    numberOfMessages: number;
-    fromStart: number;
+    number: number;
+    fromMessageId: number;
+    down: boolean;
   },
   { rejectValue: string }
 >(
   'testServerSlice/getChannelMessages',
   async (
-    { accessToken, channelId, numberOfMessages, fromStart },
+    { accessToken, channelId, number, fromMessageId, down },
     { rejectWithValue },
   ) => {
     try {
       const response = await ChannelsAPI.getChannelsMessages(
         accessToken,
         channelId,
-        numberOfMessages,
-        fromStart,
+        number,
+        fromMessageId,
+        down,
       );
 
       return response;
@@ -173,22 +175,24 @@ export const getMoreMessages = createAsyncThunk<
   {
     accessToken: string;
     channelId: string;
-    numberOfMessages: number;
-    fromStart: number;
+    number: number;
+    fromMessageId: number;
+    down: boolean;
   },
   { rejectValue: string }
 >(
   'testServerSlice/getMoreMessages',
   async (
-    { accessToken, channelId, numberOfMessages, fromStart },
+    { accessToken, channelId, number, fromMessageId, down },
     { rejectWithValue },
   ) => {
     try {
       const response = await ChannelsAPI.getChannelsMessages(
         accessToken,
         channelId,
-        numberOfMessages,
-        fromStart,
+        number,
+        fromMessageId,
+        down,
       );
 
       return response;

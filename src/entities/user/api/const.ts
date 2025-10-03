@@ -9,4 +9,6 @@ export const LOGOUT = `${BASE_PATH}/logout`;
 export const REFRESH = `${BASE_PATH}/refresh`;
 export const CHANGE_SETTINGS = (type: SettingType) =>
   `${BASE_PATH}/settings/${type}`;
+export const CHANGE_NOTIFICATION_LIFETIME = `${BASE_PATH}/settings/notification/lifetime`;
 export const CHANGE_PROFILE = `${BASE_PATH}/profile/change`;
+export const CHANGE_PROFILE_ICON = `${BASE_PATH}/icon`;

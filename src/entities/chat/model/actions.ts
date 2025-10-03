@@ -1,7 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 
-import { Chat, ChatInfo, GetChatMessages, GetChats } from './types';
+import {
+  Chat,
+  ChatInfo,
+  GetChatMessages,
+  GetChats,
+  GetMessagesParams,
+} from './types';
 
 import { ChatsAPI } from '~/entities/chat/api';
 
@@ -80,16 +86,17 @@ export const getChatInfo = createAsyncThunk<
 
 export const getChatMessages = createAsyncThunk<
   GetChatMessages,
-  { chatId: string; number: number; fromStart: number },
+  GetMessagesParams,
   { rejectValue: string }
 >(
   'chatsSlice/getChatMessages',
-  async ({ chatId, number, fromStart }, { rejectWithValue }) => {
+  async ({ chatId, number, fromMessageId, down }, { rejectWithValue }) => {
     try {
       const response = await ChatsAPI.getChatMessages(
         chatId,
         number,
-        fromStart,
+        fromMessageId,
+        down,
       );
 
       return response;
@@ -105,16 +112,17 @@ export const getChatMessages = createAsyncThunk<
 
 export const getMoreChatMessages = createAsyncThunk<
   GetChatMessages,
-  { chatId: string; number: number; fromStart: number },
+  GetMessagesParams,
   { rejectValue: string }
 >(
   'chatsSlice/getMoreChatMessages',
-  async ({ chatId, number, fromStart }, { rejectWithValue }) => {
+  async ({ chatId, number, fromMessageId, down }, { rejectWithValue }) => {
     try {
       const response = await ChatsAPI.getChatMessages(
         chatId,
         number,
-        fromStart,
+        fromMessageId,
+        down,
       );
 
       return response;

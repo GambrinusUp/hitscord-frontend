@@ -42,6 +42,7 @@ import {
   clearServerData,
   setCurrentVoiceChannelId,
 } from '~/store/ServerStore/ServerStore.reducer';
+import { NotificationChannels } from '~/widgets/notificationChannels';
 
 export const SideBar = ({ onClose }: SideBarProps) => {
   const navigate = useNavigate();
@@ -167,6 +168,7 @@ export const SideBar = ({ onClose }: SideBarProps) => {
         <Divider />
         <ScrollArea.Autosize mah="100%" maw="100%" scrollbarSize={0}>
           <TextChannels onClose={onClose} />
+          <NotificationChannels />
           <VoiceChannels />
         </ScrollArea.Autosize>
         <Panel />

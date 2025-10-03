@@ -1,4 +1,5 @@
 import { MessageFile } from '~/entities/chat';
+import { FileResponse } from '~/entities/files';
 import { LoadingState } from '~/shared';
 import { RoleType } from '~/store/RolesStore';
 
@@ -17,8 +18,12 @@ export interface ServerState {
   totalPagesBannedUsers: number;
   isLoading: boolean;
   messageIsLoading: LoadingState;
-  numberOfStarterMessage: number;
+
+  numberOfMessages: number;
+  startMessageId: number;
   remainingMessagesCount: number;
+  allMessagesCount: number;
+
   error: string;
 }
 
@@ -30,7 +35,7 @@ export interface ChannelMessage {
   messageType: MessageType;
   serverId: string | null;
   channelId: string;
-  id: string;
+  id: number;
   authorId: string;
   createdAt: string;
   replyToMessage: string | null;
@@ -39,7 +44,7 @@ export interface ChannelMessage {
 export interface GetMessage {
   messages: ChannelMessage[];
   numberOfMessages: number;
-  numberOfStarterMessage: number;
+  startMessageId: number;
   remainingMessagesCount: number;
   allMessagesCount: number;
 }
@@ -47,6 +52,7 @@ export interface GetMessage {
 export enum ChannelType {
   TEXT_CHANNEL = 0,
   VOICE_CHANNEL = 1,
+  NOTIFICATION_CHANNEL = 2,
 }
 
 export interface Role {
@@ -64,21 +70,22 @@ export interface UserOnServer {
   userName: string;
   userTag: string;
   icon: string | null;
-  roleId: string;
-  roleName: string;
-  roleType: RoleType;
-  mail: string;
+  roles: UserRoleOnServer[];
   notifiable: boolean;
   friendshipApplication: boolean;
   nonFriendMessage: boolean;
+  isFriend: boolean;
 }
 
 export interface TextChannel {
   channelId: string;
   channelName: string;
-  canWrite: true;
-  canWriteSub: true;
-  isNotifiable: true;
+  canWrite: boolean;
+  canWriteSub: boolean;
+  isNotifiable: boolean;
+  nonReadedCount: number;
+  nonReadedTaggedCount: number;
+  lastReadedMessageId: number;
 }
 
 export enum MuteStatus {
@@ -109,14 +116,19 @@ export interface AnnouncementChannel {
   annoucementRoles: any[];
 }
 
+export interface UserRoleOnServer {
+  roleId: string;
+  roleName: string;
+  roleType: number;
+}
+
 export interface ServerData {
   serverId: string;
   serverName: string;
   icon: string | null;
+  isClosed: boolean;
   roles: Role[];
-  userRoleId: string;
-  userRole: string;
-  userRoleType: RoleType;
+  userRoles: UserRoleOnServer[];
   isCreator: boolean;
   permissions: {
     canChangeRole: boolean;
@@ -139,6 +151,10 @@ export interface ServerData {
 export interface ServerItem {
   serverId: string;
   serverName: string;
+  isNotifiable: boolean;
+  icon: FileResponse | null;
+  nonReadedCount: number;
+  nonReadedTaggedCount: number;
 }
 
 export interface GetServersResponse {
@@ -164,13 +180,13 @@ export interface CreateMessageWs {
 
 export interface EditMessageWs {
   Token: string;
-  MessageId: string;
+  MessageId: number;
   Text: string;
 }
 
 export interface DeleteMessageWs {
   Token: string;
-  MessageId: string;
+  MessageId: number;
 }
 
 export interface ChannelSettings {

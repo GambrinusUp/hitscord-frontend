@@ -10,4 +10,6 @@ export {
   getUserProfile,
   logoutUser,
   refreshTokens,
+  changeNotificationLifetime,
+  changeProfileIcon,
 } from './model/actions';

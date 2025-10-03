@@ -6,6 +6,7 @@ import { SettingsForm } from '~/entities/user';
 import { EditSettings } from '~/features/settings/editSettings';
 import { PrivacySettings } from '~/features/settings/privacySettings';
 import { ProfileSettings } from '~/features/settings/profileSettings';
+import { UpdateIcon } from '~/features/settings/updateIcon';
 import { useAppSelector } from '~/hooks';
 import {
   combineValidators,
@@ -26,6 +27,7 @@ export const Settings = () => {
       notifiable: user.notifiable,
       friendshipApplication: user.friendshipApplication,
       nonFriendMessage: user.nonFriendMessage,
+      notificationLifeTime: user.notificationLifeTime,
     },
 
     validate: {
@@ -40,7 +42,11 @@ export const Settings = () => {
 
   return (
     <Stack p="xl" gap="md" w="100%">
-      <ProfileSettings isEdit={isEdit} form={form} />
+      <ProfileSettings
+        isEdit={isEdit}
+        form={form}
+        updateAction={<UpdateIcon />}
+      />
       <PrivacySettings isEdit={isEdit} form={form} />
       <EditSettings isEdit={isEdit} setIsEdit={setIsEdit} form={form} />
     </Stack>

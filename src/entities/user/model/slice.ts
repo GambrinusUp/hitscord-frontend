@@ -1,6 +1,8 @@
 import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
 
 import {
+  changeNotificationLifetime,
+  changeProfileIcon,
   changeSettings,
   changeUserProfile,
   getUserProfile,
@@ -27,6 +29,7 @@ const initialState: UserState = {
     friendshipApplication: false,
     nonFriendMessage: false,
     icon: null,
+    notificationLifeTime: 0,
   },
   accessToken: loadTokenFromLocalStorage(TokenType.ACCESS),
   refreshToken: loadTokenFromLocalStorage(TokenType.REFRESH),
@@ -135,14 +138,26 @@ export const UserSlice = createSlice({
             state.user.notifiable = !state.user.notifiable;
             break;
         }
+
+        state.error = '';
       })
       .addCase(
         changeUserProfile.fulfilled,
         (state, action: PayloadAction<User>) => {
-          state.error = '';
           state.user = action.payload;
+          state.error = '';
         },
       )
+      .addCase(changeNotificationLifetime.fulfilled, (state, { meta }) => {
+        const { time } = meta.arg;
+
+        state.user.notificationLifeTime = time;
+        state.error = '';
+      })
+      .addCase(changeProfileIcon.fulfilled, (state, action) => {
+        state.user.icon = action.payload;
+        state.error = '';
+      })
       .addMatcher(
         isAnyOf(
           changeSettings.pending,
@@ -150,6 +165,8 @@ export const UserSlice = createSlice({
           logoutUser.pending,
           getUserProfile.pending,
           registerUser.pending,
+          changeNotificationLifetime.pending,
+          changeProfileIcon.pending,
         ),
         (state) => {
           state.error = '';
@@ -162,6 +179,8 @@ export const UserSlice = createSlice({
           changeSettings.rejected,
           changeUserProfile.rejected,
           getUserProfile.rejected,
+          changeNotificationLifetime.rejected,
+          changeProfileIcon.rejected,
         ),
         (state, action) => {
           state.error = action.payload as string;

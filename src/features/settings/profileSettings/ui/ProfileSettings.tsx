@@ -3,10 +3,10 @@ import type { SettingsForm } from '~/entities/user';
 import {
   Avatar,
   Badge,
-  Button,
   Card,
   Divider,
   Group,
+  NumberInput,
   ScrollArea,
   Stack,
   Text,
@@ -14,7 +14,7 @@ import {
   Title,
 } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
-import { Calendar, Mail, Tag, Upload, User } from 'lucide-react';
+import { Calendar, Mail, Tag, User } from 'lucide-react';
 
 import { formatDateWithDots } from '~/helpers';
 import { useAppSelector } from '~/hooks';
@@ -22,10 +22,17 @@ import { useAppSelector } from '~/hooks';
 interface ProfileSettingsProps {
   isEdit: boolean;
   form: UseFormReturnType<SettingsForm>;
+  updateAction: React.ReactNode;
 }
 
-export const ProfileSettings = ({ isEdit, form }: ProfileSettingsProps) => {
+export const ProfileSettings = ({
+  isEdit,
+  form,
+  updateAction,
+}: ProfileSettingsProps) => {
   const { user } = useAppSelector((state) => state.userStore);
+
+  /* добавить загрузку иконки */
 
   return (
     <Card
@@ -49,9 +56,7 @@ export const ProfileSettings = ({ isEdit, form }: ProfileSettingsProps) => {
               Аккаунт создан: {formatDateWithDots(user.accontCreateDate)}
             </Text>
           </Group>
-          <Button variant="light" radius="md" leftSection={<Upload />}>
-            Загрузить фото
-          </Button>
+          {updateAction}
         </Stack>
       </Group>
       <Divider mt="md" />
@@ -85,6 +90,15 @@ export const ProfileSettings = ({ isEdit, form }: ProfileSettingsProps) => {
             placeholder="Введите тег пользователя"
             value={user.tag}
             disabled
+          />
+          <NumberInput
+            label="Длительность уведомления (сек.)"
+            placeholder="Число от 2 до 20"
+            key={form.key('notificationLifeTime')}
+            {...form.getInputProps('notificationLifeTime')}
+            min={2}
+            max={20}
+            disabled={!isEdit}
           />
         </Stack>
       </ScrollArea.Autosize>

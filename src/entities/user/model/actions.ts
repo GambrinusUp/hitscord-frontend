@@ -2,7 +2,9 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 
 import {
+  CHANGE_NOTIFICATION_LIFETIME_ACTION_NAME,
   CHANGE_PROFILE_ACTION_NAME,
+  CHANGE_PROFILE_ICON_ACTION_NAME,
   CHANGE_SETTINGS_ACTION_NAME,
   GET_USER_PROFILE_ACTION_NAME,
   LOGIN_USER_ACTION_NAME,
@@ -19,6 +21,7 @@ import {
   User,
 } from './types';
 
+import { FileResponse } from '~/entities/files';
 import { UserAPI } from '~/entities/user/api';
 import { ERROR_MESSAGES } from '~/shared/constants';
 
@@ -137,6 +140,27 @@ export const changeSettings = createAsyncThunk<
   }
 });
 
+export const changeNotificationLifetime = createAsyncThunk<
+  void,
+  { time: number },
+  { rejectValue: string }
+>(
+  CHANGE_NOTIFICATION_LIFETIME_ACTION_NAME,
+  async ({ time }, { rejectWithValue }) => {
+    try {
+      await UserAPI.changeNotificationLifetime(time);
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        return rejectWithValue(
+          e.response?.data?.message || ERROR_MESSAGES.DEFAULT,
+        );
+      }
+
+      return rejectWithValue(ERROR_MESSAGES.DEFAULT);
+    }
+  },
+);
+
 export const changeUserProfile = createAsyncThunk<
   User,
   { newProfile: ChangeProfileData },
@@ -144,6 +168,26 @@ export const changeUserProfile = createAsyncThunk<
 >(CHANGE_PROFILE_ACTION_NAME, async ({ newProfile }, { rejectWithValue }) => {
   try {
     const response = await UserAPI.changeProfile(newProfile);
+
+    return response;
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      return rejectWithValue(
+        e.response?.data?.message || ERROR_MESSAGES.DEFAULT,
+      );
+    }
+
+    return rejectWithValue(ERROR_MESSAGES.DEFAULT);
+  }
+});
+
+export const changeProfileIcon = createAsyncThunk<
+  FileResponse,
+  { icon: File },
+  { rejectValue: string }
+>(CHANGE_PROFILE_ICON_ACTION_NAME, async ({ icon }, { rejectWithValue }) => {
+  try {
+    const response = await UserAPI.changeProfileIcon(icon);
 
     return response;
   } catch (e) {

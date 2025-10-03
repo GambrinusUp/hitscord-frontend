@@ -1,46 +1,50 @@
 import { useEffect, useRef } from 'react';
 
+import { useChannelData } from './useChannelData';
+import { useChatData } from './useChatData';
+
 import { MAX_MESSAGE_NUMBER } from '~/constants';
-import { getChatMessages, getMoreChatMessages } from '~/entities/chat';
+import {
+  getChatInfo,
+  getChatMessages,
+  getMoreChatMessages,
+} from '~/entities/chat';
 import { MessageType } from '~/entities/message';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { getMoreMessages } from '~/store/ServerStore';
 
+/* Переписать */
 export const useMessages = (
   scrollRef: React.RefObject<HTMLDivElement>,
   type: MessageType,
 ) => {
   const dispatch = useAppDispatch();
   const { accessToken } = useAppSelector((state) => state.userStore);
+  const { activeChat } = useAppSelector((state) => state.chatsStore);
 
-  const chatsStore = useAppSelector((state) => state.chatsStore);
-  const channelsStore = useAppSelector((state) => state.testServerStore);
+  //const chatData = useChatData();
+  const channelData = useChannelData();
 
   const {
     messages,
     messagesStatus,
     remainingMessagesCount,
-    numberOfStarterMessage,
+    startMessageId,
+    allMessagesCount,
     entityId,
-  } =
-    type === MessageType.CHAT
-      ? {
-          messages: chatsStore.messages,
-          messagesStatus: chatsStore.messagesStatus,
-          remainingMessagesCount: chatsStore.remainingMessagesCount,
-          numberOfStarterMessage: chatsStore.numberOfStarterMessage,
-          entityId: chatsStore.chat?.chatId,
-        }
-      : {
-          messages: channelsStore.messages,
-          messagesStatus: channelsStore.messagesStatus,
-          remainingMessagesCount: channelsStore.remainingMessagesCount,
-          numberOfStarterMessage: channelsStore.numberOfStarterMessage,
-          entityId: channelsStore.currentChannelId,
-        };
+    //} = type === MessageType.CHAT ? chatData : channelData;
+  } = channelData;
 
   const firstMessageElementRef = useRef<HTMLDivElement | null>(null);
+  const lastMessageElementRef = useRef<HTMLDivElement | null>(null);
 
+  useEffect(() => {
+    if (type === MessageType.CHAT && activeChat) {
+      dispatch(getChatInfo({ chatId: activeChat }));
+    }
+  }, [activeChat]);
+
+  // Вызывается два раза/ много раз, возможно при смене active chat не сбрасывается chat.chatId
   useEffect(() => {
     if (!entityId) return;
 
@@ -49,20 +53,27 @@ export const useMessages = (
         getChatMessages({
           chatId: entityId,
           number: MAX_MESSAGE_NUMBER,
-          fromStart: numberOfStarterMessage,
+          fromMessageId: 2,
+          down: false,
         }),
       );
     }
-  }, [type, entityId, numberOfStarterMessage]);
+  }, [entityId]);
 
   useEffect(() => {
     if (!firstMessageElementRef.current) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting || remainingMessagesCount <= 0) return;
+        if (!entry.isIntersecting) return;
 
-        if (type === MessageType.CHAT && entityId) {
+        const messagesAbove = startMessageId - 1;
+
+        if (messagesAbove < 1) return;
+
+        const numberToLoad = Math.min(messagesAbove, MAX_MESSAGE_NUMBER);
+
+        /*if (type === MessageType.CHAT && entityId) {
           dispatch(
             getMoreChatMessages({
               chatId: entityId,
@@ -70,18 +81,16 @@ export const useMessages = (
               fromStart: numberOfStarterMessage,
             }),
           );
-        }
+        }*/
 
         if (type === MessageType.CHANNEL && entityId) {
           dispatch(
             getMoreMessages({
               accessToken,
               channelId: entityId,
-              numberOfMessages: Math.min(
-                remainingMessagesCount,
-                MAX_MESSAGE_NUMBER,
-              ),
-              fromStart: numberOfStarterMessage,
+              number: numberToLoad,
+              fromMessageId: startMessageId,
+              down: false,
             }),
           );
         }
@@ -97,11 +106,63 @@ export const useMessages = (
     return () => {
       observer.disconnect();
     };
-  }, [messages, entityId, remainingMessagesCount, numberOfStarterMessage]);
+  }, [messages, entityId, remainingMessagesCount, startMessageId]);
+
+  useEffect(() => {
+    if (!lastMessageElementRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+
+        /*if (type === MessageType.CHAT && entityId) {
+          const lastMessageId = messages[messages.length - 1]?.id;
+          
+          if (lastMessageId && lastReadedMessageId && lastMessageId < lastReadedMessageId) {
+            dispatch(
+              getMoreChatMessages({
+                chatId: entityId,
+                number: MAX_MESSAGE_NUMBER,
+                fromMessageId: lastMessageId,
+                down: true, // Подгружаем вниз (новые)
+              }),
+            );
+          }
+        }*/
+
+          if()
+
+        if (type === MessageType.CHANNEL && entityId) {
+          const lastMessageId = messages[messages.length - 1]?.id;
+
+          dispatch(
+            getMoreMessages({
+              accessToken,
+              channelId: entityId,
+              number: MAX_MESSAGE_NUMBER,
+              fromMessageId: lastMessageId,
+              down: true,
+            }),
+          );
+        }
+      },
+      {
+        root: scrollRef.current,
+        threshold: 0.1,
+      },
+    );
+
+    observer.observe(lastMessageElementRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [messages, entityId, remainingMessagesCount, startMessageId]);
 
   return {
     messages,
     messagesStatus,
     firstMessageElementRef,
+    lastMessageElementRef,
   };
 };

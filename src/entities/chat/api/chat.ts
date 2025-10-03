@@ -34,10 +34,11 @@ export const getChatInfo = async (chatId: string): Promise<ChatInfo> => {
 export const getChatMessages = async (
   chatId: string,
   number: number,
-  fromStart: number,
+  fromMessageId: number,
+  down: boolean,
 ): Promise<GetChatMessages> => {
   const { data } = await api.get('/chat/messages', {
-    params: { chatId, number, fromStart },
+    params: { chatId, number, fromMessageId, down },
   });
 
   return data;

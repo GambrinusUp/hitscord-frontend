@@ -1,3 +1,4 @@
+import { FileResponse } from '~/entities/files';
 import { LoadingState } from '~/shared';
 
 export interface RegisterCredentials {
@@ -25,7 +26,8 @@ export interface User {
   notifiable: boolean;
   friendshipApplication: boolean;
   nonFriendMessage: boolean;
-  icon: string | null;
+  icon: FileResponse | null;
+  notificationLifeTime: number;
 }
 
 export enum SettingType {
@@ -54,4 +56,5 @@ export interface SettingsForm {
   notifiable: boolean;
   friendshipApplication: boolean;
   nonFriendMessage: boolean;
+  notificationLifeTime: number;
 }

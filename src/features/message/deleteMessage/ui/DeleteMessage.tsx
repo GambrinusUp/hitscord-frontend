@@ -7,7 +7,7 @@ import { useWebSocket } from '~/shared/lib/websocket';
 
 interface DeleteMessageProps {
   setIsEditing: (value: boolean) => void;
-  messageId: string;
+  messageId: number;
   type: MessageType;
 }
 

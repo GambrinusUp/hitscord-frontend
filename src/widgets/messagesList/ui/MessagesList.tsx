@@ -14,34 +14,48 @@ interface MessagesListProps {
 export const MessagesList = ({ scrollRef, type }: MessagesListProps) => {
   const { user } = useAppSelector((state) => state.userStore);
 
-  const { messages, messagesStatus, firstMessageElementRef } = useMessages(
-    scrollRef,
-    type,
-  );
+  const {
+    messages,
+    messagesStatus,
+    firstMessageElementRef,
+    lastMessageElementRef,
+  } = useMessages(scrollRef, type);
 
   return (
     <Stack gap="sm">
       {messagesStatus === LoadingState.PENDING && <Loader />}
-      {messages.map((message, index) => (
-        <div ref={index === 0 ? firstMessageElementRef : null} key={message.id}>
-          <MessageItem
-            content={message.text}
-            isOwnMessage={user.id === message.authorId}
-            time={message.createdAt}
-            modifiedAt={message.modifiedAt}
-            authorId={message.authorId}
-            channelId={message.channelId}
-            files={message.files}
-            EditActions={(props) => (
-              <EditMessage {...props} type={type} messageId={message.id} />
-            )}
-            DeleteActions={(props) => (
-              <DeleteMessage {...props} type={type} messageId={message.id} />
-            )}
-            type={type}
-          />
-        </div>
-      ))}
+      {messages.map((message, index) => {
+        const isFirst = index === 0;
+        const isLast = index === messages.length - 1;
+
+        return (
+          <div
+            ref={(el) => {
+              if (isFirst) firstMessageElementRef.current = el;
+
+              if (isLast) lastMessageElementRef.current = el;
+            }}
+            key={message.id}
+          >
+            <MessageItem
+              content={message.text}
+              isOwnMessage={user.id === message.authorId}
+              time={message.createdAt}
+              modifiedAt={message.modifiedAt}
+              authorId={message.authorId}
+              channelId={message.channelId}
+              files={message.files}
+              EditActions={(props) => (
+                <EditMessage {...props} type={type} messageId={message.id} />
+              )}
+              DeleteActions={(props) => (
+                <DeleteMessage {...props} type={type} messageId={message.id} />
+              )}
+              type={type}
+            />
+          </div>
+        );
+      })}
     </Stack>
   );
 };

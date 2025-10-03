@@ -10,6 +10,7 @@ const EXCLUDED_FROM_ACCESS_TOKEN = [
   '/auth/registration',
   '/auth/login',
   '/auth/refresh',
+  '/auth/logout',
 ];
 
 let isRefreshing = false;
@@ -64,6 +65,8 @@ export const ApiProvider = ({ children }: Props) => {
           refreshToken &&
           !originalRequest.url?.includes('/refresh')
         ) {
+          console.log(accessToken, localStorage.getItem(TokenType.ACCESS));
+
           if (isRefreshing) {
             return new Promise((resolve, reject) => {
               failedQueue.push({

@@ -1,31 +1,61 @@
-import { Button, Card, Group, Stack, Title } from '@mantine/core';
-import { MessageCircle } from 'lucide-react';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Group,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
+import { ArrowRight } from 'lucide-react';
 
-import { Chat } from '~/entities/chat';
+import { Chat, setActiveChat } from '~/entities/chat';
+import { useAppDispatch } from '~/hooks';
 
 interface ChatItemProps {
   chat: Chat;
-  openChat: (chatId: string) => void;
 }
 
-export const ChatItem = ({ chat, openChat }: ChatItemProps) => {
-  const { chatId, chatName } = chat;
+export const ChatItem = ({ chat }: ChatItemProps) => {
+  const dispatch = useAppDispatch();
+
+  const { chatName, nonReadedCount, nonReadedTaggedCount, chatId } = chat;
+
+  const handleOpenChat = () => {
+    dispatch(setActiveChat(chatId));
+  };
 
   return (
-    <Card key={chatId} bg="#1a1b1e" padding="xs" radius="md" c="#fff" p="md">
-      <Stack>
-        <Group wrap="nowrap">
-          <MessageCircle size={24} style={{ flexShrink: 0 }} />
-          <Title order={3}>{chatName}</Title>
+    <Card bg="#1a1b1e" padding="xs" radius="md" c="#fff" p="md">
+      <Group justify="space-between">
+        <Group>
+          <Avatar src={null} alt="no image here" size="xl" />
+          <Stack>
+            <Title order={3}>{chatName}</Title>
+            <Group>
+              {nonReadedCount < 1 ? (
+                <Text>Нет новых сообщений</Text>
+              ) : (
+                <>
+                  <Badge color="blue">{nonReadedCount} новых</Badge>
+                  {nonReadedTaggedCount > 0 && (
+                    <Badge color="red">{nonReadedTaggedCount}</Badge>
+                  )}
+                </>
+              )}
+            </Group>
+          </Stack>
         </Group>
         <Button
           variant="light"
           radius="md"
-          onClick={() => openChat(chat.chatId)}
+          leftSection={<ArrowRight />}
+          onClick={handleOpenChat}
         >
           Открыть чат
         </Button>
-      </Stack>
+      </Group>
     </Card>
   );
 };

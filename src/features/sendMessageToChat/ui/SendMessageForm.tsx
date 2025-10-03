@@ -20,6 +20,8 @@ export const SendMessageForm = () => {
   const [message, setMessage] = useState('');
 
   const handleSendMessage = () => {
+    console.log(message.trim(), chat.chatId);
+
     if (message.trim() && chat.chatId) {
       sendChatMessage({
         Token: accessToken,

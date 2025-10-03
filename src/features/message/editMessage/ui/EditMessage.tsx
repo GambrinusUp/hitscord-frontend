@@ -8,7 +8,7 @@ import { useWebSocket } from '~/shared/lib/websocket';
 interface EditMessageProps {
   editedContent: string;
   setIsEditing: (value: boolean) => void;
-  messageId: string;
+  messageId: number;
   type: MessageType;
 }
 

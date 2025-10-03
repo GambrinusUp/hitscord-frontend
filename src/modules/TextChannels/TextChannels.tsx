@@ -1,7 +1,7 @@
 import { ActionIcon, Button, Collapse, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ChevronDown, ChevronRight, Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { ChannelItem } from './components/ChannelItem';
 import { TextChannelsProps } from './TextChannels.types';
@@ -43,10 +43,6 @@ export const TextChannels = ({ onClose }: TextChannelsProps) => {
     });
     openChannelModal();
   };
-
-  useEffect(() => {
-    console.log(currentChannelId);
-  }, [currentChannelId]);
 
   return (
     <>

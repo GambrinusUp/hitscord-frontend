@@ -9,12 +9,13 @@ import { GetMessage } from '~/store/ServerStore/ServerStore.types';
 export const getChannelsMessages = async (
   accessToken: string,
   channelId: string,
-  numberOfMessages: number,
-  fromStart: number = 0,
+  number: number,
+  fromMessageId: number,
+  down: boolean,
 ): Promise<GetMessage> => {
   try {
     const response = await fetch(
-      `${API_URL}/api/channel/messages?channelId=${channelId}&number=${numberOfMessages}&fromStart=${fromStart}`,
+      `${API_URL}/api/channel/messages?channelId=${channelId}&number=${number}&fromMessageId=${fromMessageId}&down=${down}`,
       {
         method: 'GET',
         headers: {

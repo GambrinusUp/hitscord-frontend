@@ -1,5 +1,7 @@
 import {
+  CHANGE_NOTIFICATION_LIFETIME,
   CHANGE_PROFILE,
+  CHANGE_PROFILE_ICON,
   CHANGE_SETTINGS,
   GET_PROFILE,
   LOGIN_USER,
@@ -8,6 +10,7 @@ import {
   REGISTER_USER,
 } from './const';
 
+import { FileResponse } from '~/entities/files';
 import {
   ChangeProfileData,
   LoginCredentials,
@@ -62,10 +65,31 @@ export const changeSettings = async (type: SettingType): Promise<void> => {
   await api.put(CHANGE_SETTINGS(type));
 };
 
+export const changeNotificationLifetime = async (
+  time: number,
+): Promise<void> => {
+  await api.put(CHANGE_NOTIFICATION_LIFETIME, {
+    lifeTime: time,
+  });
+};
+
 export const changeProfile = async (
   newProfile: ChangeProfileData,
 ): Promise<User> => {
   const { data } = await api.put(CHANGE_PROFILE, { ...newProfile });
+
+  return data;
+};
+
+export const changeProfileIcon = async (icon: File): Promise<FileResponse> => {
+  const formData = new FormData();
+  formData.append('Icon', icon);
+
+  const { data } = await api.put(CHANGE_PROFILE_ICON, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 
   return data;
 };
