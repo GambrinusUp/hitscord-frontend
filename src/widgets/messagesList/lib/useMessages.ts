@@ -130,8 +130,6 @@ export const useMessages = (
           }
         }*/
 
-          if()
-
         if (type === MessageType.CHANNEL && entityId) {
           const lastMessageId = messages[messages.length - 1]?.id;
 

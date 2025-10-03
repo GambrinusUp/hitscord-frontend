@@ -8,6 +8,7 @@ import {
   changeTextChannelSettings,
   changeVoiceChannelMaxCount,
   changeVoiceChannelSettings,
+  changeNotificationChannelSettings,
   createChannel,
   createMessage,
   createServer,
@@ -715,6 +716,7 @@ const testServerSlice = createSlice({
           getChannelSettings.pending,
           changeTextChannelSettings.pending,
           changeVoiceChannelSettings.pending,
+          changeNotificationChannelSettings.pending,
           getBannedUsers.pending,
           unbanUser.pending,
           changeVoiceChannelMaxCount.pending,
@@ -727,6 +729,7 @@ const testServerSlice = createSlice({
         isAnyOf(
           changeTextChannelSettings.fulfilled,
           changeVoiceChannelSettings.fulfilled,
+          changeNotificationChannelSettings.fulfilled,
         ),
         (state) => {
           state.error = '';
@@ -737,6 +740,7 @@ const testServerSlice = createSlice({
           getChannelSettings.rejected,
           changeTextChannelSettings.rejected,
           changeVoiceChannelSettings.rejected,
+          changeNotificationChannelSettings.rejected,
           getBannedUsers.rejected,
           unbanUser.rejected,
           changeVoiceChannelMaxCount.rejected,

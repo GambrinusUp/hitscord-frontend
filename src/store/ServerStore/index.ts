@@ -54,6 +54,7 @@ export {
   creatorUnsubscribeFromServer,
   selfMute,
   changeTextChannelSettings,
+  changeNotificationChannelSettings,
   getChannelSettings,
   changeVoiceChannelSettings,
   getMoreMessages,

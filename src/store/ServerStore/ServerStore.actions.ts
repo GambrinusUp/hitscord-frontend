@@ -452,6 +452,23 @@ export const changeTextChannelSettings = createAsyncThunk<
   },
 );
 
+export const changeNotificationChannelSettings = createAsyncThunk<
+  void,
+  { accessToken: string; settings: ChannelSettings },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeNotificationChannelSettings',
+  async ({ accessToken, settings }, { rejectWithValue }) => {
+    try {
+      await ChannelsAPI.changeNotificationChannelSettings(accessToken, settings);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
 export const getChannelSettings = createAsyncThunk<
   GetChannelSettings,
   { accessToken: string; channelId: string },

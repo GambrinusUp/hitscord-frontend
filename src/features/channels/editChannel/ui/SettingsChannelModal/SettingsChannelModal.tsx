@@ -68,7 +68,7 @@ export const SettingsChannelModal = ({
   const canWrite = roleSettings.canWrite;
   const canWriteSub = roleSettings.canWriteSub;
   //const canUse = roleSettings.canUse;
-  //const notificated = roleSettings.notificated;
+  const notificatedRole = roleSettings.notificated;
 
   const handleChangeChannelName = async () => {
     setLoading(true);
@@ -351,6 +351,24 @@ export const SettingsChannelModal = ({
                   <Text>Могут создавать подчаты:</Text>
                   <Stack gap="xs">
                     {canWriteSub.map((role) => (
+                      <Badge
+                        key={role.id}
+                        color={role.color}
+                        size="lg"
+                        variant="light"
+                        radius="md"
+                      >
+                        {role.name}
+                      </Badge>
+                    ))}
+                  </Stack>
+                </>
+              )}
+              {notificatedRole && (
+                <>
+                  <Text>Уведомляемые роли:</Text>
+                  <Stack gap="xs">
+                    {notificatedRole.map((role) => (
                       <Badge
                         key={role.id}
                         color={role.color}
