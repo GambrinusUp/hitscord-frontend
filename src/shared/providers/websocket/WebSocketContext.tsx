@@ -4,6 +4,7 @@ import {
   CreateMessageWs,
   DeleteMessageWs,
   EditMessageWs,
+  ReadMessageWs,
 } from '~/store/ServerStore';
 
 interface WebSocketContextType {
@@ -13,6 +14,7 @@ interface WebSocketContextType {
   sendChatMessage: (message: CreateMessageWs) => void;
   editChatMessage: (message: EditMessageWs) => void;
   deleteChatMessage: (message: DeleteMessageWs) => void;
+  readMessage: (message: ReadMessageWs) => void;
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | null>(

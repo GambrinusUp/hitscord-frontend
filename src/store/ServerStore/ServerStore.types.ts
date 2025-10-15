@@ -21,7 +21,10 @@ export interface ServerState {
 
   numberOfMessages: number;
   startMessageId: number;
-  remainingMessagesCount: number;
+  remainingTopMessagesCount: number;
+  lastTopMessageId: number;
+  remainingBottomMessagesCount: number;
+  lastBottomMessageId: number;
   allMessagesCount: number;
 
   error: string;
@@ -119,7 +122,7 @@ export interface AnnouncementChannel {
 export interface UserRoleOnServer {
   roleId: string;
   roleName: string;
-  roleType: number;
+  roleType: RoleType;
 }
 
 export interface ServerData {
@@ -180,12 +183,14 @@ export interface CreateMessageWs {
 
 export interface EditMessageWs {
   Token: string;
+  ChannelId: string;
   MessageId: number;
   Text: string;
 }
 
 export interface DeleteMessageWs {
   Token: string;
+  ChannelId: string;
   MessageId: number;
 }
 
@@ -219,4 +224,11 @@ export interface BannedUserResponse {
   page: number;
   size: number;
   total: number;
+}
+
+export interface ReadMessageWs {
+  Token: string;
+  isChannel: boolean;
+  MessageId: number;
+  ChannelId: string;
 }

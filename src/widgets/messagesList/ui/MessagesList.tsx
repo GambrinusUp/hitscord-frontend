@@ -36,6 +36,7 @@ export const MessagesList = ({ scrollRef, type }: MessagesListProps) => {
               if (isLast) lastMessageElementRef.current = el;
             }}
             key={message.id}
+            data-message-id={message.id}
           >
             <MessageItem
               content={message.text}

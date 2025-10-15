@@ -4,47 +4,44 @@ import {
   Badge,
   Button,
   CopyButton,
+  Divider,
   Group,
+  SimpleGrid,
   Stack,
   Text,
   Tooltip,
 } from '@mantine/core';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, UserPlus } from 'lucide-react';
 
+import { stylesUserMiniProfile } from './UserMiniProfile.style';
+
+import { createApplication } from '~/entities/friendship';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { UserOnServer } from '~/store/ServerStore';
-import { createApplication } from '~/store/UserStore';
 
-export const UserMiniProfile = ({
-  userName,
-  userTag,
-  roleName,
-  userId,
-}: Omit<
-  UserOnServer,
-  | 'icon'
-  | 'mail'
-  | 'notifiable'
-  | 'friendshipApplication'
-  | 'nonFriendMessage'
-  | 'roleId'
-  | 'serverId'
->) => {
+interface UserMiniProfileProps {
+  userOnServer: UserOnServer;
+}
+
+export const UserMiniProfile = ({ userOnServer }: UserMiniProfileProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { roles } = useAppSelector((state) => state.testServerStore.serverData);
-  const { applicationFrom } = useAppSelector((state) => state.userStore);
-  const { accessToken, user } = useAppSelector((state) => state.userStore);
+  //const { roles } = useAppSelector((state) => state.testServerStore.serverData);
+  const { applicationFrom } = useAppSelector((state) => state.friendshipStore);
+  const { user } = useAppSelector((state) => state.userStore);
+
+  const { userName, userTag, userId, notifiable, nonFriendMessage } =
+    userOnServer;
+  const userRoles = userOnServer.roles;
 
   const application = applicationFrom.find((app) => app.user.userId === userId);
 
-  const badgeColor =
-    roles.find((role) => role.name === roleName)?.color ?? 'green';
+  /*const badgeColor =
+    roles.find((role) => role.name === roleName)?.color ?? 'green';*/
 
   const handleAddFriend = async () => {
     const result = await dispatch(
       createApplication({
-        accessToken,
         userTag,
       }),
     );
@@ -56,58 +53,14 @@ export const UserMiniProfile = ({
 
   return (
     <Stack gap="xs" justify="center" align="center" w="100%">
-      <Avatar size="md" color="blue">
+      <Avatar size="lg" color="blue">
         {userName[0]}
       </Avatar>
-      <Text
-        c="white"
-        style={{
-          flex: 1,
-          display: '-webkit-box',
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: 'vertical',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'normal',
-          lineHeight: '1.2em',
-          maxHeight: '2.4em',
-          wordBreak: 'break-word',
-          cursor: 'default',
-        }}
-      >
+      <Text c="white" style={stylesUserMiniProfile.userName()}>
         {userName}
       </Text>
-      <Badge
-        color={badgeColor}
-        radius="sm"
-        variant="light"
-        style={{
-          maxWidth: 100,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          cursor: 'pointer',
-        }}
-      >
-        {roleName}
-      </Badge>
       <Group>
-        <Text
-          c="dimmed"
-          style={{
-            flex: 1,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'normal',
-            lineHeight: '1.2em',
-            maxHeight: '2.4em',
-            wordBreak: 'break-word',
-            cursor: 'default',
-          }}
-        >
+        <Text c="dimmed" style={stylesUserMiniProfile.userTag()}>
           {userTag}
         </Text>
         <CopyButton value={userTag} timeout={2000}>
@@ -128,8 +81,22 @@ export const UserMiniProfile = ({
           )}
         </CopyButton>
       </Group>
+      <Group gap="sm">
+        {userRoles.map((role) => (
+          <Badge
+            key={role.roleId}
+            //color={badgeColor}
+            radius="md"
+            variant="light"
+            style={stylesUserMiniProfile.roleName()}
+          >
+            {role.roleName}
+          </Badge>
+        ))}
+      </Group>
       {user.id !== userId && (
         <Button
+          leftSection={<UserPlus />}
           variant="light"
           radius="md"
           onClick={handleAddFriend}
@@ -138,6 +105,17 @@ export const UserMiniProfile = ({
           {application ? 'Заявка отправлена' : 'Добавить в друзья'}
         </Button>
       )}
+      <Divider color="dimmed" w="100%" />
+      <SimpleGrid cols={2} spacing="xs" verticalSpacing="xs">
+        <Stack gap={0} align="center" justify="center">
+          <Text c="dimmed">Уведомления</Text>
+          <Text fw={700}>{notifiable ? 'Включены' : 'Отключены'}</Text>
+        </Stack>
+        <Stack gap={0} align="center" justify="center">
+          <Text c="dimmed">Сообщения</Text>
+          <Text fw={700}>{nonFriendMessage ? 'Включены' : 'Отключены'}</Text>
+        </Stack>
+      </SimpleGrid>
     </Stack>
   );
 };

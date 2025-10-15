@@ -1,14 +1,14 @@
 import { Button, Group, Modal, Stack, TextInput } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
-import { changeChatName, Chat } from '~/entities/chat';
+import { changeChatName, ChatInfo } from '~/entities/chat';
 import { useAppDispatch, useNotification } from '~/hooks';
 
 interface ChangeChatNameModalProps {
   opened: boolean;
   close: () => void;
-  currentChat: Chat | null;
-  setCurrentChat: React.Dispatch<React.SetStateAction<Chat | null>>;
+  currentChat: ChatInfo | null;
+  setCurrentChat: React.Dispatch<React.SetStateAction<ChatInfo | null>>;
 }
 
 export const ChangeChatNameModal = ({

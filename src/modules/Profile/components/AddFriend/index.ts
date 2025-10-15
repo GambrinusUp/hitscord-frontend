@@ -1,1 +1,0 @@
-export { AddFriend } from './AddFriend';

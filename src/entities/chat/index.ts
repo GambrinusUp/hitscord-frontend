@@ -1,4 +1,4 @@
-export type { Chat, ChatMessage, MessageFile } from './model/types';
+export type { Chat, ChatInfo, ChatMessage, MessageFile } from './model/types';
 
 export {
   getChats,
@@ -11,4 +11,11 @@ export {
   goOutFromChat,
 } from './model/actions';
 
-export { chatsReducer, setActiveChat, addChatMessage } from './model/slice';
+export {
+  chatsReducer,
+  setActiveChat,
+  addChatMessage,
+  readChatMessageWs,
+  changeChatReadedCount,
+  readOwnChatMessage,
+} from './model/slice';

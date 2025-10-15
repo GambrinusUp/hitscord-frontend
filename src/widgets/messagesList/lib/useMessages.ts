@@ -8,10 +8,12 @@ import {
   getChatInfo,
   getChatMessages,
   getMoreChatMessages,
+  readChatMessageWs,
 } from '~/entities/chat';
 import { MessageType } from '~/entities/message';
 import { useAppDispatch, useAppSelector } from '~/hooks';
-import { getMoreMessages } from '~/store/ServerStore';
+import { useWebSocket } from '~/shared/lib/websocket';
+import { getMoreMessages, readMessageWs } from '~/store/ServerStore';
 
 /* Переписать */
 export const useMessages = (
@@ -19,21 +21,31 @@ export const useMessages = (
   type: MessageType,
 ) => {
   const dispatch = useAppDispatch();
+  const { readMessage } = useWebSocket();
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { activeChat } = useAppSelector((state) => state.chatsStore);
+  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+  const textChannels = useAppSelector(
+    (state) => state.testServerStore.serverData.channels.textChannels,
+  );
+  const lastReadedMessageId = textChannels.find(
+    (channel) => channel.channelId === currentChannelId,
+  )?.lastReadedMessageId;
 
-  //const chatData = useChatData();
+  const chatData = useChatData();
   const channelData = useChannelData();
 
   const {
     messages,
     messagesStatus,
-    remainingMessagesCount,
     startMessageId,
-    allMessagesCount,
+    lastTopMessageId,
+    lastBottomMessageId,
+    remainingBottomMessagesCount,
+    remainingTopMessagesCount,
     entityId,
-    //} = type === MessageType.CHAT ? chatData : channelData;
-  } = channelData;
+  } = type === MessageType.CHAT ? chatData : channelData;
+  //} = channelData;
 
   const firstMessageElementRef = useRef<HTMLDivElement | null>(null);
   const lastMessageElementRef = useRef<HTMLDivElement | null>(null);
@@ -53,12 +65,12 @@ export const useMessages = (
         getChatMessages({
           chatId: entityId,
           number: MAX_MESSAGE_NUMBER,
-          fromMessageId: 2,
+          fromMessageId: startMessageId,
           down: false,
         }),
       );
     }
-  }, [entityId]);
+  }, [entityId, startMessageId]);
 
   useEffect(() => {
     if (!firstMessageElementRef.current) return;
@@ -67,29 +79,22 @@ export const useMessages = (
       ([entry]) => {
         if (!entry.isIntersecting) return;
 
-        const messagesAbove = startMessageId - 1;
+        console.log(remainingTopMessagesCount, lastTopMessageId);
 
-        if (messagesAbove < 1) return;
+        if (remainingTopMessagesCount < 1) return;
 
-        const numberToLoad = Math.min(messagesAbove, MAX_MESSAGE_NUMBER);
-
-        /*if (type === MessageType.CHAT && entityId) {
-          dispatch(
-            getMoreChatMessages({
-              chatId: entityId,
-              number: Math.min(remainingMessagesCount, MAX_MESSAGE_NUMBER),
-              fromStart: numberOfStarterMessage,
-            }),
-          );
-        }*/
+        const numberToLoad = Math.min(
+          remainingTopMessagesCount,
+          MAX_MESSAGE_NUMBER,
+        );
 
         if (type === MessageType.CHANNEL && entityId) {
           dispatch(
             getMoreMessages({
               accessToken,
               channelId: entityId,
-              number: numberToLoad,
-              fromMessageId: startMessageId,
+              number: numberToLoad + 1,
+              fromMessageId: lastTopMessageId,
               down: false,
             }),
           );
@@ -106,7 +111,7 @@ export const useMessages = (
     return () => {
       observer.disconnect();
     };
-  }, [messages, entityId, remainingMessagesCount, startMessageId]);
+  }, [entityId, remainingTopMessagesCount, lastTopMessageId]);
 
   useEffect(() => {
     if (!lastMessageElementRef.current) return;
@@ -115,32 +120,31 @@ export const useMessages = (
       ([entry]) => {
         if (!entry.isIntersecting) return;
 
-        /*if (type === MessageType.CHAT && entityId) {
-          const lastMessageId = messages[messages.length - 1]?.id;
-          
-          if (lastMessageId && lastReadedMessageId && lastMessageId < lastReadedMessageId) {
-            dispatch(
-              getMoreChatMessages({
-                chatId: entityId,
-                number: MAX_MESSAGE_NUMBER,
-                fromMessageId: lastMessageId,
-                down: true, // Подгружаем вниз (новые)
-              }),
-            );
-          }
-        }*/
+        if (remainingBottomMessagesCount < 1) return;
 
-          if()
+        const numberToLoad = Math.min(
+          remainingBottomMessagesCount,
+          MAX_MESSAGE_NUMBER,
+        );
+
+        if (type === MessageType.CHAT && entityId) {
+          dispatch(
+            getMoreChatMessages({
+              chatId: entityId,
+              number: numberToLoad + 1,
+              fromMessageId: lastBottomMessageId,
+              down: true,
+            }),
+          );
+        }
 
         if (type === MessageType.CHANNEL && entityId) {
-          const lastMessageId = messages[messages.length - 1]?.id;
-
           dispatch(
             getMoreMessages({
               accessToken,
               channelId: entityId,
-              number: MAX_MESSAGE_NUMBER,
-              fromMessageId: lastMessageId,
+              number: numberToLoad + 1,
+              fromMessageId: lastBottomMessageId,
               down: true,
             }),
           );
@@ -157,7 +161,87 @@ export const useMessages = (
     return () => {
       observer.disconnect();
     };
-  }, [messages, entityId, remainingMessagesCount, startMessageId]);
+  }, [entityId, remainingBottomMessagesCount, lastBottomMessageId]);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          /*if (entry.isIntersecting && lastReadedMessageId && currentChannelId) {
+            const messageId = Number(
+              entry.target.getAttribute('data-message-id'),
+            );
+
+            if (messageId > lastReadedMessageId) {
+              console.log(messageId, lastReadedMessageId);
+              readMessage({
+                Token: accessToken,
+                isChannel: type === MessageType.CHANNEL,
+                MessageId: messageId,
+                ChannelId: currentChannelId,
+              });
+
+              dispatch(
+                readMessageWs({
+                  readChannelId: currentChannelId,
+                  readedMessageId: messageId,
+                }),
+              );
+            }
+          }*/
+
+          if (entry.isIntersecting && lastReadedMessageId) {
+            const messageId = Number(
+              entry.target.getAttribute('data-message-id'),
+            );
+
+            const isChannel = type === MessageType.CHANNEL;
+            const targetId = isChannel ? currentChannelId : activeChat;
+
+            if (!targetId) return;
+
+            if (messageId > lastReadedMessageId) {
+              readMessage({
+                Token: accessToken,
+                isChannel: isChannel,
+                MessageId: messageId,
+                ChannelId: targetId,
+              });
+
+              if (isChannel) {
+                dispatch(
+                  readMessageWs({
+                    readChannelId: targetId,
+                    readedMessageId: messageId,
+                  }),
+                );
+              } else {
+                dispatch(
+                  readChatMessageWs({
+                    readChatId: targetId,
+                    readedMessageId: messageId,
+                  }),
+                );
+              }
+            }
+          }
+        });
+      },
+      { threshold: 0.5, root: scrollRef.current },
+    );
+
+    messages.forEach((message) => {
+      const element = document.querySelector(
+        `[data-message-id="${message.id}"]`,
+      );
+
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [messages, lastReadedMessageId]);
 
   return {
     messages,

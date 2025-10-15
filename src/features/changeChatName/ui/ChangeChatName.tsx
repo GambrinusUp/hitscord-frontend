@@ -5,13 +5,13 @@ import { useState } from 'react';
 
 import { ChangeChatNameModal } from './ChangeChatNameModal';
 
-import { Chat } from '~/entities/chat';
+import { ChatInfo } from '~/entities/chat';
 import { useAppSelector } from '~/hooks';
 
 export const ChangeChatName = () => {
   const { chat } = useAppSelector((state) => state.chatsStore);
   const [opened, { open, close }] = useDisclosure(false);
-  const [currentChat, setCurrentChat] = useState<Chat | null>(null);
+  const [currentChat, setCurrentChat] = useState<ChatInfo | null>(null);
 
   const handleChangeName = () => {
     setCurrentChat(chat);

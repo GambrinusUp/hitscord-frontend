@@ -19,17 +19,16 @@ import { Calendar, Plus, UserCheck, UserMinus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { ServerSettingsModalProps } from './ServerSettingsModal.types';
+import { UserRoleItem } from './UserRoleItem';
 
 import { formatDateTime } from '~/helpers';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { LoadingState } from '~/shared';
-import { getRoles, RoleType } from '~/store/RolesStore';
+import { getRoles } from '~/store/RolesStore';
 import {
-  changeRole,
   changeServerName,
   deleteUserFromServer,
   getBannedUsers,
-  getServerData,
   unbanUser,
 } from '~/store/ServerStore';
 
@@ -46,15 +45,13 @@ export const ServerSettingsModal = ({
     pageBannedUsers,
     totalPagesBannedUsers,
   } = useAppSelector((state) => state.testServerStore);
-  const { rolesList, rolesLoading } = useAppSelector(
-    (state) => state.rolesStore,
-  );
+  const { rolesLoading } = useAppSelector((state) => state.rolesStore);
   const { accessToken, user } = useAppSelector((state) => state.userStore);
   const [activeSetting, setActiveSetting] = useState<
     'name' | 'roles' | 'deleteUser' | 'unbanUser'
   >('roles');
-  const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
-  const [assignRoleId, setAssignRoleId] = useState<string | null>('');
+  //const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
+  //const [assignRoleId, setAssignRoleId] = useState<string | null>('');
   const [loading, setLoading] = useState(false);
   const [newServerName, setNewServerName] = useState(serverData.serverName);
   const { showSuccess } = useNotification();
@@ -64,8 +61,9 @@ export const ServerSettingsModal = ({
   const canDeleteUsers = serverData.permissions.canDeleteUsers;
   const canChangeRole = serverData.permissions.canChangeRole;
   const canCreateRoles = serverData.permissions.canCreateRoles;
+  const users = serverData.users;
 
-  const assignRole = async () => {
+  /*const assignRole = async () => {
     if (!assignRoleUserId || !assignRoleId) return;
     setLoading(true);
     const result = await dispatch(
@@ -84,7 +82,7 @@ export const ServerSettingsModal = ({
       onClose();
     }
   };
-
+*/
   const handleChangeServerName = async () => {
     if (newServerName.length < 6) {
       return;
@@ -239,7 +237,7 @@ export const ServerSettingsModal = ({
           )}
         </Stack>
         <ScrollArea>
-          {activeSetting === 'roles' && (
+          {/*activeSetting === 'roles' && (
             <Stack gap="md">
               <Text size="lg" w={500}>
                 Присвоить роль пользователю
@@ -284,6 +282,15 @@ export const ServerSettingsModal = ({
                 Присвоить роль
               </Button>
             </Stack>
+          )*/}
+          {activeSetting === 'roles' && (
+            <ScrollArea.Autosize mah={400} miw={500} mx="auto">
+              <Stack gap="md">
+                {users.map((user) => (
+                  <UserRoleItem key={user.userId} user={user} />
+                ))}
+              </Stack>
+            </ScrollArea.Autosize>
           )}
           {activeSetting === 'name' && isCreator && (
             <Stack gap="md">
@@ -313,15 +320,15 @@ export const ServerSettingsModal = ({
                 placeholder="Выберите пользователя"
                 data={serverData.users
                   .filter((userOnServer) => userOnServer.userId !== user.id)
-                  .filter(
+                  /*.filter(
                     (userOnServer) =>
                       userOnServer.roleType !== RoleType.Creator,
-                  )
-                  .filter(
+                  )*/
+                  /*.filter(
                     (userOnServer) =>
                       Number(userOnServer.roleType) >=
                       Number(serverData.userRoleType),
-                  )
+                  )*/
                   .map((userOnServer) => ({
                     value: userOnServer.userId,
                     label: userOnServer.userName,

@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { ChannelItemProps } from './ChannelItem.types';
 
 import { SettingsChannelModal } from '~/components/SettingsChannelModal';
-import { useAppSelector } from '~/hooks';
 import { styles } from '~/modules/TextChannels';
 import { ChannelType } from '~/store/ServerStore';
 
@@ -15,9 +14,9 @@ export const ChannelItem = ({
   currentChannelId,
   channelName,
   canWorkChannels,
+  nonReadedCount,
   handleOpenChannel,
 }: ChannelItemProps) => {
-  const { hasNewMessage } = useAppSelector((state) => state.testServerStore);
   const [isHovered, setIsHovered] = useState('');
   const [opened, { open, close }] = useDisclosure(false);
 
@@ -37,9 +36,16 @@ export const ChannelItem = ({
         onMouseLeave={() => setIsHovered('')}
       >
         <Button
-          leftSection={
+          /*leftSection={
             hasNewMessage && channelId === currentChannelId ? (
-              <Badge circle>1</Badge>
+              <Badge circle>{nonReadedCount}</Badge>
+            ) : (
+              <Hash />
+            )
+          }*/
+          leftSection={
+            nonReadedCount > 0 ? (
+              <Badge circle>{nonReadedCount}</Badge>
             ) : (
               <Hash />
             )

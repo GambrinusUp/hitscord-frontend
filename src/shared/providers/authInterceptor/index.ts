@@ -1,1 +1,1 @@
-export { ApiProvider } from './authInterceptor';
+export { ApiProvider } from './AuthInterceptor';

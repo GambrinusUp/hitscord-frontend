@@ -78,13 +78,14 @@ export const TextChannels = ({ onClose }: TextChannelsProps) => {
         <Collapse in={opened} w="100%">
           <Stack gap="xs">
             {serverData.channels.textChannels.map(
-              ({ channelId, channelName }) => (
+              ({ channelId, channelName, nonReadedCount }) => (
                 <ChannelItem
                   key={channelId}
                   channelId={channelId}
                   currentChannelId={currentChannelId}
                   channelName={channelName}
                   canWorkChannels={canWorkChannels}
+                  nonReadedCount={nonReadedCount}
                   handleOpenChannel={() => handleOpenChannel(channelId)}
                   handleEditChannel={() =>
                     handleEditChannel(channelName, channelId)

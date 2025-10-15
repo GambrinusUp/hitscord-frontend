@@ -35,7 +35,7 @@ export interface ChatMessage {
   messageType: MessageType;
   serverId: string | null;
   channelId: string;
-  id: string;
+  id: number;
   authorId: string;
   createdAt: string;
   replyToMessage: string | null;

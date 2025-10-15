@@ -49,16 +49,16 @@ export const ChatsSlice = createSlice({
       state.error = '';
     },
     addChatMessage: (state, action: PayloadAction<ChatMessage>) => {
-      const { chatId } = action.payload;
+      const { channelId } = action.payload;
 
-      if (chatId === state.activeChat) {
+      if (channelId === state.activeChat) {
         state.messages.push(action.payload);
         //state.hasNewMessage = true;
       }
     },
     deleteChatMessageWS: (
       state,
-      action: PayloadAction<{ chatId: string; messageId: string }>,
+      action: PayloadAction<{ chatId: string; messageId: number }>,
     ) => {
       if (state.activeChat === action.payload.chatId) {
         state.messages = state.messages.filter(
@@ -67,7 +67,7 @@ export const ChatsSlice = createSlice({
       }
     },
     editChatMessageWS: (state, action: PayloadAction<ChatMessage>) => {
-      if (state.activeChat === action.payload.chatId) {
+      if (state.activeChat === action.payload.channelId) {
         const index = state.messages.findIndex(
           (message) => message.id === action.payload.id,
         );

@@ -135,6 +135,66 @@ export const changeRole = async (
   }
 };
 
+export const addRole = async (
+  accessToken: string,
+  serverId: string,
+  userId: string,
+  role: string,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/server/addrole`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        serverId: serverId,
+        userId: userId,
+        role: role,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error create server:', error);
+    throw error;
+  }
+};
+
+export const removeRole = async (
+  accessToken: string,
+  serverId: string,
+  userId: string,
+  role: string,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/server/removerole`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        serverId: serverId,
+        userId: userId,
+        role: role,
+      }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error create server:', error);
+    throw error;
+  }
+};
+
 export const subscribeToServer = async (
   accessToken: string,
   serverId: string,

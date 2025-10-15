@@ -1,89 +1,63 @@
 import type { UserOnServer } from '~/store/ServerStore';
 
-import { Avatar, Badge, Flex, Popover, Text, Tooltip } from '@mantine/core';
+import {
+  Avatar,
+  Badge,
+  Group,
+  Popover,
+  Stack,
+  Text,
+  Tooltip,
+} from '@mantine/core';
 import { useState } from 'react';
 
-import { UserMiniProfile } from '~/components/UserMiniProfile';
-import { useAppSelector } from '~/hooks';
+import { userItemStyles } from './UserItem.style';
 
-export const UserItem = ({
-  userId,
-  userName,
-  userTag,
-  roleName,
-  roleType,
-}: Omit<
-  UserOnServer,
-  | 'icon'
-  | 'mail'
-  | 'notifiable'
-  | 'friendshipApplication'
-  | 'nonFriendMessage'
-  | 'roleId'
-  | 'serverId'
->) => {
+import { UserMiniProfile } from '~/components/UserMiniProfile';
+
+interface UserItemProps {
+  user: UserOnServer;
+}
+
+export const UserItem = ({ user }: UserItemProps) => {
+  //const { roles } = useAppSelector((state) => state.testServerStore.serverData);
+
   const [opened, setOpened] = useState(false);
-  const { roles } = useAppSelector((state) => state.testServerStore.serverData);
-  const badgeColor =
-    roles.find((role) => role.name === roleName)?.color ?? 'green';
+
+  const { userName, roles } = user;
+
+  const role = roles[0];
 
   return (
     <Popover opened={opened} onChange={setOpened} position="left" radius="md">
       <Popover.Target>
-        <Flex
-          align="center"
-          gap="sm"
-          style={{ width: '100%', overflow: 'hidden', cursor: 'pointer' }}
+        <Group
+          style={userItemStyles.group()}
           onClick={() => setOpened((o) => !o)}
         >
           <Avatar size="md" color="blue">
-            {userName}
+            {userName[0]}
           </Avatar>
-          <Tooltip label={userName} position="top-start" withArrow>
-            <Text
-              c="white"
-              style={{
-                flex: 1,
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'normal',
-                lineHeight: '1.2em',
-                maxHeight: '2.4em',
-                wordBreak: 'break-word',
-              }}
-            >
-              {userName}
-            </Text>
-          </Tooltip>
-          <Tooltip label={roleName} position="top-end" withArrow>
-            <Badge
-              variant="light"
-              color={badgeColor}
-              radius="sm"
-              style={{
-                maxWidth: 100,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                cursor: 'pointer',
-              }}
-            >
-              {roleName}
-            </Badge>
-          </Tooltip>
-        </Flex>
+          <Stack>
+            <Tooltip label={userName} position="top-start" withArrow>
+              <Text c="white" style={userItemStyles.userName()}>
+                {userName}
+              </Text>
+            </Tooltip>
+            <Tooltip label={role.roleName} position="top" withArrow>
+              <Badge
+                variant="light"
+                //color={badgeColor}
+                style={userItemStyles.badge()}
+              >
+                {role.roleName}
+              </Badge>
+            </Tooltip>
+          </Stack>
+        </Group>
       </Popover.Target>
       <Popover.Dropdown bg="#43474f">
-        <UserMiniProfile
-          userId={userId}
-          userName={userName}
-          userTag={userTag}
-          roleName={roleName}
-          roleType={roleType}
-        />
+        <UserMiniProfile userOnServer={user} />
       </Popover.Dropdown>
     </Popover>
   );

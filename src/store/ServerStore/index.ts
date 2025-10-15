@@ -10,6 +10,7 @@ export type {
   GetChannelSettings,
   BannedUser,
   BannedUserResponse,
+  ReadMessageWs,
 } from './ServerStore.types';
 export { ChannelType, MuteStatus, MessageType } from './ServerStore.types';
 
@@ -34,6 +35,11 @@ export {
   removeUserFromVoiceChannel,
   toggleUserMuteStatus,
   updatedRole,
+  readMessageWs,
+  changeReadedCount,
+  readOwnMessage,
+  addRoleToUserWs,
+  removeRoleFromUserWs,
 } from './ServerStore.reducer';
 
 export {
@@ -60,4 +66,6 @@ export {
   getBannedUsers,
   unbanUser,
   changeVoiceChannelMaxCount,
+  addRole,
+  removeRole,
 } from './ServerStore.actions';

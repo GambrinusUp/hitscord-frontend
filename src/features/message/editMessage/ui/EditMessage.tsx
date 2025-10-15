@@ -19,6 +19,8 @@ export const EditMessage = ({
   type,
 }: EditMessageProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
+  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+  const { activeChat } = useAppSelector((state) => state.chatsStore);
   const { editMessage, editChatMessage } = useWebSocket();
 
   const handleEdit = () => {
@@ -30,6 +32,7 @@ export const EditMessage = ({
       case MessageType.CHANNEL:
         editMessage({
           Token: accessToken,
+          ChannelId: currentChannelId!,
           MessageId: messageId,
           Text: editedContent.trim(),
         });
@@ -37,6 +40,7 @@ export const EditMessage = ({
       case MessageType.CHAT:
         editChatMessage({
           Token: accessToken,
+          ChannelId: activeChat!,
           MessageId: messageId,
           Text: editedContent.trim(),
         });

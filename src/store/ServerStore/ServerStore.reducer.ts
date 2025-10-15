@@ -1,6 +1,7 @@
 import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
 
 import {
+  addRole,
   changeChannelName,
   changeNameOnServer,
   changeRole,
@@ -22,6 +23,7 @@ import {
   getMoreMessages,
   getServerData,
   getUserServers,
+  removeRole,
   selfMute,
   subscribeToServer,
   unbanUser,
@@ -31,7 +33,6 @@ import {
   BannedUserResponse,
   ChannelMessage,
   GetChannelSettings,
-  GetMessage,
   MuteStatus,
   ServerData,
   ServerItem,
@@ -41,7 +42,6 @@ import {
 
 import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { LoadingState } from '~/shared';
-import { RoleType } from '~/store/RolesStore';
 import { UpdateRole } from '~/store/RolesStore/RolesStore.types';
 
 const initialState: ServerState = {
@@ -91,7 +91,10 @@ const initialState: ServerState = {
   isLoading: false,
   numberOfMessages: MAX_MESSAGE_NUMBER,
   startMessageId: 0,
-  remainingMessagesCount: 0,
+  remainingTopMessagesCount: 0,
+  lastTopMessageId: 0,
+  remainingBottomMessagesCount: MAX_MESSAGE_NUMBER,
+  lastBottomMessageId: 0,
   allMessagesCount: 0,
   messageIsLoading: LoadingState.IDLE,
   error: '',
@@ -208,9 +211,11 @@ const testServerSlice = createSlice({
       };
       state.numberOfMessages = 0;
       state.startMessageId = 0;
-      state.remainingMessagesCount = 0;
+      state.remainingTopMessagesCount = 0;
+      state.lastTopMessageId = 0;
       state.allMessagesCount = 0;
-      state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
+      state.remainingBottomMessagesCount = MAX_MESSAGE_NUMBER;
+      state.lastBottomMessageId = 0;
     },
     clearHasNewMessage: (state) => {
       state.hasNewMessage = false;
@@ -346,12 +351,118 @@ const testServerSlice = createSlice({
       }
 
       state.serverData.users = state.serverData.users.map((user) => {
-        if (user.roleId === roleId) {
-          user.roleName = name;
-        }
+        user.roles = user.roles.map((role) => {
+          if (role.roleId === roleId) {
+            return { ...role, roleName: name };
+          }
+
+          return role;
+        });
 
         return user;
       });
+    },
+    readMessageWs: (
+      state,
+      action: PayloadAction<{ readChannelId: string; readedMessageId: number }>,
+    ) => {
+      const indexChannel = state.serverData.channels.textChannels.findIndex(
+        (channel) => channel.channelId === action.payload.readChannelId,
+      );
+
+      if (indexChannel >= 0) {
+        state.serverData.channels.textChannels[indexChannel].nonReadedCount =
+          state.serverData.channels.textChannels[indexChannel].nonReadedCount -
+          1;
+        state.serverData.channels.textChannels[
+          indexChannel
+        ].lastReadedMessageId = action.payload.readedMessageId;
+      }
+    },
+    changeReadedCount: (
+      state,
+      action: PayloadAction<{ channelId: string; readedMessageId: number }>,
+    ) => {
+      const indexChannel = state.serverData.channels.textChannels.findIndex(
+        (channel) => channel.channelId === action.payload.channelId,
+      );
+
+      if (indexChannel >= 0) {
+        state.serverData.channels.textChannels[indexChannel].nonReadedCount =
+          state.serverData.channels.textChannels[indexChannel].nonReadedCount +
+          1;
+      }
+    },
+    readOwnMessage: (
+      state,
+      action: PayloadAction<{ channelId: string; readedMessageId: number }>,
+    ) => {
+      const indexChannel = state.serverData.channels.textChannels.findIndex(
+        (channel) => channel.channelId === action.payload.channelId,
+      );
+
+      console.log(indexChannel);
+
+      if (indexChannel >= 0) {
+        state.serverData.channels.textChannels[
+          indexChannel
+        ].lastReadedMessageId = action.payload.readedMessageId;
+      }
+    },
+    addRoleToUserWs: (
+      state,
+      action: PayloadAction<{
+        channelId: string;
+        userId: string;
+        roleId: string;
+      }>,
+    ) => {
+      const { userId, roleId } = action.payload;
+      const findedRole = state.serverData.roles.find(
+        (role) => role.id === roleId,
+      );
+
+      if (findedRole) {
+        const userIndex = state.serverData.users.findIndex(
+          (user) => user.userId === userId,
+        );
+
+        if (userIndex >= 0) {
+          state.serverData.users[userIndex].roles = [
+            ...state.serverData.users[userIndex].roles,
+            {
+              roleId: findedRole.id,
+              roleName: findedRole.name,
+              roleType: findedRole.type,
+            },
+          ];
+        }
+      }
+    },
+    removeRoleFromUserWs: (
+      state,
+      action: PayloadAction<{
+        channelId: string;
+        userId: string;
+        roleId: string;
+      }>,
+    ) => {
+      const { userId, roleId } = action.payload;
+      const findedRole = state.serverData.roles.find(
+        (role) => role.id === roleId,
+      );
+
+      if (findedRole) {
+        const userIndex = state.serverData.users.findIndex(
+          (user) => user.userId === userId,
+        );
+
+        if (userIndex >= 0) {
+          state.serverData.users[userIndex].roles = state.serverData.users[
+            userIndex
+          ].roles.filter((role) => role.roleId !== roleId);
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -402,8 +513,11 @@ const testServerSlice = createSlice({
         };
         state.numberOfMessages = 0;
         state.startMessageId = 0;
-        state.remainingMessagesCount = 0;
+        state.remainingTopMessagesCount = 0;
+        state.lastTopMessageId = 0;
         state.allMessagesCount = 0;
+        state.remainingBottomMessagesCount = MAX_MESSAGE_NUMBER;
+        state.lastBottomMessageId = 0;
         state.error = '';
       })
       .addCase(
@@ -484,29 +598,65 @@ const testServerSlice = createSlice({
         state.messagesStatus = LoadingState.PENDING;
         state.numberOfMessages = 0;
         state.startMessageId = 0;
-        state.remainingMessagesCount = 0;
+        state.remainingTopMessagesCount = 0;
         state.allMessagesCount = 0;
+        state.remainingBottomMessagesCount = MAX_MESSAGE_NUMBER;
         state.isLoading = true;
         state.error = '';
       })
-      .addCase(
-        getChannelMessages.fulfilled,
-        (state, action: PayloadAction<GetMessage>) => {
-          state.messages = action.payload.messages;
-          state.hasNewMessage = false;
-          state.messagesStatus = LoadingState.FULFILLED;
-          state.isLoading = false;
-          state.remainingMessagesCount = action.payload.remainingMessagesCount;
-          state.allMessagesCount = action.payload.allMessagesCount;
+      .addCase(getChannelMessages.fulfilled, (state, action) => {
+        const { payload } = action;
 
-          state.startMessageId = action.payload.startMessageId;
-          /*if (action.payload.remainingMessagesCount > 0) {
-            state.numberOfStarterMessage = MAX_MESSAGE_NUMBER;
-          }*/
+        const {
+          messages,
+          allMessagesCount,
+          remainingMessagesCount,
+          startMessageId,
+        } = payload;
+        //const { down } = meta.arg;
 
-          state.error = '';
-        },
-      )
+        console.log(messages);
+
+        state.messages = messages;
+        state.hasNewMessage = false;
+        state.messagesStatus = LoadingState.FULFILLED;
+        state.isLoading = false;
+        state.remainingTopMessagesCount = remainingMessagesCount;
+        //state.lastTopMessageId = messages[0].id;
+
+        if (messages.length > 0) {
+          state.lastTopMessageId = messages[0].id;
+        } else {
+          state.lastTopMessageId = 0;
+        }
+
+        /*const lastMessage = messages[messages.length - 1];
+
+        if (lastMessage) {
+          state.lastBottomMessageId = lastMessage.id;
+        }
+
+        if (lastMessage?.id === allMessagesCount) {
+          state.remainingBottomMessagesCount = 0;
+        }*/
+
+        state.lastTopMessageId = messages.length > 0 ? messages[0].id : 0;
+        state.lastBottomMessageId =
+          messages.length > 0 ? messages[messages.length - 1].id : 0;
+
+        if (messages.length > 0) {
+          const lastMessage = messages[messages.length - 1];
+
+          if (lastMessage?.id === allMessagesCount) {
+            state.remainingBottomMessagesCount = 0;
+          }
+        }
+
+        state.allMessagesCount = allMessagesCount;
+        state.startMessageId = startMessageId;
+
+        state.error = '';
+      })
       .addCase(getChannelMessages.rejected, (state, action) => {
         state.isLoading = false;
         state.messagesStatus = LoadingState.REJECTED;
@@ -516,47 +666,32 @@ const testServerSlice = createSlice({
         state.messageIsLoading = LoadingState.PENDING;
         state.error = '';
       })
-      /*.addCase(
-        getMoreMessages.fulfilled,
-        (state, action: PayloadAction<GetMessage>) => {
-          state.messages = [...action.payload.messages, ...state.messages];
-          state.messageIsLoading = LoadingState.FULFILLED;
-          state.remainingMessagesCount = action.payload.remainingMessagesCount;
-
-          if (action.payload.remainingMessagesCount > 0) {
-            state.numberOfStarterMessage =
-              state.numberOfStarterMessage + MAX_MESSAGE_NUMBER;
-          }
-          state.error = '';
-        },
-      )*/
-      /*{
-            "messages": [],
-            "numberOfMessages": 0,
-            "startMessageId": 0,
-            "remainingMessagesCount": 6,
-            "allMessagesCount": 6
-          }*/
       .addCase(getMoreMessages.fulfilled, (state, action) => {
         const { payload, meta } = action;
-        const {
-          messages,
-          remainingMessagesCount,
-          allMessagesCount,
-          startMessageId,
-        } = payload;
+        const { messages, remainingMessagesCount, allMessagesCount } = payload;
         const { down } = meta.arg;
 
         if (!down) {
-          state.messages = [...messages, ...state.messages];
+          const newMessages = messages.slice(0, -1);
+          state.messages = [...newMessages, ...state.messages];
+
+          state.remainingTopMessagesCount = remainingMessagesCount;
+          state.lastTopMessageId = messages[0].id;
         } else {
-          state.messages = [...state.messages, ...messages];
+          const newMessages = messages.slice(1);
+          state.messages = [...state.messages, ...newMessages];
+
+          state.remainingBottomMessagesCount = remainingMessagesCount;
+          const lastMessage = newMessages.at(-1);
+
+          if (lastMessage) {
+            state.lastBottomMessageId = lastMessage.id;
+          }
         }
 
         state.messageIsLoading = LoadingState.FULFILLED;
-        state.remainingMessagesCount = remainingMessagesCount;
         state.allMessagesCount = allMessagesCount;
-        state.startMessageId = startMessageId;
+        //state.startMessageId = startMessageId;
 
         state.error = '';
       })
@@ -703,6 +838,26 @@ const testServerSlice = createSlice({
         state.error = '';
       })
 
+      .addCase(addRole.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(addRole.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(addRole.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+
+      .addCase(removeRole.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(removeRole.fulfilled, (state) => {
+        state.error = '';
+      })
+      .addCase(removeRole.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+
       .addMatcher(
         isAnyOf(getChannelSettings.fulfilled),
         (state, action: PayloadAction<GetChannelSettings>) => {
@@ -768,6 +923,11 @@ export const {
   removeUserFromVoiceChannel,
   toggleUserMuteStatus,
   updatedRole,
+  readMessageWs,
+  changeReadedCount,
+  readOwnMessage,
+  addRoleToUserWs,
+  removeRoleFromUserWs,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

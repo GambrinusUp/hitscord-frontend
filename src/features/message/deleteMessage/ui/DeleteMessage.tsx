@@ -17,6 +17,8 @@ export const DeleteMessage = ({
   type,
 }: DeleteMessageProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
+  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+  const { activeChat } = useAppSelector((state) => state.chatsStore);
   const { deleteMessage, deleteChatMessage } = useWebSocket();
 
   const handleDelete = () => {
@@ -24,12 +26,14 @@ export const DeleteMessage = ({
       case MessageType.CHANNEL:
         deleteMessage({
           Token: accessToken,
+          ChannelId: currentChannelId!,
           MessageId: messageId,
         });
         break;
       case MessageType.CHAT:
         deleteChatMessage({
           Token: accessToken,
+          ChannelId: activeChat!,
           MessageId: messageId,
         });
         break;

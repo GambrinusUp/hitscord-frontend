@@ -18,9 +18,9 @@ export const UserItem = ({
   userId,
   //handleMuteUser,
 }: UserItemProps) => {
-  const roleType = useAppSelector(
+  /*const roleType = useAppSelector(
     (state) => state.testServerStore.serverData.userRoleType,
-  );
+  );*/
   const canWorkChannels = useAppSelector(
     (state) => state.testServerStore.serverData.permissions.canWorkChannels,
   );
@@ -31,11 +31,11 @@ export const UserItem = ({
     (channel) => channel.channelId === channelId,
   )?.users;
   const { user } = useAppSelector((state) => state.userStore);
-  const userRoleType = useAppSelector((state) =>
+  /*const userRoleType = useAppSelector((state) =>
     state.testServerStore.serverData.users.find(
       (user) => user.userId === userId,
     ),
-  )?.roleType;
+  )?.roleType;*/
 
   /* const isMuted =
     users?.find((user) => user.userId === userId)?.muteStatus ===
@@ -107,7 +107,7 @@ export const UserItem = ({
           </Menu.Item>
         )}
         {canWorkChannels &&
-          Number(roleType) <= Number(userRoleType) &&
+          //Number(roleType) <= Number(userRoleType) &&
           userId !== user.id && (
             <Menu.Item
               leftSection={<Unplug />}

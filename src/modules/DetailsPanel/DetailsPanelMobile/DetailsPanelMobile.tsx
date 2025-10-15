@@ -57,7 +57,7 @@ export const DetailsPanelMobile = ({
                     radius="sm"
                     style={{ marginLeft: 'auto', maxWidth: 100 }}
                   >
-                    {user.roleName}
+                    {'Роль пока недоступна'}
                   </Badge>
                 </Group>
               ))}

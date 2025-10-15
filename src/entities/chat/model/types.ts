@@ -57,7 +57,7 @@ export interface ChatMessage {
   messageType: MessageType;
   serverId: string | null;
   channelId: string;
-  id: string;
+  id: number;
   authorId: string;
   createdAt: string;
   replyToMessage: string | null;
@@ -72,9 +72,11 @@ export interface ChatsState {
   messages: ChatMessage[];
   messagesStatus: LoadingState;
   messageIsLoading: LoadingState;
-  numberOfMessages: number;
+  remainingTopMessagesCount: number;
+  lastTopMessageId: number;
+  remainingBottomMessagesCount: number;
+  lastBottomMessageId: number;
   startMessageId: number;
-  remainingMessagesCount: number;
   allMessagesCount: number;
   error: string;
 }

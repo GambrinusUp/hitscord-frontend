@@ -102,6 +102,40 @@ export const changeRole = createAsyncThunk<
   },
 );
 
+export const addRole = createAsyncThunk<
+  void,
+  { accessToken: string; serverId: string; userId: string; role: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/addRole',
+  async ({ accessToken, serverId, userId, role }, { rejectWithValue }) => {
+    try {
+      await ServerAPI.addRole(accessToken, serverId, userId, role);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const removeRole = createAsyncThunk<
+  void,
+  { accessToken: string; serverId: string; userId: string; role: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/removeRole',
+  async ({ accessToken, serverId, userId, role }, { rejectWithValue }) => {
+    try {
+      await ServerAPI.removeRole(accessToken, serverId, userId, role);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
 export const subscribeToServer = createAsyncThunk<
   void,
   { accessToken: string; serverId: string; userName: string },

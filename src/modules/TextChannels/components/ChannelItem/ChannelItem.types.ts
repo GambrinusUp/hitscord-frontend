@@ -3,6 +3,7 @@ export interface ChannelItemProps {
   currentChannelId: string | null;
   channelName: string;
   canWorkChannels: boolean;
+  nonReadedCount: number;
   handleOpenChannel: () => void;
   handleEditChannel: () => void;
 }

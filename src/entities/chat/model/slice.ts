@@ -41,8 +41,10 @@ const initialState: ChatsState = {
   messages: [],
   messagesStatus: LoadingState.IDLE,
   messageIsLoading: LoadingState.IDLE,
-  remainingMessagesCount: MAX_MESSAGE_NUMBER,
-  numberOfMessages: 0,
+  remainingTopMessagesCount: 0,
+  lastTopMessageId: 0,
+  remainingBottomMessagesCount: MAX_MESSAGE_NUMBER,
+  lastBottomMessageId: 0,
   startMessageId: 0,
   allMessagesCount: 0,
 };
@@ -64,7 +66,7 @@ export const ChatsSlice = createSlice({
     },
     deleteChatMessageWS: (
       state,
-      action: PayloadAction<{ chatId: string; messageId: string }>,
+      action: PayloadAction<{ chatId: string; messageId: number }>,
     ) => {
       if (state.activeChat === action.payload.chatId) {
         state.messages = state.messages.filter(
@@ -81,6 +83,37 @@ export const ChatsSlice = createSlice({
         if (index !== -1) {
           state.messages[index] = action.payload;
         }
+      }
+    },
+    readChatMessageWs: (
+      state,
+      action: PayloadAction<{ readChatId: string; readedMessageId: number }>,
+    ) => {
+      const { readChatId, readedMessageId } = action.payload;
+
+      if (state.activeChat === readChatId) {
+        state.chat.nonReadedCount = state.chat.nonReadedCount - 1;
+        state.chat.lastReadedMessageId = readedMessageId;
+      }
+    },
+    changeChatReadedCount: (
+      state,
+      action: PayloadAction<{ readChatId: string; readedMessageId: number }>,
+    ) => {
+      const { readChatId } = action.payload;
+
+      if (state.activeChat === readChatId) {
+        state.chat.nonReadedCount = state.chat.nonReadedCount + 1;
+      }
+    },
+    readOwnChatMessage: (
+      state,
+      action: PayloadAction<{ readChatId: string; readedMessageId: number }>,
+    ) => {
+      const { readChatId, readedMessageId } = action.payload;
+
+      if (state.activeChat === readChatId) {
+        state.chat.lastReadedMessageId = readedMessageId;
       }
     },
   },
@@ -154,8 +187,10 @@ export const ChatsSlice = createSlice({
           nonNotifiable: false,
           icon: null,
         };
-        state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
-        state.numberOfMessages = 0;
+        state.remainingTopMessagesCount = 0;
+        state.lastTopMessageId = 0;
+        state.remainingBottomMessagesCount = MAX_MESSAGE_NUMBER;
+        state.lastBottomMessageId = 0;
         state.startMessageId = 0;
         state.allMessagesCount = 0;
         state.messages = [];
@@ -165,6 +200,7 @@ export const ChatsSlice = createSlice({
         getChatInfo.fulfilled,
         (state, action: PayloadAction<ChatInfo>) => {
           state.chat = action.payload;
+          state.startMessageId = action.payload.lastReadedMessageId;
           state.chatLoading = LoadingState.FULFILLED;
           state.error = '';
         },
@@ -176,23 +212,47 @@ export const ChatsSlice = createSlice({
 
       .addCase(getChatMessages.pending, (state) => {
         state.messagesStatus = LoadingState.PENDING;
-        state.remainingMessagesCount = MAX_MESSAGE_NUMBER;
-        state.numberOfMessages = 0;
-        state.startMessageId = 0;
+        state.remainingTopMessagesCount = 0;
+        state.lastTopMessageId = 0;
+        state.remainingBottomMessagesCount = MAX_MESSAGE_NUMBER;
+        state.lastBottomMessageId = 0;
+        //state.startMessageId = 0;
         state.allMessagesCount = 0;
         state.messages = [];
         state.error = '';
       })
+      // обработать случаи, когда массив пустой
       .addCase(
         getChatMessages.fulfilled,
         (state, action: PayloadAction<GetChatMessages>) => {
-          state.messages = action.payload.messages;
-          state.messagesStatus = LoadingState.FULFILLED;
-          state.remainingMessagesCount = action.payload.remainingMessagesCount;
+          const { payload } = action;
+          const { messages, allMessagesCount, remainingMessagesCount } =
+            payload;
 
-          if (action.payload.remainingMessagesCount > 0) {
-            state.numberOfStarterMessage = MAX_MESSAGE_NUMBER;
+          state.messages = messages;
+
+          //
+          if (messages.length > 0) {
+            state.remainingTopMessagesCount = remainingMessagesCount;
+          } else {
+            state.remainingTopMessagesCount = 0;
           }
+
+          state.lastTopMessageId = messages.length > 0 ? messages[0].id : 0;
+          state.lastBottomMessageId =
+            messages.length > 0 ? messages[messages.length - 1].id : 0;
+
+          if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+
+            if (lastMessage?.id === allMessagesCount) {
+              state.remainingBottomMessagesCount = 0;
+            }
+          }
+
+          state.allMessagesCount = allMessagesCount;
+          //state.startMessageId = startMessageId;
+          state.messagesStatus = LoadingState.FULFILLED;
           state.error = '';
         },
       )
@@ -204,20 +264,34 @@ export const ChatsSlice = createSlice({
         state.messageIsLoading = LoadingState.PENDING;
         state.error = '';
       })
-      .addCase(
-        getMoreChatMessages.fulfilled,
-        (state, action: PayloadAction<GetChatMessages>) => {
-          state.messages = [...action.payload.messages, ...state.messages];
-          state.messageIsLoading = LoadingState.FULFILLED;
-          state.remainingMessagesCount = action.payload.remainingMessagesCount;
+      .addCase(getMoreChatMessages.fulfilled, (state, action) => {
+        const { payload, meta } = action;
+        const { messages, remainingMessagesCount, allMessagesCount } = payload;
+        const { down } = meta.arg;
 
-          if (action.payload.remainingMessagesCount > 0) {
-            state.numberOfStarterMessage =
-              state.numberOfStarterMessage + MAX_MESSAGE_NUMBER;
+        if (!down) {
+          const newMessages = messages.slice(0, -1);
+          state.messages = [...newMessages, ...state.messages];
+
+          state.remainingTopMessagesCount = remainingMessagesCount;
+          state.lastTopMessageId = messages[0].id;
+        } else {
+          const newMessages = messages.slice(1);
+          state.messages = [...state.messages, ...newMessages];
+
+          state.remainingBottomMessagesCount = remainingMessagesCount;
+          const lastMessage = newMessages.at(-1);
+
+          if (lastMessage) {
+            state.lastBottomMessageId = lastMessage.id;
           }
-          state.error = '';
-        },
-      )
+        }
+
+        state.messagesStatus = LoadingState.FULFILLED;
+        state.allMessagesCount = allMessagesCount;
+
+        state.error = '';
+      })
       .addCase(getMoreChatMessages.rejected, (state, action) => {
         state.messageIsLoading = LoadingState.REJECTED;
         state.error = action.payload as string;
@@ -254,6 +328,9 @@ export const {
   addChatMessage,
   deleteChatMessageWS,
   editChatMessageWS,
+  readChatMessageWs,
+  changeChatReadedCount,
+  readOwnChatMessage,
 } = ChatsSlice.actions;
 
 export const chatsReducer = ChatsSlice.reducer;

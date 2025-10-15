@@ -20,14 +20,7 @@ export const DetailsPanel = () => {
         <ScrollArea.Autosize mah="100%" maw="100%">
           <Stack gap="xs">
             {serverData.users.map((user) => (
-              <UserItem
-                key={user.userId}
-                userId={user.userId}
-                userName={user.userName}
-                userTag={user.userTag}
-                roleName={user.roleName}
-                roleType={user.roleType}
-              />
+              <UserItem key={user.userId} user={user} />
             ))}
           </Stack>
         </ScrollArea.Autosize>
