@@ -11,21 +11,28 @@ import {
   Text,
   Textarea,
   TextInput,
+  Notification,
 } from '@mantine/core';
 import { ArrowDown, Menu, Paperclip, Search, Send, Users } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
-import { ChatSectionProps, MentionSuggestion } from './ChatSection.types';
+import { ChatSectionProps } from './ChatSection.types';
 import { formatTagMessage } from './ChatSection.utils';
+import { useMentionSuggestions } from './lib/useMentionSuggestions';
 
+import { ChatMessage } from '~/entities/chat';
 import { attachFile, clearFiles } from '~/entities/files';
 import { MessageType } from '~/entities/message';
+import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
 import { AttachedFilesList } from '~/features/attachedFilesList';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import { useScrollToBottom } from '~/shared/lib/hooks';
 import { useWebSocket } from '~/shared/lib/websocket';
-import { MessageType as ServerMessageType } from '~/store/ServerStore';
+import {
+  ChannelMessage,
+  MessageType as ServerMessageType,
+} from '~/store/ServerStore';
 import { MessagesList } from '~/widgets/messagesList';
 
 export const ChatSection = ({
@@ -39,7 +46,6 @@ export const ChatSection = ({
     currentServerId,
     currentChannelId,
     messages,
-    hasNewMessage,
     messagesStatus,
     serverData,
   } = useAppSelector((state) => state.testServerStore);
@@ -51,6 +57,8 @@ export const ChatSection = ({
   const channelSettings = serverData.channels.textChannels.find(
     (channel) => channel.channelId === currentChannelId,
   );
+  /* Вынести в shared */
+  const { getUsername } = useMessageAuthor(MessageType.CHANNEL);
   const { scrollRef, isAtBottom, showButton, handleScroll, scrollToBottom } =
     useScrollToBottom({
       messagesStatus,
@@ -59,134 +67,54 @@ export const ChatSection = ({
     });
 
   const canWrite = channelSettings?.canWrite;
+  const nonReadedCount = channelSettings?.nonReadedCount;
+  const nonReadedTaggedCount = channelSettings?.nonReadedTaggedCount;
   const [newMessage, setNewMessage] = useState('');
-
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<MentionSuggestion[]>([]);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(0);
-  const [currentMention, setCurrentMention] =
-    useState<MentionSuggestion | null>(null);
+  const [replyMessage, setReplyMessage] = useState<
+    ChatMessage | ChannelMessage | null
+  >(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  const findMentionAtCursor = (
-    text: string,
-    cursorPosition: number,
-  ): MentionSuggestion | null => {
-    const before = text.slice(0, cursorPosition);
-    const match = before.match(/@([\w#-]*)$/);
-
-    if (match) {
-      const search = match[1];
-      const atIndex = before.lastIndexOf('@');
-
-      return {
-        type: 'user',
-        id: '',
-        display: '',
-        tag: '',
-        startIndex: atIndex,
-        searchText: search,
-      };
-    }
-
-    return null;
-  };
-
-  const filterSuggestions = (
-    mention: MentionSuggestion,
-  ): MentionSuggestion[] => {
-    const text = mention.searchText.toLowerCase();
-
-    const userMatches = users
-      .filter((u) => `${u.userName}#${u.userTag}`.toLowerCase().includes(text))
-      .slice(0, 5)
-      .map((u) => ({
-        type: 'user' as const,
-        id: u.userId,
-        display: u.userName,
-        tag: `${u.userTag}`,
-        startIndex: mention.startIndex,
-        searchText: mention.searchText,
-      }));
-
-    const roleMatches = roles
-      .filter(
-        (r) =>
-          r.name.toLowerCase().includes(text) ||
-          r.tag.toLowerCase().includes(text),
-      )
-      .slice(0, 5)
-      .map((r) => ({
-        type: 'role' as const,
-        id: r.id,
-        display: r.name,
-        tag: r.tag,
-        startIndex: mention.startIndex,
-        searchText: mention.searchText,
-      }));
-
-    return [...userMatches, ...roleMatches];
-  };
+  const {
+    suggestions,
+    suggestionsRef,
+    clearSuggestions,
+    handleTextChange,
+    showSuggestions,
+    downSuggestion,
+    upSuggestion,
+    enterSuggestion,
+    cancelSuggestion,
+    insertMention,
+    selectedSuggestionIndex,
+    setSelectedSuggestionIndex,
+  } = useMentionSuggestions({
+    users,
+    roles,
+    textareaRef,
+    newMessage,
+    setNewMessage,
+  });
 
   const handleSendMessage = () => {
     if (newMessage.trim() && currentServerId && currentChannelId) {
-      console.log(formatTagMessage(newMessage.trim()));
       sendMessage({
         Token: accessToken,
         ChannelId: currentChannelId,
         Classic: {
-          Text: newMessage.trim(),
+          Text: formatTagMessage(newMessage.trim()),
           NestedChannel: false,
           Files: uploadedFiles.map((file) => file.fileId),
         },
-
+        ReplyToMessageId: replyMessage ? replyMessage.id : undefined,
         MessageType: ServerMessageType.Classic,
       });
       setNewMessage('');
-      setShowSuggestions(false);
-      setCurrentMention(null);
+      setReplyMessage(null);
+      clearSuggestions();
       dispatch(clearFiles());
     }
-  };
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    const pos = e.target.selectionStart || 0;
-    setNewMessage(val);
-    const mention = findMentionAtCursor(val, pos);
-
-    if (mention) {
-      const list = filterSuggestions(mention);
-      setSuggestions(list);
-      setCurrentMention(mention);
-      setShowSuggestions(list.length > 0);
-      setSelectedSuggestionIndex(0);
-    } else {
-      setShowSuggestions(false);
-      setCurrentMention(null);
-    }
-  };
-
-  const insertMention = (item: MentionSuggestion) => {
-    if (!currentMention || !textareaRef.current) return;
-
-    console.log('insertMention', item);
-
-    const before = newMessage.slice(0, currentMention.startIndex);
-    const after = newMessage.slice(textareaRef.current.selectionStart || 0);
-    const mentionText =
-      item.type === 'user' ? `@${item.tag} ` : `@${item.tag} `;
-    const updated = before + mentionText + after;
-    setNewMessage(updated);
-    setShowSuggestions(false);
-    setCurrentMention(null);
-    setTimeout(() => {
-      const pos = before.length + mentionText.length;
-      textareaRef.current!.setSelectionRange(pos, pos);
-      textareaRef.current!.focus();
-    }, 0);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -202,31 +130,23 @@ export const ChatSection = ({
     switch (event.key) {
       case 'ArrowDown':
         event.preventDefault();
-        setSelectedSuggestionIndex((prev) =>
-          prev < suggestions.length - 1 ? prev + 1 : 0,
-        );
+        downSuggestion();
         break;
 
       case 'ArrowUp':
         event.preventDefault();
-        setSelectedSuggestionIndex((prev) =>
-          prev > 0 ? prev - 1 : suggestions.length - 1,
-        );
+        upSuggestion();
         break;
 
       case 'Tab':
       case 'Enter':
         event.preventDefault();
-
-        if (suggestions[selectedSuggestionIndex]) {
-          insertMention(suggestions[selectedSuggestionIndex]);
-        }
+        enterSuggestion();
         break;
 
       case 'Escape':
         event.preventDefault();
-        setShowSuggestions(false);
-        setCurrentMention(null);
+        cancelSuggestion();
         break;
     }
   };
@@ -242,18 +162,6 @@ export const ChatSection = ({
 
     e.target.value = '';
   };
-
-  useEffect(() => {
-    if (suggestionsRef.current && showSuggestions) {
-      const selectedElement = suggestionsRef.current.children[
-        selectedSuggestionIndex
-      ] as HTMLElement;
-
-      if (selectedElement) {
-        selectedElement.scrollIntoView({ block: 'nearest' });
-      }
-    }
-  }, [selectedSuggestionIndex, showSuggestions]);
 
   return (
     <Box
@@ -284,7 +192,11 @@ export const ChatSection = ({
         style={{ flex: 1, padding: 10 }}
         onScrollPositionChange={handleScroll}
       >
-        <MessagesList scrollRef={scrollRef} type={MessageType.CHANNEL} />
+        <MessagesList
+          scrollRef={scrollRef}
+          type={MessageType.CHANNEL}
+          replyToMessage={(message) => setReplyMessage(message)}
+        />
       </ScrollArea>
 
       {!isAtBottom && showButton && (
@@ -296,7 +208,12 @@ export const ChatSection = ({
             zIndex: 10,
           }}
         >
-          <Indicator size={14} disabled={!hasNewMessage} withBorder>
+          <Indicator
+            size={14}
+            disabled={nonReadedCount! <= 0 && nonReadedTaggedCount! <= 0}
+            color={nonReadedTaggedCount! > 0 ? 'red' : 'blue'}
+            withBorder
+          >
             <ActionIcon
               size="lg"
               variant="filled"
@@ -310,7 +227,16 @@ export const ChatSection = ({
 
       <Box pos="relative">
         <AttachedFilesList />
-
+        {replyMessage && (
+          <Box p={6}>
+            <Notification
+              title={getUsername(replyMessage.authorId)}
+              onClose={() => setReplyMessage(null)}
+            >
+              <Text lineClamp={2}>{replyMessage.text}</Text>
+            </Notification>
+          </Box>
+        )}
         {showSuggestions && suggestions.length > 0 && (
           <Paper
             ref={suggestionsRef}

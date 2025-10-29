@@ -9,22 +9,28 @@ import {
   Text,
   Tooltip,
 } from '@mantine/core';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
+import { useUserServer } from './lib/useUserServer';
 import { userItemStyles } from './UserItem.style';
 
 import { UserMiniProfile } from '~/components/UserMiniProfile';
+import { useIcon, useRoleColor } from '~/shared/lib/hooks';
 
 interface UserItemProps {
   user: UserOnServer;
 }
 
 export const UserItem = ({ user }: UserItemProps) => {
-  //const { roles } = useAppSelector((state) => state.testServerStore.serverData);
+  const { getRoleColor } = useRoleColor();
+  const { getUserIcon } = useUserServer();
+  const { userName, roles, userId } = user;
+
+  const userIcon = useMemo(() => getUserIcon(userId), [getUserIcon, userId]);
+
+  const { iconBase64 } = useIcon(userIcon);
 
   const [opened, setOpened] = useState(false);
-
-  const { userName, roles } = user;
 
   const role = roles[0];
 
@@ -35,7 +41,7 @@ export const UserItem = ({ user }: UserItemProps) => {
           style={userItemStyles.group()}
           onClick={() => setOpened((o) => !o)}
         >
-          <Avatar size="md" color="blue">
+          <Avatar size="md" color="blue" src={iconBase64}>
             {userName[0]}
           </Avatar>
           <Stack>
@@ -47,7 +53,7 @@ export const UserItem = ({ user }: UserItemProps) => {
             <Tooltip label={role.roleName} position="top" withArrow>
               <Badge
                 variant="light"
-                //color={badgeColor}
+                color={getRoleColor(role.roleId)}
                 style={userItemStyles.badge()}
               >
                 {role.roleName}
@@ -57,7 +63,7 @@ export const UserItem = ({ user }: UserItemProps) => {
         </Group>
       </Popover.Target>
       <Popover.Dropdown bg="#43474f">
-        <UserMiniProfile userOnServer={user} />
+        <UserMiniProfile userOnServer={user} userIcon={iconBase64} />
       </Popover.Dropdown>
     </Popover>
   );

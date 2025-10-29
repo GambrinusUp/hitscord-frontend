@@ -5,6 +5,8 @@ import { WebSocketContext } from './WebSocketContext';
 import {
   addChatMessage,
   changeChatReadedCount,
+  deleteChatMessageWS,
+  editChatMessageWS,
   readOwnChatMessage,
 } from '~/entities/chat';
 import { formatMessage, formatUser } from '~/helpers';
@@ -16,7 +18,6 @@ import {
   useDisconnect,
 } from '~/hooks';
 import { setOpenHome } from '~/store/AppStore';
-import { deleteChatMessageWS, editChatMessageWS } from '~/store/ChatsStore';
 import {
   addMessage,
   deleteMessageWs,
@@ -302,6 +303,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                 changeReadedCount({
                   channelId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
+                  serverId: formattedMessage.serverId!,
                 }),
               );
             } else {
@@ -309,6 +311,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                 readOwnMessage({
                   channelId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
+                  serverId: formattedMessage.serverId!,
                 }),
               );
             }

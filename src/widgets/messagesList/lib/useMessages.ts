@@ -1,8 +1,5 @@
 import { useEffect, useRef } from 'react';
 
-import { useChannelData } from './useChannelData';
-import { useChatData } from './useChatData';
-
 import { MAX_MESSAGE_NUMBER } from '~/constants';
 import {
   getChatInfo,
@@ -12,6 +9,7 @@ import {
 } from '~/entities/chat';
 import { MessageType } from '~/entities/message';
 import { useAppDispatch, useAppSelector } from '~/hooks';
+import { useChannelData, useChatData } from '~/shared/lib/hooks';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { getMoreMessages, readMessageWs } from '~/store/ServerStore';
 
@@ -24,13 +22,15 @@ export const useMessages = (
   const { readMessage } = useWebSocket();
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { activeChat } = useAppSelector((state) => state.chatsStore);
-  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+  const { currentChannelId, currentServerId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
   const textChannels = useAppSelector(
     (state) => state.testServerStore.serverData.channels.textChannels,
   );
-  const lastReadedMessageId = textChannels.find(
-    (channel) => channel.channelId === currentChannelId,
-  )?.lastReadedMessageId;
+  const lastReadedMessageId =
+    textChannels.find((channel) => channel.channelId === currentChannelId)
+      ?.lastReadedMessageId || 0;
 
   const chatData = useChatData();
   const channelData = useChannelData();
@@ -45,10 +45,12 @@ export const useMessages = (
     remainingTopMessagesCount,
     entityId,
   } = type === MessageType.CHAT ? chatData : channelData;
-  //} = channelData;
 
   const firstMessageElementRef = useRef<HTMLDivElement | null>(null);
   const lastMessageElementRef = useRef<HTMLDivElement | null>(null);
+
+  const isLoadingTop = useRef(false);
+  const prevScrollHeightRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (type === MessageType.CHAT && activeChat) {
@@ -61,12 +63,14 @@ export const useMessages = (
     if (!entityId) return;
 
     if (type === MessageType.CHAT) {
+      const isFirstLoad = startMessageId === 0;
+
       dispatch(
         getChatMessages({
           chatId: entityId,
           number: MAX_MESSAGE_NUMBER,
           fromMessageId: startMessageId,
-          down: false,
+          down: isFirstLoad,
         }),
       );
     }
@@ -76,20 +80,26 @@ export const useMessages = (
     if (!firstMessageElementRef.current) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
+      async ([entry]) => {
         if (!entry.isIntersecting) return;
 
-        console.log(remainingTopMessagesCount, lastTopMessageId);
-
         if (remainingTopMessagesCount < 1) return;
+
+        if (isLoadingTop.current) return;
+
+        isLoadingTop.current = true;
 
         const numberToLoad = Math.min(
           remainingTopMessagesCount,
           MAX_MESSAGE_NUMBER,
         );
 
+        if (scrollRef.current) {
+          prevScrollHeightRef.current = scrollRef.current.scrollHeight;
+        }
+
         if (type === MessageType.CHANNEL && entityId) {
-          dispatch(
+          await dispatch(
             getMoreMessages({
               accessToken,
               channelId: entityId,
@@ -99,6 +109,19 @@ export const useMessages = (
             }),
           );
         }
+
+        requestAnimationFrame(() => {
+          if (!scrollRef.current || prevScrollHeightRef.current === null) {
+            return;
+          }
+
+          const newScrollHeight = scrollRef.current.scrollHeight;
+          const diff = newScrollHeight - prevScrollHeightRef.current;
+
+          scrollRef.current.scrollTop = diff;
+          prevScrollHeightRef.current = null;
+          isLoadingTop.current = false;
+        });
       },
       {
         root: scrollRef.current,
@@ -108,9 +131,7 @@ export const useMessages = (
 
     observer.observe(firstMessageElementRef.current);
 
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [entityId, remainingTopMessagesCount, lastTopMessageId]);
 
   useEffect(() => {
@@ -169,30 +190,9 @@ export const useMessages = (
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          /*if (entry.isIntersecting && lastReadedMessageId && currentChannelId) {
-            const messageId = Number(
-              entry.target.getAttribute('data-message-id'),
-            );
+          //console.log(entry.isIntersecting, lastReadedMessageId);
 
-            if (messageId > lastReadedMessageId) {
-              console.log(messageId, lastReadedMessageId);
-              readMessage({
-                Token: accessToken,
-                isChannel: type === MessageType.CHANNEL,
-                MessageId: messageId,
-                ChannelId: currentChannelId,
-              });
-
-              dispatch(
-                readMessageWs({
-                  readChannelId: currentChannelId,
-                  readedMessageId: messageId,
-                }),
-              );
-            }
-          }*/
-
-          if (entry.isIntersecting && lastReadedMessageId) {
+          if (entry.isIntersecting) {
             const messageId = Number(
               entry.target.getAttribute('data-message-id'),
             );
@@ -215,6 +215,7 @@ export const useMessages = (
                   readMessageWs({
                     readChannelId: targetId,
                     readedMessageId: messageId,
+                    serverId: currentServerId,
                   }),
                 );
               } else {

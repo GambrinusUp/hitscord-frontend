@@ -1,19 +1,9 @@
 import { useAppSelector } from '~/hooks';
 
-/*
-  numberOfMessages: number;
-  startMessageId: number;
-  remainingTopMessagesCount: number;
-  lastTopMessageId: number;
-  remainingBottomMessagesCount: number;
-  lastBottomMessageId: number;
-  allMessagesCount: number;
-*/
-
 export const useChannelData = () => {
   const messages = useAppSelector((state) => state.testServerStore.messages);
   const messagesStatus = useAppSelector(
-    (state) => state.testServerStore.messagesStatus,
+    (state) => state.testServerStore.messageIsLoading,
   );
   const remainingTopMessagesCount = useAppSelector(
     (state) => state.testServerStore.remainingTopMessagesCount,

@@ -11,6 +11,8 @@ export type {
   BannedUser,
   BannedUserResponse,
   ReadMessageWs,
+  Role,
+  ReplyMessage,
 } from './ServerStore.types';
 export { ChannelType, MuteStatus, MessageType } from './ServerStore.types';
 
@@ -68,4 +70,6 @@ export {
   changeVoiceChannelMaxCount,
   addRole,
   removeRole,
+  getChannelMessages,
+  changeServerIcon,
 } from './ServerStore.actions';

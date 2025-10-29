@@ -11,7 +11,6 @@ export const useMessageAuthor = (type: MessageType) => {
 
   const getUsername = useCallback(
     (authorId: string) => {
-      console.log('render');
       switch (type) {
         case MessageType.CHAT: {
           const userName = usersOnChat.find(
@@ -34,5 +33,29 @@ export const useMessageAuthor = (type: MessageType) => {
     [type, usersOnServer, usersOnChat],
   );
 
-  return { getUsername };
+  const getUserIcon = useCallback(
+    (authorId: string) => {
+      switch (type) {
+        case MessageType.CHAT: {
+          const userIcon = usersOnChat.find(
+            (user) => user.userId === authorId,
+          )?.icon;
+
+          return userIcon?.fileId;
+        }
+        case MessageType.CHANNEL: {
+          const userIcon = usersOnServer.find(
+            (user) => user.userId === authorId,
+          )?.icon;
+
+          return userIcon?.fileId;
+        }
+        default:
+          return '';
+      }
+    },
+    [type, usersOnServer, usersOnChat],
+  );
+
+  return { getUsername, getUserIcon };
 };

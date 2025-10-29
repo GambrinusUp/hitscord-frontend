@@ -31,18 +31,14 @@ export const ChannelItem = ({
         style={{
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          maxWidth: 230,
         }}
         onMouseEnter={() => setIsHovered(channelId)}
         onMouseLeave={() => setIsHovered('')}
       >
         <Button
-          /*leftSection={
-            hasNewMessage && channelId === currentChannelId ? (
-              <Badge circle>{nonReadedCount}</Badge>
-            ) : (
-              <Hash />
-            )
-          }*/
           leftSection={
             nonReadedCount > 0 ? (
               <Badge circle>{nonReadedCount}</Badge>
@@ -59,9 +55,16 @@ export const ChannelItem = ({
               isHovered === channelId,
               currentChannelId === channelId,
             ),
+            label: {
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              wordBreak: 'break-all',
+              maxWidth: '100%',
+            },
           }}
-          fullWidth
           onClick={handleOpenChannel}
+          fullWidth
         >
           {channelName}
         </Button>

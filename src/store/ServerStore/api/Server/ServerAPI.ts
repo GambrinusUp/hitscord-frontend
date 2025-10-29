@@ -1,4 +1,6 @@
 import { API_URL } from '~/constants';
+import { FileResponse } from '~/entities/files';
+import { api } from '~/shared/api';
 import {
   BannedUserResponse,
   GetServersResponse,
@@ -420,4 +422,21 @@ export const unbanUser = async (
     console.error('Error unban user:', error);
     throw error;
   }
+};
+
+export const changeServerIcon = async (
+  serverId: string,
+  icon: File,
+): Promise<FileResponse> => {
+  const formData = new FormData();
+  formData.append('ServerId', serverId);
+  formData.append('Icon', icon);
+
+  const { data } = await api.put('/server/icon', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return data;
 };

@@ -2,9 +2,11 @@ import { Avatar, Box, Stack, Text, Title, Tooltip } from '@mantine/core';
 
 import { formatDateWithDots } from '~/helpers';
 import { useAppSelector } from '~/hooks';
+import { useIcon } from '~/shared/lib/hooks';
 
 export const Profile = () => {
   const { user } = useAppSelector((state) => state.userStore);
+  const { iconBase64 } = useIcon(user.icon?.fileId);
 
   return (
     <Box
@@ -13,7 +15,7 @@ export const Profile = () => {
       visibleFrom="sm"
     >
       <Stack gap="md" align="center">
-        <Avatar size={80} radius="xl" src={undefined} alt={user.name} />
+        <Avatar size={80} radius="xl" src={iconBase64} alt={user.name} />
         <Tooltip label={user.name} withArrow>
           <Title
             order={3}

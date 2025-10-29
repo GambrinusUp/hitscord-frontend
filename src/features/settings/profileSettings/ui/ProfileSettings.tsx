@@ -18,6 +18,7 @@ import { Calendar, Mail, Tag, User } from 'lucide-react';
 
 import { formatDateWithDots } from '~/helpers';
 import { useAppSelector } from '~/hooks';
+import { useIcon } from '~/shared/lib/hooks';
 
 interface ProfileSettingsProps {
   isEdit: boolean;
@@ -31,8 +32,7 @@ export const ProfileSettings = ({
   updateAction,
 }: ProfileSettingsProps) => {
   const { user } = useAppSelector((state) => state.userStore);
-
-  /* добавить загрузку иконки */
+  const { iconBase64 } = useIcon(user.icon?.fileId);
 
   return (
     <Card
@@ -44,7 +44,7 @@ export const ProfileSettings = ({
       <Title order={2}>Информация о профиле</Title>
       <Text c="dimmed">Основная информация о вашем аккаунте</Text>
       <Group mt="md">
-        {!user.icon && <Avatar src={null} alt="no image here" size="xl" />}
+        <Avatar src={iconBase64} alt="User profile icon" size="xl" />
         <Stack>
           <Group>
             <Title order={4}>{user.name}</Title>

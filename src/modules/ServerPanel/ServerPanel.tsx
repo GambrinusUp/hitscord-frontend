@@ -58,6 +58,8 @@ export const ServerPanel = () => {
                 key={server.serverId}
                 serverId={server.serverId}
                 serverName={server.serverName}
+                nonReadedCount={server.nonReadedCount}
+                nonReadedTaggedCount={server.nonReadedTaggedCount}
               />
             ))}
           </Stack>

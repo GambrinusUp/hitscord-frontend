@@ -1,17 +1,24 @@
-import { Loader, Stack } from '@mantine/core';
+import { Flex, Loader, Stack } from '@mantine/core';
 
+import { ChatMessage } from '~/entities/chat';
 import { MessageItem, MessageType } from '~/entities/message';
 import { DeleteMessage, EditMessage } from '~/features/message';
 import { useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
+import { ChannelMessage } from '~/store/ServerStore';
 import { useMessages } from '~/widgets/messagesList/lib/useMessages';
 
 interface MessagesListProps {
   scrollRef: React.RefObject<HTMLDivElement>;
   type: MessageType;
+  replyToMessage: (message: ChatMessage | ChannelMessage) => void;
 }
 
-export const MessagesList = ({ scrollRef, type }: MessagesListProps) => {
+export const MessagesList = ({
+  scrollRef,
+  type,
+  replyToMessage,
+}: MessagesListProps) => {
   const { user } = useAppSelector((state) => state.userStore);
 
   const {
@@ -23,7 +30,11 @@ export const MessagesList = ({ scrollRef, type }: MessagesListProps) => {
 
   return (
     <Stack gap="sm">
-      {messagesStatus === LoadingState.PENDING && <Loader />}
+      {messagesStatus === LoadingState.PENDING && (
+        <Flex justify="center" align="center" w="100%">
+          <Loader />
+        </Flex>
+      )}
       {messages.map((message, index) => {
         const isFirst = index === 0;
         const isLast = index === messages.length - 1;
@@ -39,7 +50,9 @@ export const MessagesList = ({ scrollRef, type }: MessagesListProps) => {
             data-message-id={message.id}
           >
             <MessageItem
+              id={message.id}
               content={message.text}
+              replyMessage={message.replyToMessage}
               isOwnMessage={user.id === message.authorId}
               time={message.createdAt}
               modifiedAt={message.modifiedAt}
@@ -53,6 +66,7 @@ export const MessagesList = ({ scrollRef, type }: MessagesListProps) => {
                 <DeleteMessage {...props} type={type} messageId={message.id} />
               )}
               type={type}
+              onReplyMessage={() => replyToMessage(message)}
             />
           </div>
         );

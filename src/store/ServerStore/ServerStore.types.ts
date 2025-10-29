@@ -30,6 +30,26 @@ export interface ServerState {
   error: string;
 }
 
+/*
+ "MessageType": "Classic",
+        "ServerId": "a9d10ffb-f4be-4bd0-ba92-c92d6787edd1",
+        "ChannelId": "a3d60ffa-39aa-42d4-9d55-c5da1255aaf9",
+        "Id": 53,
+        "AuthorId": "642c3f85-d376-498a-9964-f39f54a39226",
+        "CreatedAt": "2025-10-19T08:19:33.126942Z",
+        "Text": "5"
+*/
+
+export interface ReplyMessage {
+  messageType: MessageType;
+  serverId: string | null;
+  channelId: string;
+  id: number;
+  authorId: string;
+  createdAt: string;
+  text: string;
+}
+
 export interface ChannelMessage {
   text: string;
   modifiedAt: string | null;
@@ -41,7 +61,7 @@ export interface ChannelMessage {
   id: number;
   authorId: string;
   createdAt: string;
-  replyToMessage: string | null;
+  replyToMessage: ReplyMessage | null;
 }
 
 export interface GetMessage {
@@ -72,7 +92,7 @@ export interface UserOnServer {
   userId: string;
   userName: string;
   userTag: string;
-  icon: string | null;
+  icon: FileResponse | null;
   roles: UserRoleOnServer[];
   notifiable: boolean;
   friendshipApplication: boolean;
@@ -128,7 +148,7 @@ export interface UserRoleOnServer {
 export interface ServerData {
   serverId: string;
   serverName: string;
-  icon: string | null;
+  icon: FileResponse | null;
   isClosed: boolean;
   roles: Role[];
   userRoles: UserRoleOnServer[];
@@ -172,7 +192,7 @@ export enum MessageType {
 export interface CreateMessageWs {
   Token: string;
   ChannelId: string;
-  ReplyToMessageId?: string;
+  ReplyToMessageId?: number;
   MessageType: MessageType;
   Classic: {
     Text: string;
@@ -231,4 +251,16 @@ export interface ReadMessageWs {
   isChannel: boolean;
   MessageId: number;
   ChannelId: string;
+}
+
+export interface ChangeReadedCount {
+  serverId: string;
+  channelId: string;
+  readedMessageId: number;
+}
+
+export interface ReadedMessageWs {
+  readChannelId: string;
+  readedMessageId: number;
+  serverId: string | null;
 }

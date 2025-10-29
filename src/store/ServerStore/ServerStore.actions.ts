@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { AxiosError } from 'axios';
 
 import { ChannelsAPI } from './api/Channels';
 import { MessagesAPI } from './api/Messages';
@@ -12,6 +13,10 @@ import {
   GetMessage,
   BannedUserResponse,
 } from './ServerStore.types';
+
+import { FileResponse } from '~/entities/files';
+import { ERROR_MESSAGES } from '~/shared/constants';
+import { RootState } from '~/store/store';
 
 export const getUserServers = createAsyncThunk<
   ServerItem[],
@@ -179,12 +184,12 @@ export const getChannelMessages = createAsyncThunk<
     fromMessageId: number;
     down: boolean;
   },
-  { rejectValue: string }
+  { rejectValue: string; state: RootState }
 >(
   'testServerSlice/getChannelMessages',
   async (
     { accessToken, channelId, number, fromMessageId, down },
-    { rejectWithValue },
+    { rejectWithValue, getState },
   ) => {
     try {
       const response = await ChannelsAPI.getChannelsMessages(
@@ -194,6 +199,39 @@ export const getChannelMessages = createAsyncThunk<
         fromMessageId,
         down,
       );
+
+      if (response.messages.length > 0) {
+        return response;
+      }
+
+      const state = getState();
+      const server = state.testServerStore;
+
+      const channel = server.serverData.channels.textChannels.find(
+        (c) => c.channelId === channelId,
+      );
+
+      const hasUnread =
+        (channel?.nonReadedCount ?? 0) > 0 ||
+        (channel?.nonReadedTaggedCount ?? 0) > 0;
+
+      const shouldLoadDown =
+        !down &&
+        fromMessageId !== 0 &&
+        response.messages.length === 0 &&
+        hasUnread;
+
+      if (shouldLoadDown) {
+        const fallbackResponse = await ChannelsAPI.getChannelsMessages(
+          accessToken,
+          channelId,
+          number,
+          fromMessageId,
+          true,
+        );
+
+        return fallbackResponse;
+      }
 
       return response;
     } catch (e) {
@@ -605,6 +643,29 @@ export const changeVoiceChannelMaxCount = createAsyncThunk<
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',
       );
+    }
+  },
+);
+
+export const changeServerIcon = createAsyncThunk<
+  FileResponse,
+  { serverId: string; icon: File },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeServerIcon',
+  async ({ serverId, icon }, { rejectWithValue }) => {
+    try {
+      const response = await ServerAPI.changeServerIcon(serverId, icon);
+
+      return response;
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        return rejectWithValue(
+          e.response?.data?.message || ERROR_MESSAGES.DEFAULT,
+        );
+      }
+
+      return rejectWithValue(ERROR_MESSAGES.DEFAULT);
     }
   },
 );

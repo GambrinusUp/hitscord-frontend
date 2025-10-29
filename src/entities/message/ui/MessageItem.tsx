@@ -14,7 +14,9 @@ import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
 import { MessageItemProps } from '~/entities/message/model/types';
 import { formatDateTime } from '~/helpers';
 import { useNotification } from '~/hooks';
+import { useIcon } from '~/shared/lib/hooks';
 
+// Обернуть в memo
 export const MessageItem = ({
   type,
   isOwnMessage,
@@ -30,13 +32,19 @@ export const MessageItem = ({
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
-  const { getUsername } = useMessageAuthor(type);
+  const { getUsername, getUserIcon } = useMessageAuthor(type);
   const { showError } = useNotification();
 
   const userName = useMemo(
     () => getUsername(authorId),
     [getUsername, authorId],
   );
+  const userIcon = useMemo(
+    () => getUserIcon(authorId),
+    [getUserIcon, authorId],
+  );
+
+  const { iconBase64 } = useIcon(userIcon);
 
   const handleFileClick = async (file: MessageFile) => {
     try {
@@ -73,7 +81,7 @@ export const MessageItem = ({
         style={{ flexDirection: isOwnMessage ? 'row-reverse' : 'row' }}
         gap="xs"
       >
-        <Avatar size="md" color="blue">
+        <Avatar size="md" color="blue" src={iconBase64}>
           {userName ? userName[0] : '?'}
         </Avatar>
         <Box style={messageItemStyles.box(isOwnMessage, isEditing)}>
@@ -96,7 +104,6 @@ export const MessageItem = ({
               }}
             />
           )}
-
           {files && (
             <Flex direction="column" gap={6} mt={8}>
               {files.map((file) => (
@@ -122,7 +129,6 @@ export const MessageItem = ({
               ))}
             </Flex>
           )}
-
           <Group justify="space-between">
             <Text style={messageItemStyles.meta(isOwnMessage)}>
               {formatDateTime(time)}

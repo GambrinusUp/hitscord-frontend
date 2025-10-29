@@ -4,8 +4,12 @@ import { useRef } from 'react';
 
 import { useUploadIcon } from '~/features/settings/updateIcon/lib';
 
-export const UpdateIcon = () => {
-  const { validateAndUpload } = useUploadIcon();
+interface UpdateIconProps {
+  type: 'profile' | 'server';
+}
+
+export const UpdateIcon = ({ type }: UpdateIconProps) => {
+  const { validateAndUpload } = useUploadIcon({ type });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +32,7 @@ export const UpdateIcon = () => {
         leftSection={<Upload />}
         onClick={handleClick}
       >
-        Загрузить фото
+        Загрузить {type === 'profile' ? 'фото' : 'иконку'}
       </Button>
       <input
         type="file"

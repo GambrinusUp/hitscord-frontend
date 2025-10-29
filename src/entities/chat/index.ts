@@ -18,4 +18,6 @@ export {
   readChatMessageWs,
   changeChatReadedCount,
   readOwnChatMessage,
+  editChatMessageWS,
+  deleteChatMessageWS,
 } from './model/slice';

@@ -1,8 +1,14 @@
 import { changeProfileIcon } from '~/entities/user';
-import { useAppDispatch, useNotification } from '~/hooks';
+import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { changeServerIcon } from '~/store/ServerStore';
 
-export const useUploadIcon = () => {
+interface UseUploadIconProps {
+  type: 'profile' | 'server';
+}
+
+export const useUploadIcon = ({ type }: UseUploadIconProps) => {
   const dispatch = useAppDispatch();
+  const { currentServerId } = useAppSelector((state) => state.testServerStore);
   const { showSuccess, showError } = useNotification();
 
   const validateAndUpload = async (file: File) => {
@@ -37,10 +43,20 @@ export const useUploadIcon = () => {
       URL.revokeObjectURL(objectUrl);
     }
 
-    const result = await dispatch(changeProfileIcon({ icon: file }));
+    if (type === 'profile') {
+      const result = await dispatch(changeProfileIcon({ icon: file }));
 
-    if (result.meta.requestStatus === 'fulfilled') {
-      showSuccess('Аватарка успешно установлена');
+      if (result.meta.requestStatus === 'fulfilled') {
+        showSuccess('Аватарка успешно установлена');
+      }
+    } else if (currentServerId) {
+      const result = await dispatch(
+        changeServerIcon({ serverId: currentServerId, icon: file }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        showSuccess('Иконка сервера успешно установлена');
+      }
     }
   };
 

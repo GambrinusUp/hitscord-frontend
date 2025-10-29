@@ -17,16 +17,21 @@ import { stylesUserMiniProfile } from './UserMiniProfile.style';
 
 import { createApplication } from '~/entities/friendship';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { useRoleColor } from '~/shared/lib/hooks';
 import { UserOnServer } from '~/store/ServerStore';
 
 interface UserMiniProfileProps {
   userOnServer: UserOnServer;
+  userIcon: string | null;
 }
 
-export const UserMiniProfile = ({ userOnServer }: UserMiniProfileProps) => {
+export const UserMiniProfile = ({
+  userOnServer,
+  userIcon,
+}: UserMiniProfileProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  //const { roles } = useAppSelector((state) => state.testServerStore.serverData);
+  const { getRoleColor } = useRoleColor();
   const { applicationFrom } = useAppSelector((state) => state.friendshipStore);
   const { user } = useAppSelector((state) => state.userStore);
 
@@ -35,9 +40,6 @@ export const UserMiniProfile = ({ userOnServer }: UserMiniProfileProps) => {
   const userRoles = userOnServer.roles;
 
   const application = applicationFrom.find((app) => app.user.userId === userId);
-
-  /*const badgeColor =
-    roles.find((role) => role.name === roleName)?.color ?? 'green';*/
 
   const handleAddFriend = async () => {
     const result = await dispatch(
@@ -53,7 +55,7 @@ export const UserMiniProfile = ({ userOnServer }: UserMiniProfileProps) => {
 
   return (
     <Stack gap="xs" justify="center" align="center" w="100%">
-      <Avatar size="lg" color="blue">
+      <Avatar size="lg" color="blue" src={userIcon}>
         {userName[0]}
       </Avatar>
       <Text c="white" style={stylesUserMiniProfile.userName()}>
@@ -85,7 +87,7 @@ export const UserMiniProfile = ({ userOnServer }: UserMiniProfileProps) => {
         {userRoles.map((role) => (
           <Badge
             key={role.roleId}
-            //color={badgeColor}
+            color={getRoleColor(role.roleId)}
             radius="md"
             variant="light"
             style={stylesUserMiniProfile.roleName()}

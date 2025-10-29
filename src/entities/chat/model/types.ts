@@ -49,6 +49,17 @@ export interface MessageFile {
   fileSize: number;
 }
 
+/* Вынести в shared */
+export interface ReplyMessage {
+  messageType: MessageType;
+  serverId: string | null;
+  channelId: string;
+  id: number;
+  authorId: string;
+  createdAt: string;
+  text: string;
+}
+
 export interface ChatMessage {
   text: string;
   modifiedAt: string | null;
@@ -60,7 +71,7 @@ export interface ChatMessage {
   id: number;
   authorId: string;
   createdAt: string;
-  replyToMessage: string | null;
+  replyToMessage: ReplyMessage | null;
 }
 
 export interface ChatsState {

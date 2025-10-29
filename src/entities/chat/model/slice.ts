@@ -92,7 +92,7 @@ export const ChatsSlice = createSlice({
       const { readChatId, readedMessageId } = action.payload;
 
       if (state.activeChat === readChatId) {
-        state.chat.nonReadedCount = state.chat.nonReadedCount - 1;
+        state.chat.nonReadedCount -= 1;
         state.chat.lastReadedMessageId = readedMessageId;
       }
     },
@@ -103,7 +103,15 @@ export const ChatsSlice = createSlice({
       const { readChatId } = action.payload;
 
       if (state.activeChat === readChatId) {
-        state.chat.nonReadedCount = state.chat.nonReadedCount + 1;
+        state.chat.nonReadedCount += 1;
+      }
+
+      const chatIndex = state.chatsList.findIndex(
+        (chat) => chat.chatId === readChatId,
+      );
+
+      if (chatIndex >= 0) {
+        state.chatsList[chatIndex].nonReadedCount += 1;
       }
     },
     readOwnChatMessage: (
@@ -287,7 +295,7 @@ export const ChatsSlice = createSlice({
           }
         }
 
-        state.messagesStatus = LoadingState.FULFILLED;
+        state.messageIsLoading = LoadingState.FULFILLED;
         state.allMessagesCount = allMessagesCount;
 
         state.error = '';

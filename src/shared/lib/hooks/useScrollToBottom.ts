@@ -1,8 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
-import { useAppDispatch } from '~/hooks';
+import { useChannelData } from './useChannelData';
+import { useChatData } from './useChatData';
+
+import { getMoreChatMessages } from '~/entities/chat';
+import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared/types';
-import { clearHasNewMessage } from '~/store/ServerStore';
+import { clearHasNewMessage, getMoreMessages } from '~/store/ServerStore';
 
 interface UseScrollToBottomProps {
   messagesStatus: LoadingState;
@@ -20,6 +24,13 @@ export const useScrollToBottom = ({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showButton, setShowButton] = useState(false);
 
+  const { accessToken } = useAppSelector((state) => state.userStore);
+  const chatData = useChatData();
+  const channelData = useChannelData();
+
+  const { lastBottomMessageId, remainingBottomMessagesCount, entityId } =
+    type === 'chat' ? chatData : channelData;
+
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
 
@@ -34,13 +45,39 @@ export const useScrollToBottom = ({
   }, [scrollRef]);
 
   const scrollToBottom = useCallback(
-    (behavior: ScrollBehavior = 'smooth') => {
+    async (behavior: ScrollBehavior = 'smooth') => {
       if (!scrollRef.current) return;
+
+      if (remainingBottomMessagesCount > 0 && entityId) {
+        const numberToLoad = remainingBottomMessagesCount + 1;
+
+        if (type === 'channel') {
+          await dispatch(
+            getMoreMessages({
+              accessToken,
+              channelId: entityId,
+              number: numberToLoad,
+              fromMessageId: lastBottomMessageId,
+              down: true,
+            }),
+          );
+        } else {
+          await dispatch(
+            getMoreChatMessages({
+              chatId: entityId,
+              number: numberToLoad,
+              fromMessageId: lastBottomMessageId,
+              down: true,
+            }),
+          );
+        }
+      }
 
       scrollRef.current.scrollTo({
         top: scrollRef.current.scrollHeight,
         behavior,
       });
+
       setShowButton(false);
     },
     [scrollRef],

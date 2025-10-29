@@ -1,4 +1,4 @@
-import { ActionIcon, Avatar } from '@mantine/core';
+import { ActionIcon, Avatar, Badge, Box } from '@mantine/core';
 
 import { ServerItemProps } from './ServerItem.types';
 
@@ -7,7 +7,12 @@ import { useAppDispatch, useAppSelector } from '~/hooks';
 import { setOpenHome, setUserStreamView } from '~/store/AppStore';
 import { setCurrentServerId } from '~/store/ServerStore';
 
-export const ServerItem = ({ serverId, serverName }: ServerItemProps) => {
+export const ServerItem = ({
+  serverId,
+  serverName,
+  nonReadedCount,
+  nonReadedTaggedCount,
+}: ServerItemProps) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.userStore);
 
@@ -23,15 +28,55 @@ export const ServerItem = ({ serverId, serverName }: ServerItemProps) => {
   };
 
   return (
-    <ActionIcon
-      size="xl"
-      radius="xl"
-      variant="transparent"
-      onClick={handleClick}
-    >
-      <Avatar size="md" color="blue">
-        {serverName}
-      </Avatar>
-    </ActionIcon>
+    <Box pos="relative" style={{ cursor: 'pointer' }}>
+      <ActionIcon
+        size="xl"
+        radius="xl"
+        variant="transparent"
+        onClick={handleClick}
+      >
+        <Avatar size="md" color="blue">
+          {serverName.charAt(0).toUpperCase()}
+        </Avatar>
+      </ActionIcon>
+      {nonReadedTaggedCount > 0 && (
+        <Badge
+          color="red"
+          variant="filled"
+          size="xs"
+          circle
+          pos="absolute"
+          top={25}
+          right={30}
+          w={16}
+          h={16}
+          p={0}
+          style={{
+            border: '2px solid #0E0E10',
+          }}
+        >
+          {nonReadedTaggedCount > 9 ? '9+' : nonReadedTaggedCount}
+        </Badge>
+      )}
+      {nonReadedCount > 0 && (
+        <Badge
+          color="blue"
+          variant="filled"
+          size="xs"
+          circle
+          pos="absolute"
+          top={5}
+          right={30}
+          w={16}
+          h={16}
+          p={0}
+          style={{
+            border: '2px solid #0E0E10',
+          }}
+        >
+          {nonReadedCount > 9 ? '9+' : nonReadedCount}
+        </Badge>
+      )}
+    </Box>
   );
 };

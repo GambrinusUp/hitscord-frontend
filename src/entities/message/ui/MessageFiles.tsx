@@ -1,0 +1,65 @@
+import { Flex, Group, Text } from '@mantine/core';
+import saveAs from 'file-saver';
+
+import { messageFilesStyles } from './MessageFiles.style';
+
+import { MessageFile } from '~/entities/chat';
+import { getFile } from '~/entities/files';
+import { formatFileSize } from '~/entities/message/lib/formatFileSize';
+import { getFileIcon } from '~/entities/message/lib/getFileIcon';
+import { useNotification } from '~/hooks';
+
+interface MessageFilesProps {
+  files: MessageFile[];
+  channelId: string;
+}
+
+/* Вынести в фичу */
+export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
+  const { showError } = useNotification();
+
+  const handleFileClick = async (file: MessageFile) => {
+    try {
+      const response = await getFile(channelId, file.fileId);
+
+      if (!response.base64File) {
+        console.error('Файл пустой или не содержит base64');
+
+        return;
+      }
+
+      const byteCharacters = atob(response.base64File);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: response.fileType });
+
+      saveAs(blob, response.fileName);
+    } catch (error) {
+      showError(`Ошибка загрузки файла: ${error}`);
+    }
+  };
+
+  return (
+    <Flex direction="column" gap={6} mt={8}>
+      {files.map((file) => (
+        <Group
+          key={file.fileId}
+          gap="xs"
+          style={messageFilesStyles.message()}
+          onClick={() => handleFileClick(file)}
+        >
+          {getFileIcon(file.fileType)}
+          <Text size="sm" style={{ wordBreak: 'break-word' }}>
+            {file.fileName}
+          </Text>
+          <Text size="xs" c="gray.4">
+            {formatFileSize(file.fileSize)}
+          </Text>
+        </Group>
+      ))}
+    </Flex>
+  );
+};

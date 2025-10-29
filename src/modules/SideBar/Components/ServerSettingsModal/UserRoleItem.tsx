@@ -96,6 +96,11 @@ export const UserRoleItem = ({ user }: UserRoleItemProps) => {
               withRemoveButton={user.roles.length > 1}
               onRemove={() => handleRemoveRole(role.roleId)}
               disabled={loading}
+              /*styles={{
+                root: {
+                  background: getRoleColor(role.roleId),
+                },
+              }}*/
             >
               {role.roleName}
             </Pill>

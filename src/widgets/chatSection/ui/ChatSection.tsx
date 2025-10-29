@@ -10,7 +10,7 @@ import {
 } from '@mantine/core';
 import { ArrowLeft, ArrowDown } from 'lucide-react';
 
-import { setActiveChat } from '~/entities/chat';
+import { ChatMessage, setActiveChat } from '~/entities/chat';
 import { MessageType } from '~/entities/message';
 import { AddUserToChat } from '~/features/addUserToChat';
 import { AttachedFilesList } from '~/features/attachedFilesList';
@@ -24,6 +24,7 @@ interface ChatSectionProps {
   MessagesList: React.ComponentType<{
     scrollRef: React.RefObject<HTMLDivElement>;
     type: MessageType;
+    replyToMessage: (message: ChatMessage) => void;
   }>;
 }
 
@@ -75,7 +76,11 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
         style={{ flex: 1, padding: 10 }}
         onScrollPositionChange={handleScroll}
       >
-        <MessagesList scrollRef={scrollRef} type={MessageType.CHAT} />
+        <MessagesList
+          scrollRef={scrollRef}
+          type={MessageType.CHAT}
+          replyToMessage={() => {}}
+        />
       </ScrollArea>
       {!isAtBottom && showButton && (
         <Box

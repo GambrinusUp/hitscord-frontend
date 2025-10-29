@@ -1,4 +1,4 @@
-import { ATTACH_FILE, GET_FILE } from './const';
+import { ATTACH_FILE, GET_FILE, GET_ICON } from './const';
 
 import { FileResponse } from '~/entities/files/model/types';
 import { api } from '~/shared/api';
@@ -8,6 +8,12 @@ export const getFile = async (
   fileId: string,
 ): Promise<FileResponse> => {
   const { data } = await api.get(GET_FILE(channelId, fileId));
+
+  return data;
+};
+
+export const getIcon = async (fileId: string): Promise<FileResponse> => {
+  const { data } = await api.get(GET_ICON(fileId));
 
   return data;
 };

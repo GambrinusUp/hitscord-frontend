@@ -15,7 +15,7 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { Calendar, Plus, UserCheck, UserMinus } from 'lucide-react';
+import { Calendar, ImageUp, Plus, UserCheck, UserMinus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { ServerSettingsModalProps } from './ServerSettingsModal.types';
@@ -23,6 +23,7 @@ import { UserRoleItem } from './UserRoleItem';
 
 import { formatDateTime } from '~/helpers';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { IconChange } from '~/modules/SideBar/components/IconChange';
 import { LoadingState } from '~/shared';
 import { getRoles } from '~/store/RolesStore';
 import {
@@ -48,7 +49,7 @@ export const ServerSettingsModal = ({
   const { rolesLoading } = useAppSelector((state) => state.rolesStore);
   const { accessToken, user } = useAppSelector((state) => state.userStore);
   const [activeSetting, setActiveSetting] = useState<
-    'name' | 'roles' | 'deleteUser' | 'unbanUser'
+    'name' | 'roles' | 'deleteUser' | 'unbanUser' | 'changeIcon'
   >('roles');
   //const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
   //const [assignRoleId, setAssignRoleId] = useState<string | null>('');
@@ -235,54 +236,16 @@ export const ServerSettingsModal = ({
               onClick={() => setActiveSetting('unbanUser')}
             />
           )}
+          {isCreator && (
+            <NavLink
+              label="Загрузка иконки"
+              leftSection={<ImageUp size={16} />}
+              active={activeSetting === 'changeIcon'}
+              onClick={() => setActiveSetting('changeIcon')}
+            />
+          )}
         </Stack>
         <ScrollArea>
-          {/*activeSetting === 'roles' && (
-            <Stack gap="md">
-              <Text size="lg" w={500}>
-                Присвоить роль пользователю
-              </Text>
-              <Select
-                label="Выбор пользователя"
-                placeholder="Выберите пользователя"
-                data={serverData.users
-                  .filter((userOnServer) => userOnServer.userId !== user.id)
-                  .filter(
-                    (userOnServer) =>
-                      userOnServer.roleType !== RoleType.Creator,
-                  )
-                  .filter(
-                    (userOnServer) =>
-                      Number(userOnServer.roleType) >=
-                      Number(serverData.userRoleType),
-                  )
-                  .map((userOnServer) => ({
-                    value: userOnServer.userId,
-                    label: userOnServer.userName,
-                  }))}
-                value={assignRoleUserId}
-                onChange={setAssignRoleUserId}
-              />
-              <Select
-                label="Выбор роли"
-                placeholder="Выберите роль"
-                data={rolesList
-                  .filter(
-                    (role) =>
-                      Number(role.role.type) >= Number(serverData.userRoleType),
-                  )
-                  .map((role) => ({
-                    value: role.role.id,
-                    label: role.role.name,
-                  }))}
-                value={assignRoleId}
-                onChange={setAssignRoleId}
-              />
-              <Button onClick={assignRole} loading={loading}>
-                Присвоить роль
-              </Button>
-            </Stack>
-          )*/}
           {activeSetting === 'roles' && (
             <ScrollArea.Autosize mah={400} miw={500} mx="auto">
               <Stack gap="md">
@@ -415,6 +378,8 @@ export const ServerSettingsModal = ({
               </Flex>
             </Stack>
           )}
+
+          {activeSetting === 'changeIcon' && <IconChange />}
         </ScrollArea>
       </Group>
     </Modal>

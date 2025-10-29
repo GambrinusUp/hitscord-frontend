@@ -45,7 +45,7 @@ export const Settings = () => {
       <ProfileSettings
         isEdit={isEdit}
         form={form}
-        updateAction={<UpdateIcon />}
+        updateAction={<UpdateIcon type={'profile'} />}
       />
       <PrivacySettings isEdit={isEdit} form={form} />
       <EditSettings isEdit={isEdit} setIsEdit={setIsEdit} form={form} />

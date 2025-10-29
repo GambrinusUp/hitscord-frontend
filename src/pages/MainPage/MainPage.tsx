@@ -12,15 +12,11 @@ import { DetailsPanel, DetailsPanelMobile } from '~/modules/DetailsPanel';
 import { ProfilePage } from '~/modules/Profile';
 import { ServerPanel } from '~/modules/ServerPanel';
 import { SideBar, SideBarMobile } from '~/modules/SideBar';
-import {
-  getChannelMessages,
-  getServerData,
-} from '~/store/ServerStore/ServerStore.actions';
+import { getChannelMessages, getServerData } from '~/store/ServerStore';
 
 export const MainPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  //const { showMessage } = useNotification();
   const { isUserStreamView, isOpenHome } = useAppSelector(
     (state) => state.appStore,
   );
@@ -35,12 +31,6 @@ export const MainPage = () => {
     detailsPanelOpened,
     { open: openDetailsPanel, close: closeDetailsPanel },
   ] = useDisclosure(false);
-  /*const { sendMessage, editMessage, deleteMessage } = useWebSocketHandler({
-    accessToken,
-    dispatch,
-    serverId: currentServerId,
-    showMessage,
-  });*/
 
   useEffect(() => {
     if (!isLoggedIn) navigate('/');
@@ -58,18 +48,19 @@ export const MainPage = () => {
 
   useEffect(() => {
     if (currentChannelId && accessToken) {
-      console.log(MAX_MESSAGE_NUMBER, startMessageId);
+      const isFirstLoad = startMessageId === 0;
+
       dispatch(
         getChannelMessages({
           accessToken,
           channelId: currentChannelId,
           number: MAX_MESSAGE_NUMBER,
           fromMessageId: startMessageId,
-          down: false,
+          down: isFirstLoad,
         }),
       );
     }
-  }, [accessToken, currentChannelId, currentServerId, dispatch]);
+  }, [accessToken, currentChannelId, dispatch]);
 
   return (
     <Box style={{ display: 'flex', height: '100dvh' }}>

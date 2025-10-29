@@ -5,6 +5,7 @@ import {
   changeChannelName,
   changeNameOnServer,
   changeRole,
+  changeServerIcon,
   changeServerName,
   changeTextChannelSettings,
   changeVoiceChannelMaxCount,
@@ -31,9 +32,11 @@ import {
 } from './ServerStore.actions';
 import {
   BannedUserResponse,
+  ChangeReadedCount,
   ChannelMessage,
   GetChannelSettings,
   MuteStatus,
+  ReadedMessageWs,
   ServerData,
   ServerItem,
   ServerState,
@@ -49,7 +52,7 @@ const initialState: ServerState = {
   serverData: {
     serverId: '',
     serverName: '',
-    icon: '',
+    icon: null,
     isClosed: false,
     roles: [],
     userRoles: [],
@@ -117,16 +120,18 @@ const testServerSlice = createSlice({
           (channel) => channel.channelId === channelId,
         );
 
-        /*
-                        "nonReadedCount": 0,
-                "nonReadedTaggedCount": 0,
-                "lastReadedMessageId": 1
-        */
-
         if (textChannel) {
           state.startMessageId = textChannel.lastReadedMessageId;
         }
       }
+
+      state.numberOfMessages = 0;
+      state.remainingTopMessagesCount = 0;
+      state.lastTopMessageId = 0;
+      state.allMessagesCount = 0;
+      state.remainingBottomMessagesCount = MAX_MESSAGE_NUMBER;
+      state.lastBottomMessageId = 0;
+      state.messages = [];
     },
     setCurrentVoiceChannelId: (state, action: PayloadAction<string | null>) => {
       state.currentVoiceChannelId = action.payload;
@@ -134,9 +139,11 @@ const testServerSlice = createSlice({
     addMessage: (state, action: PayloadAction<ChannelMessage>) => {
       const { channelId } = action.payload;
 
+      console.log(action.payload);
+
       if (channelId === state.currentChannelId) {
         state.messages.push(action.payload);
-        state.hasNewMessage = true;
+        //state.hasNewMessage = true;
       }
     },
     deleteMessageWs: (
@@ -179,7 +186,7 @@ const testServerSlice = createSlice({
       state.serverData = {
         serverId: '',
         serverName: '',
-        icon: '',
+        icon: null,
         isClosed: false,
         roles: [],
         userRoles: [],
@@ -362,51 +369,60 @@ const testServerSlice = createSlice({
         return user;
       });
     },
-    readMessageWs: (
-      state,
-      action: PayloadAction<{ readChannelId: string; readedMessageId: number }>,
-    ) => {
+    readMessageWs: (state, action: PayloadAction<ReadedMessageWs>) => {
+      const { readChannelId, readedMessageId, serverId } = action.payload;
+
       const indexChannel = state.serverData.channels.textChannels.findIndex(
-        (channel) => channel.channelId === action.payload.readChannelId,
+        (channel) => channel.channelId === readChannelId,
       );
 
       if (indexChannel >= 0) {
-        state.serverData.channels.textChannels[indexChannel].nonReadedCount =
-          state.serverData.channels.textChannels[indexChannel].nonReadedCount -
+        state.serverData.channels.textChannels[indexChannel].nonReadedCount -=
           1;
         state.serverData.channels.textChannels[
           indexChannel
-        ].lastReadedMessageId = action.payload.readedMessageId;
+        ].lastReadedMessageId = readedMessageId;
+      }
+
+      const indexServer = state.serversList.findIndex(
+        (server) => server.serverId === serverId,
+      );
+
+      if (indexServer >= 0) {
+        state.serversList[indexServer].nonReadedCount -= 1;
       }
     },
-    changeReadedCount: (
-      state,
-      action: PayloadAction<{ channelId: string; readedMessageId: number }>,
-    ) => {
+    changeReadedCount: (state, action: PayloadAction<ChangeReadedCount>) => {
+      const { channelId, serverId } = action.payload;
+
       const indexChannel = state.serverData.channels.textChannels.findIndex(
-        (channel) => channel.channelId === action.payload.channelId,
+        (channel) => channel.channelId === channelId,
       );
 
       if (indexChannel >= 0) {
-        state.serverData.channels.textChannels[indexChannel].nonReadedCount =
-          state.serverData.channels.textChannels[indexChannel].nonReadedCount +
+        state.serverData.channels.textChannels[indexChannel].nonReadedCount +=
           1;
       }
-    },
-    readOwnMessage: (
-      state,
-      action: PayloadAction<{ channelId: string; readedMessageId: number }>,
-    ) => {
-      const indexChannel = state.serverData.channels.textChannels.findIndex(
-        (channel) => channel.channelId === action.payload.channelId,
+
+      const indexServer = state.serversList.findIndex(
+        (server) => server.serverId === serverId,
       );
 
-      console.log(indexChannel);
+      if (indexServer >= 0) {
+        state.serversList[indexServer].nonReadedCount += 1;
+      }
+    },
+    readOwnMessage: (state, action: PayloadAction<ChangeReadedCount>) => {
+      const { channelId, readedMessageId } = action.payload;
+
+      const indexChannel = state.serverData.channels.textChannels.findIndex(
+        (channel) => channel.channelId === channelId,
+      );
 
       if (indexChannel >= 0) {
         state.serverData.channels.textChannels[
           indexChannel
-        ].lastReadedMessageId = action.payload.readedMessageId;
+        ].lastReadedMessageId = readedMessageId;
       }
     },
     addRoleToUserWs: (
@@ -489,7 +505,7 @@ const testServerSlice = createSlice({
         state.serverData = {
           serverId: '',
           serverName: '',
-          icon: '',
+          icon: null,
           isClosed: false,
           roles: [],
           userRoles: [],
@@ -511,6 +527,7 @@ const testServerSlice = createSlice({
           },
           isNotifiable: false,
         };
+        state.currentChannelId = null;
         state.numberOfMessages = 0;
         state.startMessageId = 0;
         state.remainingTopMessagesCount = 0;
@@ -613,16 +630,12 @@ const testServerSlice = createSlice({
           remainingMessagesCount,
           startMessageId,
         } = payload;
-        //const { down } = meta.arg;
-
-        console.log(messages);
 
         state.messages = messages;
         state.hasNewMessage = false;
         state.messagesStatus = LoadingState.FULFILLED;
         state.isLoading = false;
         state.remainingTopMessagesCount = remainingMessagesCount;
-        //state.lastTopMessageId = messages[0].id;
 
         if (messages.length > 0) {
           state.lastTopMessageId = messages[0].id;
@@ -630,15 +643,7 @@ const testServerSlice = createSlice({
           state.lastTopMessageId = 0;
         }
 
-        /*const lastMessage = messages[messages.length - 1];
-
-        if (lastMessage) {
-          state.lastBottomMessageId = lastMessage.id;
-        }
-
-        if (lastMessage?.id === allMessagesCount) {
-          state.remainingBottomMessagesCount = 0;
-        }*/
+        // remainingBottomMessagesCount ??
 
         state.lastTopMessageId = messages.length > 0 ? messages[0].id : 0;
         state.lastBottomMessageId =
@@ -855,6 +860,17 @@ const testServerSlice = createSlice({
         state.error = '';
       })
       .addCase(removeRole.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
+
+      .addCase(changeServerIcon.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(changeServerIcon.fulfilled, (state, action) => {
+        state.serverData.icon = action.payload;
+        state.error = '';
+      })
+      .addCase(changeServerIcon.rejected, (state, action) => {
         state.error = action.payload as string;
       })
 

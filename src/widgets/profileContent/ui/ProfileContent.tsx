@@ -2,6 +2,7 @@ import { Flex, Stack, Title, Tabs, Box, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useState } from 'react';
 
+import { ChatMessage } from '~/entities/chat';
 import { MessageType } from '~/entities/message';
 import { useAppSelector } from '~/hooks';
 
@@ -11,11 +12,13 @@ interface ProfileContentProps {
     MessagesList: React.ComponentType<{
       scrollRef: React.RefObject<HTMLDivElement>;
       type: MessageType;
+      replyToMessage: (message: ChatMessage) => void;
     }>;
   }>;
   MessagesList: React.ComponentType<{
     scrollRef: React.RefObject<HTMLDivElement>;
     type: MessageType;
+    replyToMessage: (message: ChatMessage) => void;
   }>;
   Settings: React.ComponentType;
   FriendshipList: React.ComponentType;

@@ -10,6 +10,7 @@ import {
 } from './types';
 
 import { ChatsAPI } from '~/entities/chat/api';
+import { RootState } from '~/store/store';
 
 export const createChat = createAsyncThunk<
   Chat,
@@ -87,10 +88,13 @@ export const getChatInfo = createAsyncThunk<
 export const getChatMessages = createAsyncThunk<
   GetChatMessages,
   GetMessagesParams,
-  { rejectValue: string }
+  { rejectValue: string; state: RootState }
 >(
   'chatsSlice/getChatMessages',
-  async ({ chatId, number, fromMessageId, down }, { rejectWithValue }) => {
+  async (
+    { chatId, number, fromMessageId, down },
+    { rejectWithValue, getState },
+  ) => {
     try {
       const response = await ChatsAPI.getChatMessages(
         chatId,
@@ -98,6 +102,36 @@ export const getChatMessages = createAsyncThunk<
         fromMessageId,
         down,
       );
+
+      if (response.messages.length > 0) {
+        return response;
+      }
+
+      const state = getState();
+      const chatStore = state.chatsStore;
+
+      const chat = chatStore.chatsList?.find((c) => c.chatId === chatId);
+
+      const hasUnread =
+        (chat?.nonReadedCount ?? 0) > 0 ||
+        (chat?.nonReadedTaggedCount ?? 0) > 0;
+
+      const shouldLoadDown =
+        !down &&
+        fromMessageId !== 0 &&
+        response.messages.length === 0 &&
+        hasUnread;
+
+      if (shouldLoadDown) {
+        const fallbackResponse = await ChatsAPI.getChatMessages(
+          chatId,
+          number,
+          fromMessageId,
+          true,
+        );
+
+        return fallbackResponse;
+      }
 
       return response;
     } catch (e) {
