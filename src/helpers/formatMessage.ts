@@ -1,9 +1,8 @@
 import { ChatMessage, MessageFile } from '~/entities/chat';
-import { ChannelMessage } from '~/store/ServerStore';
-import { MessageType, ReplyMessage } from '~/store/ServerStore';
+import { ChannelMessage, MessageType, ReplyMessage } from '~/store/ServerStore';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const formatMessageFile = (rawFile: any): MessageFile => ({
+export const formatMessageFile = (rawFile: any): MessageFile => ({
   fileId: rawFile.FileId, // FileId -> fileId
   fileName: rawFile.FileName, // FileName -> fileName
   fileType: rawFile.FileType, // FileType -> fileType
@@ -11,7 +10,7 @@ const formatMessageFile = (rawFile: any): MessageFile => ({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const formatReplyMessage = (rawMessage: any): ReplyMessage => ({
+export const formatReplyMessage = (rawMessage: any): ReplyMessage => ({
   messageType: MessageType.Classic,
   serverId: rawMessage.ServerId || null,
   channelId: rawMessage.ChannelId,

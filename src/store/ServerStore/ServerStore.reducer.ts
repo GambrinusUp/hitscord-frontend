@@ -139,11 +139,10 @@ const testServerSlice = createSlice({
     addMessage: (state, action: PayloadAction<ChannelMessage>) => {
       const { channelId } = action.payload;
 
-      console.log(action.payload);
-
       if (channelId === state.currentChannelId) {
-        state.messages.push(action.payload);
-        //state.hasNewMessage = true;
+        if(state.remainingBottomMessagesCount <= 0) {
+          state.messages.push(action.payload);
+        }
       }
     },
     deleteMessageWs: (
@@ -655,6 +654,8 @@ const testServerSlice = createSlice({
           if (lastMessage?.id === allMessagesCount) {
             state.remainingBottomMessagesCount = 0;
           }
+        } else if (allMessagesCount === 0) {
+          state.remainingBottomMessagesCount = 0;
         }
 
         state.allMessagesCount = allMessagesCount;

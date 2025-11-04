@@ -20,4 +20,7 @@ export {
   readOwnChatMessage,
   editChatMessageWS,
   deleteChatMessageWS,
+  addUserInChatWs,
+  addChat,
+  updateChatIcon,
 } from './model/slice';

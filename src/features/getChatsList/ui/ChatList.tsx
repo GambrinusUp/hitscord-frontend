@@ -31,7 +31,7 @@ export const ChatsList = ({ onCreateChatClick }: ChatsListProps) => {
         </Button>
       </Group>
       <ScrollArea style={{ flex: 1, maxHeight: '100%' }}>
-        <Stack gap="xs">
+        <Stack gap="xs" align="center">
           {chatsList.map((chat) => (
             <ChatItem key={chat.chatId} chat={chat} />
           ))}

@@ -27,7 +27,7 @@ export const ChatItem = ({ chat }: ChatItemProps) => {
   };
 
   return (
-    <Card bg="#1a1b1e" padding="xs" radius="md" c="#fff" p="md">
+    <Card bg="#1a1b1e" padding="xs" radius="md" c="#fff" p="md" w="100%">
       <Group justify="space-between">
         <Group>
           <Avatar src={null} alt="no image here" size="xl" />

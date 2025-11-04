@@ -162,7 +162,11 @@ export const MessageItem = ({
         <Avatar size="md" color="blue" src={iconBase64}>
           {userName ? userName[0] : '?'}
         </Avatar>
-        <Stack gap="xs" align={isOwnMessage ? 'flex-end' : 'flex-start'}>
+        <Stack
+          gap="xs"
+          align={isOwnMessage ? 'flex-end' : 'flex-start'}
+          w="100%"
+        >
           <Group
             gap="xs"
             style={{ flexDirection: isOwnMessage ? 'row-reverse' : 'row' }}

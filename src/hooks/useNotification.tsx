@@ -1,7 +1,34 @@
+import { Button, Group, Stack, Text } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { CircleCheck, CircleX, MessageSquareWarning } from 'lucide-react';
+import { BellRing, CircleCheck, CircleX } from 'lucide-react';
 
-export function useNotification() {
+import { useAppDispatch, useAppSelector } from './redux';
+
+import { socket } from '~/api';
+import { formatMessage } from '~/entities/message';
+import { NotificationData } from '~/entities/notifications';
+import { setOpenHome, setUserStreamView } from '~/store/AppStore';
+import { setCurrentChannelId, setCurrentServerId } from '~/store/ServerStore';
+
+export const useNotification = () => {
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.userStore);
+  const {currentChannelId} = useAppSelector((state) => state.testServerStore)
+
+  const handleOpenChannel = (serverId: string, channelId: string) => {
+    if(currentChannelId === channelId) return
+
+    dispatch(setCurrentServerId(serverId));
+    dispatch(setCurrentChannelId(channelId));
+    dispatch(setUserStreamView(false));
+    dispatch(setOpenHome(false));
+    socket.emit('setServer', {
+      serverId,
+      userName: user.name,
+      userId: user.id,
+    });
+  };
+
   const showSuccess = (message: string) => {
     notifications.show({
       message,
@@ -25,17 +52,45 @@ export function useNotification() {
     });
   };
 
-  const showMessage = (message: string) => {
+  const showMessage = (notification: NotificationData, closeTime: number) => {
     notifications.show({
-      title: 'Уведомление',
-      message,
+      title: (
+        <Group gap="xs">
+          <BellRing size={14} />
+          <Text>{'Новое упоминание'}</Text>
+        </Group>
+      ),
+      message: (
+        <Stack gap={0}>
+          <Group gap="xs">
+            <Text fw={500}>{notification.serverName}</Text>
+            <Text># {notification.channelName}</Text>
+          </Group>
+          <Text
+            lineClamp={2}
+            dangerouslySetInnerHTML={{
+              __html: formatMessage(notification.text),
+            }}
+          />
+          <Button
+            variant="light"
+            size="xs"
+            radius="md"
+            mt="xs"
+            onClick={() =>
+              handleOpenChannel(notification.serverId, notification.channelId)
+            }
+          >
+            Перейти к сообщению
+          </Button>
+        </Stack>
+      ),
       position: 'top-right',
       color: 'yellow',
       radius: 'md',
-      autoClose: 5000,
-      icon: <MessageSquareWarning />,
+      autoClose: closeTime * 1000,
     });
   };
 
   return { showSuccess, showError, showMessage };
-}
+};

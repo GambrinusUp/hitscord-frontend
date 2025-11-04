@@ -3,14 +3,17 @@ import { useCallback, useEffect, useRef } from 'react';
 import { WebSocketContext } from './WebSocketContext';
 
 import {
+  addChat,
   addChatMessage,
+  addUserInChatWs,
   changeChatReadedCount,
   deleteChatMessageWS,
   editChatMessageWS,
   readOwnChatMessage,
+  updateChatIcon,
 } from '~/entities/chat';
-import { formatMessage, formatUser } from '~/helpers';
-import { formatChatMessage } from '~/helpers/formatMessage';
+import { formatMessage, formatNotification, formatUser } from '~/helpers';
+import { formatChatMessage, formatMessageFile } from '~/helpers/formatMessage';
 import {
   useAppDispatch,
   useNotification,
@@ -56,6 +59,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
   const serverIdRef = useRef<string | null>(null);
   const userIdRef = useRef<string | undefined>(undefined);
   const currentVoiceChannelIdRef = useRef(currentVoiceChannelId);
+  const notificationLifeTimeRef = useRef(0);
 
   useEffect(() => {
     serverIdRef.current = currentServerId;
@@ -68,6 +72,10 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
   useEffect(() => {
     currentVoiceChannelIdRef.current = currentVoiceChannelId;
   }, [currentVoiceChannelId]);
+
+  useEffect(() => {
+    notificationLifeTimeRef.current = user.notificationLifeTime;
+  }, [user.notificationLifeTime]);
 
   useEffect(() => {
     if (accessToken) {
@@ -92,6 +100,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         const currentServerIdValue = serverIdRef.current;
         const currentUserIdValue = userIdRef.current;
         const currentVoiceChannelIdValue = currentVoiceChannelIdRef.current;
+        const notificationLifeTimeValue = notificationLifeTimeRef.current;
 
         console.log(data);
 
@@ -372,7 +381,10 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
         if (data.MessageType === 'User notified') {
           if (showMessage) {
-            showMessage(data.Payload.Text);
+            showMessage(
+              formatNotification(data.Payload),
+              notificationLifeTimeValue,
+            );
           }
         }
 
@@ -397,6 +409,48 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
               channelId: data.Payload.ServerId,
               userId: data.Payload.UserId,
               roleId: data.Payload.RoleId,
+            }),
+          );
+        }
+
+        if (data.MessageType === 'New user in chat') {
+          dispatch(
+            addUserInChatWs({
+              chatId: data.Payload.ChatId,
+              userId: data.Payload.UserId,
+              userName: data.Payload.UserName,
+              userTag: data.Payload.UserTag,
+              icon: data.Payload.Icon
+                ? formatMessageFile(data.Payload.Icon)
+                : null,
+              notifiable: data.Payload.Notifiable,
+              friendshipApplication: data.Payload.FriendshipApplication,
+              nonFriendMessage: data.Payload.NonFriendMessage,
+              isFriend: data.Payload.isFriend,
+            }),
+          );
+        }
+
+        if (data.MessageType === 'You added to chat') {
+          dispatch(
+            addChat({
+              chatId: data.Payload.ChatId,
+              chatName: data.Payload.ChatName,
+              nonReadedCount: data.Payload.NonReadedCount,
+              nonReadedTaggedCount: data.Payload.NonReadedTaggedCount,
+              lastReadedMessageId: data.Payload.LastReadedMessageId,
+              icon: data.Payload.Icon
+                ? formatMessageFile(data.Payload.Icon)
+                : null,
+            }),
+          );
+        }
+
+        if (data.MessageType === 'New icon on chat') {
+          dispatch(
+            updateChatIcon({
+              chatId: data.Payload.ChatId,
+              icon: formatMessageFile(data.Payload.Icon),
             }),
           );
         }

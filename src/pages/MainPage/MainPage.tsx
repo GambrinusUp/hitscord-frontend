@@ -50,6 +50,8 @@ export const MainPage = () => {
     if (currentChannelId && accessToken) {
       const isFirstLoad = startMessageId === 0;
 
+      console.log(startMessageId, currentChannelId, isFirstLoad);
+
       dispatch(
         getChannelMessages({
           accessToken,

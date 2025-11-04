@@ -1,6 +1,7 @@
 export { formatDateTime } from './formatDateTime';
-export { formatMessage } from './formatMessage';
+export { formatMessage, formatMessageFile } from './formatMessage';
 export { formatUser } from './formatUser';
 export { getErrorMessage } from './getErrorMessage';
 export { getUserGroups } from './getUserGroups';
 export { formatDateWithDots } from './formatDateWithDots';
+export { formatNotification } from './formatNotification';

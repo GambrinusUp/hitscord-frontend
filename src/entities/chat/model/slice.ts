@@ -17,9 +17,11 @@ import {
   GetChats,
   ChatInfo,
   GetChatMessages,
+  UserInChat,
 } from './types';
 
 import { MAX_MESSAGE_NUMBER } from '~/constants';
+import { FileResponse } from '~/entities/files';
 import { LoadingState } from '~/shared';
 
 const initialState: ChatsState = {
@@ -61,7 +63,9 @@ export const ChatsSlice = createSlice({
       const { channelId } = action.payload;
 
       if (channelId === state.activeChat) {
-        state.messages.push(action.payload);
+        if(state.remainingBottomMessagesCount <= 0) {
+          state.messages.push(action.payload);
+        }
       }
     },
     deleteChatMessageWS: (
@@ -122,6 +126,34 @@ export const ChatsSlice = createSlice({
 
       if (state.activeChat === readChatId) {
         state.chat.lastReadedMessageId = readedMessageId;
+      }
+    },
+    addUserInChatWs: (state, action: PayloadAction<UserInChat>) => {
+      const { chatId } = action.payload;
+
+      if (state.activeChat === chatId) {
+        state.chat.users.push(action.payload);
+      }
+    },
+    addChat: (state, action: PayloadAction<Chat>) => {
+      state.chatsList.push(action.payload);
+    },
+    updateChatIcon: (
+      state,
+      action: PayloadAction<{ chatId: string; icon: FileResponse }>,
+    ) => {
+      const { chatId, icon } = action.payload;
+
+      const chatIndex = state.chatsList.findIndex(
+        (chat) => chat.chatId === chatId,
+      );
+
+      if (chatIndex >= 0) {
+        state.chatsList[chatIndex].icon = icon;
+      }
+
+      if (state.activeChat === chatId) {
+        state.chat.icon = icon;
       }
     },
   },
@@ -339,6 +371,9 @@ export const {
   readChatMessageWs,
   changeChatReadedCount,
   readOwnChatMessage,
+  addUserInChatWs,
+  addChat,
+  updateChatIcon,
 } = ChatsSlice.actions;
 
 export const chatsReducer = ChatsSlice.reducer;

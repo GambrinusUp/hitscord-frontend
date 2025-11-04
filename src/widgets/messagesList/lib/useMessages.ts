@@ -159,6 +159,8 @@ export const useMessages = (
           );
         }
 
+        console.log(remainingBottomMessagesCount, lastBottomMessageId);
+
         if (type === MessageType.CHANNEL && entityId) {
           dispatch(
             getMoreMessages({

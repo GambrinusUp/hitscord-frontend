@@ -7,7 +7,7 @@ export interface Chat {
   nonReadedCount: number;
   nonReadedTaggedCount: number;
   lastReadedMessageId: number;
-  icon: FileResponse;
+  icon: FileResponse | null;
 }
 
 export interface GetChats {
