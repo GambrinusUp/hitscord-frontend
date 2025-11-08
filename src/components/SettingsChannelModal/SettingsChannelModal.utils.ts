@@ -19,6 +19,13 @@ export const getOptionsForChannelType = (type: ChannelType) => {
         { value: '1', label: 'Присоединиться' },
       ];
 
+    case ChannelType.NOTIFICATION_CHANNEL:
+      return [
+        { value: '0', label: 'Видеть' },
+        { value: '2', label: 'Писать' },
+        { value: '5', label: 'Получать уведомления' },
+      ];
+
     default:
       return [];
   }

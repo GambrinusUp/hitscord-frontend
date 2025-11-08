@@ -455,6 +455,26 @@ export const deleteUserFromServer = createAsyncThunk<
   },
 );
 
+export const changeNotificationChannelSettings = createAsyncThunk<
+  void,
+  { accessToken: string; settings: ChannelSettings },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeNotificationChannelSettings',
+  async ({ accessToken, settings }, { rejectWithValue }) => {
+    try {
+      await ChannelsAPI.changeNotificationChannelSettings(
+        accessToken,
+        settings,
+      );
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
 export const changeChannelName = createAsyncThunk<
   void,
   { accessToken: string; id: string; name: string },

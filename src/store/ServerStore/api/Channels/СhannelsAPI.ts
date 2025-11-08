@@ -168,6 +168,33 @@ export const changeTextChannelSettings = async (
   }
 };
 
+export const changeNotificationChannelSettings = async (
+  accessToken: string,
+  settings: ChannelSettings,
+) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/api/channel/settings/change/notification`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      },
+    );
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change notification channel settings:', error);
+    throw error;
+  }
+};
+
 /*export const getTextChannelSettings = async (
   accessToken: string,
   channelId: string,

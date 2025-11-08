@@ -31,6 +31,7 @@ import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { RoleType } from '~/store/RolesStore';
 import {
   changeChannelName,
+  changeNotificationChannelSettings,
   changeTextChannelSettings,
   changeVoiceChannelMaxCount,
   changeVoiceChannelSettings,
@@ -67,6 +68,7 @@ export const SettingsChannelModal = ({
   const canJoin = roleSettings.canJoin;
   const canWrite = roleSettings.canWrite;
   const canWriteSub = roleSettings.canWriteSub;
+  const notificatedRole = roleSettings.notificated;
   //const canUse = roleSettings.canUse;
   //const notificated = roleSettings.notificated;
 
@@ -139,6 +141,31 @@ export const SettingsChannelModal = ({
     ) {
       const result = await dispatch(
         changeVoiceChannelSettings({
+          accessToken,
+          settings: {
+            channelId,
+            add: toBoolean(add),
+            type: Number(type),
+            roleId: assignRoleId,
+          },
+        }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        setLoading(false);
+        showSuccess('Настройки успешно изменены');
+        onClose();
+      }
+    }
+
+    if (
+      channelType === ChannelType.NOTIFICATION_CHANNEL &&
+      add &&
+      type &&
+      assignRoleId
+    ) {
+      const result = await dispatch(
+        changeNotificationChannelSettings({
           accessToken,
           settings: {
             channelId,
@@ -351,6 +378,24 @@ export const SettingsChannelModal = ({
                   <Text>Могут создавать подчаты:</Text>
                   <Stack gap="xs">
                     {canWriteSub.map((role) => (
+                      <Badge
+                        key={role.id}
+                        color={role.color}
+                        size="lg"
+                        variant="light"
+                        radius="md"
+                      >
+                        {role.name}
+                      </Badge>
+                    ))}
+                  </Stack>
+                </>
+              )}
+              {notificatedRole && (
+                <>
+                  <Text>Уведомляемые роли:</Text>
+                  <Stack gap="xs">
+                    {notificatedRole.map((role) => (
                       <Badge
                         key={role.id}
                         color={role.color}

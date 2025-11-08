@@ -4,6 +4,7 @@ import {
   addRole,
   changeChannelName,
   changeNameOnServer,
+  changeNotificationChannelSettings,
   changeRole,
   changeServerIcon,
   changeServerName,
@@ -899,6 +900,7 @@ const testServerSlice = createSlice({
           getBannedUsers.pending,
           unbanUser.pending,
           changeVoiceChannelMaxCount.pending,
+          changeNotificationChannelSettings.pending,
         ),
         (state) => {
           state.error = '';
@@ -908,6 +910,7 @@ const testServerSlice = createSlice({
         isAnyOf(
           changeTextChannelSettings.fulfilled,
           changeVoiceChannelSettings.fulfilled,
+          changeNotificationChannelSettings.fulfilled,
         ),
         (state) => {
           state.error = '';
@@ -921,6 +924,7 @@ const testServerSlice = createSlice({
           getBannedUsers.rejected,
           unbanUser.rejected,
           changeVoiceChannelMaxCount.rejected,
+          changeNotificationChannelSettings.rejected,
         ),
         (state, action) => {
           state.error = action.payload as string;

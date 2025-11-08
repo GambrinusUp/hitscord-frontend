@@ -79,4 +79,5 @@ export {
   removeRole,
   getChannelMessages,
   changeServerIcon,
+  changeNotificationChannelSettings,
 } from './ServerStore.actions';
