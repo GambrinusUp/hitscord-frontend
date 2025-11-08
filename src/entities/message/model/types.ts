@@ -16,7 +16,7 @@ export interface MessageItemProps {
   authorId: string;
   channelId: string;
   modifiedAt?: string | null;
-  files: MessageFile[] | null;
+  files: MessageFile[] | null | undefined;
   onReplyMessage: () => void;
   EditActions?: React.FC<{
     editedContent: string;

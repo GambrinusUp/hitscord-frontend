@@ -12,6 +12,7 @@ import {
   readOwnChatMessage,
   updateChatIcon,
 } from '~/entities/chat';
+import { Vote } from '~/entities/vote';
 import { formatMessage, formatNotification, formatUser } from '~/helpers';
 import { formatChatMessage, formatMessageFile } from '~/helpers/formatMessage';
 import {
@@ -44,6 +45,7 @@ import {
   toggleUserMuteStatus,
   addRoleToUserWs,
   removeRoleFromUserWs,
+  updateVoteWs,
 } from '~/store/ServerStore';
 
 export const WebSocketProvider = (props: React.PropsWithChildren) => {
@@ -304,7 +306,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         if (data.MessageType === 'New message') {
           const formattedMessage = formatMessage(data.Payload);
 
-          if (formattedMessage.id && formattedMessage.text) {
+          if (formattedMessage.id) {
             dispatch(addMessage(formattedMessage));
 
             if (formattedMessage.authorId !== user.id) {
@@ -453,6 +455,15 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
               icon: formatMessageFile(data.Payload.Icon),
             }),
           );
+        }
+
+        if (
+          data.MessageType === 'User voted' ||
+          data.MessageType === 'User unvoted'
+        ) {
+          const formattedMessage = formatMessage(data.Payload);
+
+          dispatch(updateVoteWs(formattedMessage));
         }
       };
 
@@ -607,6 +618,44 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
     [wsRef],
   );
 
+  const vote = useCallback(
+    (voteData: Vote) => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        const sendData = {
+          Type: 'Vote',
+          Content: voteData,
+        };
+
+        wsRef.current.send(JSON.stringify(sendData));
+      } else {
+        console.error(
+          'WebSocket is not open. Ready state:',
+          wsRef.current?.readyState,
+        );
+      }
+    },
+    [wsRef],
+  );
+
+  const unVote = useCallback(
+    (voteData: Vote) => {
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        const sendData = {
+          Type: 'Unvote',
+          Content: voteData,
+        };
+
+        wsRef.current.send(JSON.stringify(sendData));
+      } else {
+        console.error(
+          'WebSocket is not open. Ready state:',
+          wsRef.current?.readyState,
+        );
+      }
+    },
+    [wsRef],
+  );
+
   return (
     <WebSocketContext.Provider
       value={{
@@ -617,6 +666,8 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         deleteMessage,
         deleteChatMessage,
         readMessage,
+        vote,
+        unVote,
       }}
     >
       {props.children}

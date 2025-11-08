@@ -165,7 +165,8 @@ export const MessageItem = ({
         <Stack
           gap="xs"
           align={isOwnMessage ? 'flex-end' : 'flex-start'}
-          w="100%"
+          style={{ flex: 1 }}
+          //w="100%"
         >
           <Group
             gap="xs"

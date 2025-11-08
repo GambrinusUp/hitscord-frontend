@@ -1,8 +1,12 @@
-type Validator = (value: string) => string | null;
+type Validator = (value: string | undefined) => string | null;
 
 export const minLength =
   (min: number, field: string): Validator =>
   (value) => {
+    if (value === undefined) {
+      return null;
+    }
+
     if (value.trim().length < min) {
       return `${field} должно содержать минимум ${min} символов`;
     }
@@ -13,6 +17,10 @@ export const minLength =
 export const maxLength =
   (max: number, field: string): Validator =>
   (value) => {
+    if (value === undefined) {
+      return null;
+    }
+
     if (value.trim().length > max) {
       return `${field} не должно превышать ${max} символов`;
     }
@@ -21,6 +29,10 @@ export const maxLength =
   };
 
 export const isEmail: Validator = (value) => {
+  if (value === undefined) {
+    return null;
+  }
+
   if (!/^\S+@\S+$/.test(value)) {
     return 'Неверный формат email';
   }

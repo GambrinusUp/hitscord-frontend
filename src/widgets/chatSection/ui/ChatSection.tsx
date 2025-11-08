@@ -16,6 +16,7 @@ import { AddUserToChat } from '~/features/addUserToChat';
 import { AttachedFilesList } from '~/features/attachedFilesList';
 import { ChangeChatName } from '~/features/changeChatName';
 import { LeaveChat } from '~/features/leaveChat';
+import { CreatePoll } from '~/features/polls';
 import { SendMessageForm } from '~/features/sendMessageToChat';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { useScrollToBottom } from '~/shared/lib/hooks';
@@ -102,7 +103,7 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
       )}
       <Box pos="relative">
         <AttachedFilesList />
-        <SendMessageForm />
+        <SendMessageForm CreatePoll={CreatePoll} />
       </Box>
     </Box>
   );

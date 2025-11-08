@@ -38,8 +38,8 @@ export interface ChatInfo {
 }
 
 export enum MessageType {
-  Classic,
-  Vote,
+  Classic = 'Classic',
+  Vote = 'Vote',
 }
 
 export interface MessageFile {
@@ -60,18 +60,36 @@ export interface ReplyMessage {
   text: string;
 }
 
+export interface VoteVariant {
+  id: string;
+  number: number;
+  content: string;
+  totalVotes: number;
+  votedUserIds: string[];
+}
+
 export interface ChatMessage {
-  text: string;
-  modifiedAt: string | null;
-  nestedChannel: string | null;
-  files: MessageFile[] | null;
   messageType: MessageType;
   serverId: string | null;
+  serverName: string | null;
   channelId: string;
+  channelName: string | null;
   id: number;
   authorId: string;
   createdAt: string;
   replyToMessage: ReplyMessage | null;
+
+  text?: string | null;
+  modifiedAt?: string | null;
+  nestedChannel?: string | null;
+  files?: MessageFile[] | null;
+
+  title?: string | null;
+  content?: string | null;
+  isAnonimous?: boolean;
+  multiple?: boolean;
+  deadline?: string | null;
+  variants?: VoteVariant[];
 }
 
 export interface ChatsState {

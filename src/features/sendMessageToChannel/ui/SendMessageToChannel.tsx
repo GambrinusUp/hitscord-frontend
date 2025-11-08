@@ -6,7 +6,7 @@ import { clearFiles, attachFile } from '~/entities/files';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import { useWebSocket } from '~/shared/lib/websocket';
-import { MessageType } from '~/store/ServerStore/ServerStore.types';
+import { ServerMessageType } from '~/store/ServerStore';
 
 export const SendMessageToChannel = () => {
   const { sendChatMessage } = useWebSocket();
@@ -29,7 +29,7 @@ export const SendMessageToChannel = () => {
           Files: uploadedFiles.map((file) => file.fileId),
           NestedChannel: false,
         },
-        MessageType: MessageType.Classic,
+        MessageType: ServerMessageType.Classic,
       });
       setMessage('');
       dispatch(clearFiles());

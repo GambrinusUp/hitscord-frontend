@@ -25,14 +25,12 @@ import { attachFile, clearFiles } from '~/entities/files';
 import { MessageType } from '~/entities/message';
 import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
 import { AttachedFilesList } from '~/features/attachedFilesList';
+import { CreatePoll } from '~/features/polls';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import { useScrollToBottom } from '~/shared/lib/hooks';
 import { useWebSocket } from '~/shared/lib/websocket';
-import {
-  ChannelMessage,
-  MessageType as ServerMessageType,
-} from '~/store/ServerStore';
+import { ChannelMessage, ServerMessageType } from '~/store/ServerStore';
 import { MessagesList } from '~/widgets/messagesList';
 
 export const ChatSection = ({
@@ -296,6 +294,7 @@ export const ChatSection = ({
               <input type="file" hidden multiple onChange={handleFileChange} />
             </ActionIcon>
           )}
+          {canWrite && <CreatePoll />}
           <Textarea
             ref={textareaRef}
             w="100%"

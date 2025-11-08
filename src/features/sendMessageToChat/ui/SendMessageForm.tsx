@@ -6,9 +6,13 @@ import { clearFiles, attachFile } from '~/entities/files';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import { useWebSocket } from '~/shared/lib/websocket';
-import { MessageType } from '~/store/ServerStore/ServerStore.types';
+import { ServerMessageType } from '~/store/ServerStore';
 
-export const SendMessageForm = () => {
+interface SendMessageFormProps {
+  CreatePoll: React.ComponentType;
+}
+
+export const SendMessageForm = ({ CreatePoll }: SendMessageFormProps) => {
   const { sendChatMessage } = useWebSocket();
   const dispatch = useAppDispatch();
   const { accessToken } = useAppSelector((state) => state.userStore);
@@ -20,8 +24,6 @@ export const SendMessageForm = () => {
   const [message, setMessage] = useState('');
 
   const handleSendMessage = () => {
-    console.log(message.trim(), chat.chatId);
-
     if (message.trim() && chat.chatId) {
       sendChatMessage({
         Token: accessToken,
@@ -31,7 +33,7 @@ export const SendMessageForm = () => {
           Files: uploadedFiles.map((file) => file.fileId),
           NestedChannel: false,
         },
-        MessageType: MessageType.Classic,
+        MessageType: ServerMessageType.Classic,
       });
       setMessage('');
       dispatch(clearFiles());
@@ -66,6 +68,7 @@ export const SendMessageForm = () => {
         <Paperclip size={20} />
         <input type="file" hidden multiple onChange={handleFileChange} />
       </ActionIcon>
+      <CreatePoll />
       <Textarea
         w="100%"
         placeholder="Написать..."

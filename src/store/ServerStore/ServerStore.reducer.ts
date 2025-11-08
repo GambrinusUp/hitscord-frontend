@@ -140,7 +140,7 @@ const testServerSlice = createSlice({
       const { channelId } = action.payload;
 
       if (channelId === state.currentChannelId) {
-        if(state.remainingBottomMessagesCount <= 0) {
+        if (state.remainingBottomMessagesCount <= 0) {
           state.messages.push(action.payload);
         }
       }
@@ -477,6 +477,15 @@ const testServerSlice = createSlice({
             userIndex
           ].roles.filter((role) => role.roleId !== roleId);
         }
+      }
+    },
+    updateVoteWs: (state, action: PayloadAction<ChannelMessage>) => {
+      const index = state.messages.findIndex(
+        (message) => message.id === action.payload.id,
+      );
+
+      if (index !== -1) {
+        state.messages[index] = action.payload;
       }
     },
   },
@@ -945,6 +954,7 @@ export const {
   readOwnMessage,
   addRoleToUserWs,
   removeRoleFromUserWs,
+  updateVoteWs,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

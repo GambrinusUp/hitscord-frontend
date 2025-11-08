@@ -2,10 +2,14 @@ import { Flex, Loader, Stack } from '@mantine/core';
 
 import { ChatMessage } from '~/entities/chat';
 import { MessageItem, MessageType } from '~/entities/message';
+import { PollItem } from '~/entities/vote';
 import { DeleteMessage, EditMessage } from '~/features/message';
 import { useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
-import { ChannelMessage } from '~/store/ServerStore';
+import {
+  ChannelMessage,
+  MessageType as ServerMessageType,
+} from '~/store/ServerStore';
 import { useMessages } from '~/widgets/messagesList/lib/useMessages';
 
 interface MessagesListProps {
@@ -49,25 +53,44 @@ export const MessagesList = ({
             key={message.id}
             data-message-id={message.id}
           >
-            <MessageItem
-              id={message.id}
-              content={message.text}
-              replyMessage={message.replyToMessage}
-              isOwnMessage={user.id === message.authorId}
-              time={message.createdAt}
-              modifiedAt={message.modifiedAt}
-              authorId={message.authorId}
-              channelId={message.channelId}
-              files={message.files}
-              EditActions={(props) => (
-                <EditMessage {...props} type={type} messageId={message.id} />
-              )}
-              DeleteActions={(props) => (
-                <DeleteMessage {...props} type={type} messageId={message.id} />
-              )}
-              type={type}
-              onReplyMessage={() => replyToMessage(message)}
-            />
+            {message.messageType === ServerMessageType.Classic ? (
+              <MessageItem
+                id={message.id}
+                content={message.text!}
+                replyMessage={message.replyToMessage}
+                isOwnMessage={user.id === message.authorId}
+                time={message.createdAt}
+                modifiedAt={message.modifiedAt}
+                authorId={message.authorId}
+                channelId={message.channelId}
+                files={message.files}
+                EditActions={(props) => (
+                  <EditMessage {...props} type={type} messageId={message.id} />
+                )}
+                DeleteActions={(props) => (
+                  <DeleteMessage
+                    {...props}
+                    type={type}
+                    messageId={message.id}
+                  />
+                )}
+                type={type}
+                onReplyMessage={() => replyToMessage(message)}
+              />
+            ) : (
+              <PollItem
+                pollId={message.id}
+                authorId={message.authorId}
+                isOwnMessage={user.id === message.authorId}
+                type={type}
+                time={message.createdAt}
+                title={message.title!}
+                content={message.content}
+                variants={message.variants!}
+                multiple={message.multiple!}
+                deadLine={message.deadline}
+              />
+            )}
           </div>
         );
       })}

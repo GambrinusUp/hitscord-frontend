@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getIcon } from '~/entities/files';
 
 const iconCache = new Map<string, string>();
+const failedToLoad = new Set<string>();
 
 export const useIcon = (fileId?: string, options: { skip?: boolean } = {}) => {
   const [iconBase64, setIconBase64] = useState<string | null>(null);
@@ -11,6 +12,13 @@ export const useIcon = (fileId?: string, options: { skip?: boolean } = {}) => {
 
   useEffect(() => {
     if (options.skip || !fileId) {
+      setIconBase64(null);
+
+      return;
+    }
+
+    if (failedToLoad.has(fileId)) {
+      setError('Failed to load icon');
       setIconBase64(null);
 
       return;
@@ -31,11 +39,13 @@ export const useIcon = (fileId?: string, options: { skip?: boolean } = {}) => {
         const dataUrl = `data:${iconData.fileType};base64,${iconData.base64File}`;
 
         iconCache.set(fileId, dataUrl);
+        failedToLoad.delete(fileId);
         setIconBase64(dataUrl);
       } catch (err) {
         console.error('Error fetching icon:', err);
         setError('Failed to load icon');
         setIconBase64(null);
+        failedToLoad.add(fileId);
       } finally {
         setLoading(false);
       }
@@ -48,6 +58,7 @@ export const useIcon = (fileId?: string, options: { skip?: boolean } = {}) => {
     if (!fileId) return;
 
     iconCache.delete(fileId);
+    failedToLoad.delete(fileId);
 
     setLoading(true);
     try {
@@ -58,6 +69,7 @@ export const useIcon = (fileId?: string, options: { skip?: boolean } = {}) => {
     } catch (err) {
       console.error('Error refetching icon:', err);
       setError('Failed to reload icon');
+      failedToLoad.add(fileId);
     } finally {
       setLoading(false);
     }

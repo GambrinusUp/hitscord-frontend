@@ -1,5 +1,6 @@
 import { createContext } from 'react';
 
+import { Vote } from '~/entities/vote';
 import {
   CreateMessageWs,
   DeleteMessageWs,
@@ -15,6 +16,8 @@ interface WebSocketContextType {
   editChatMessage: (message: EditMessageWs) => void;
   deleteChatMessage: (message: DeleteMessageWs) => void;
   readMessage: (message: ReadMessageWs) => void;
+  vote: (voteData: Vote) => void;
+  unVote: (voteData: Vote) => void;
 }
 
 export const WebSocketContext = createContext<WebSocketContextType | null>(

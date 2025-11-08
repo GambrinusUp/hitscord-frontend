@@ -13,8 +13,14 @@ export type {
   ReadMessageWs,
   Role,
   ReplyMessage,
+  VoteVariant,
 } from './ServerStore.types';
-export { ChannelType, MuteStatus, MessageType } from './ServerStore.types';
+export {
+  ChannelType,
+  MuteStatus,
+  MessageType,
+  ServerMessageType,
+} from './ServerStore.types';
 
 export {
   ServerReducer,
@@ -42,6 +48,7 @@ export {
   readOwnMessage,
   addRoleToUserWs,
   removeRoleFromUserWs,
+  updateVoteWs,
 } from './ServerStore.reducer';
 
 export {
