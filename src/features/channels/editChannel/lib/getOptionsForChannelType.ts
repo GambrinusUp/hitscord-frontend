@@ -1,9 +1,5 @@
 import { ChannelType } from '~/store/ServerStore';
 
-export const toBoolean = (str: string): boolean => {
-  return str.toLowerCase() === 'true';
-};
-
 export const getOptionsForChannelType = (type: ChannelType) => {
   switch (type) {
     case ChannelType.TEXT_CHANNEL:

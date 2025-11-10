@@ -19,13 +19,6 @@ export const messageItemStyles = {
     wordBreak: 'break-word',
   }),
 
-  textarea: (): MantineStyleProp => ({
-    marginBottom: '4px',
-    width: '100%',
-    flexGrow: 1,
-    boxSizing: 'border-box',
-  }),
-
   meta: (isOwnMessage: boolean): MantineStyleProp => ({
     marginTop: 4,
     fontSize: 12,

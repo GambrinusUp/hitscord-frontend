@@ -7,9 +7,8 @@ import {
   Notification,
   Stack,
   Text,
-  Textarea,
 } from '@mantine/core';
-import { Check, Edit2, EllipsisVertical, Reply, Trash2, X } from 'lucide-react';
+import { EllipsisVertical, Reply } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { MessageFiles } from './MessageFiles';
@@ -17,14 +16,11 @@ import { messageItemStyles } from './MessageItem.style';
 
 import { formatMessage } from '~/entities/message/lib/formatMessage';
 import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
-import { MessageItemProps, MessageType } from '~/entities/message/model/types';
+import { MessageItemProps } from '~/entities/message/model/types';
 import { formatDateTime } from '~/helpers';
-import { useAppSelector } from '~/hooks';
 import { useIcon } from '~/shared/lib/hooks';
-import { useWebSocket } from '~/shared/lib/websocket';
 
 export const MessageItem = ({
-  id,
   type,
   isOwnMessage,
   content,
@@ -35,18 +31,13 @@ export const MessageItem = ({
   channelId,
   files,
   onReplyMessage,
-  //EditActions,
-  //DeleteActions,
+  EditMessage,
+  MessageActions,
 }: MessageItemProps) => {
-  const { accessToken } = useAppSelector((state) => state.userStore);
-  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
-  const { activeChat } = useAppSelector((state) => state.chatsStore);
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
   const { getUsername, getUserIcon } = useMessageAuthor(type);
-  const { deleteMessage, deleteChatMessage, editMessage, editChatMessage } =
-    useWebSocket();
 
   const userName = useMemo(
     () => getUsername(authorId),
@@ -58,57 +49,6 @@ export const MessageItem = ({
   );
 
   const { iconBase64 } = useIcon(userIcon);
-
-  const handleEdit = () => {
-    setEditedContent(content);
-    setIsEditing(true);
-  };
-
-  const handleEditMessage = () => {
-    if (!editedContent.trim()) {
-      return;
-    }
-
-    switch (type) {
-      case MessageType.CHANNEL:
-        editMessage({
-          Token: accessToken,
-          ChannelId: currentChannelId!,
-          MessageId: id,
-          Text: editedContent.trim(),
-        });
-        break;
-      case MessageType.CHAT:
-        editChatMessage({
-          Token: accessToken,
-          ChannelId: activeChat!,
-          MessageId: id,
-          Text: editedContent.trim(),
-        });
-        break;
-    }
-
-    setIsEditing(false);
-  };
-
-  const handleDelete = () => {
-    switch (type) {
-      case MessageType.CHANNEL:
-        deleteMessage({
-          Token: accessToken,
-          ChannelId: currentChannelId!,
-          MessageId: id,
-        });
-        break;
-      case MessageType.CHAT:
-        deleteChatMessage({
-          Token: accessToken,
-          ChannelId: activeChat!,
-          MessageId: id,
-        });
-        break;
-    }
-  };
 
   return (
     <Group
@@ -141,15 +81,13 @@ export const MessageItem = ({
             </ActionIcon>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item leftSection={<Edit2 size={12} />} onClick={handleEdit}>
-              Редактировать
-            </Menu.Item>
-            <Menu.Item
-              leftSection={<Trash2 size={12} />}
-              onClick={handleDelete}
-            >
-              Удалить
-            </Menu.Item>
+            {MessageActions && (
+              <MessageActions
+                setIsEditing={setIsEditing}
+                setEditedContent={setEditedContent}
+                messageContent={content}
+              />
+            )}
           </Menu.Dropdown>
         </Menu>
       </Group>
@@ -196,33 +134,12 @@ export const MessageItem = ({
                 {replyMessage.text}
               </Notification>
             )}
-            {isEditing ? (
-              <Stack gap="xs">
-                <Textarea
-                  radius="md"
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.currentTarget.value)}
-                  autosize
-                  minRows={1}
-                  style={messageItemStyles.textarea()}
-                />
-                <Group gap="xs" justify="flex-end">
-                  <ActionIcon
-                    variant="filled"
-                    color="green"
-                    onClick={handleEditMessage}
-                  >
-                    <Check size={12} />
-                  </ActionIcon>
-                  <ActionIcon
-                    variant="filled"
-                    color="red"
-                    onClick={() => setIsEditing(false)}
-                  >
-                    <X size={12} />
-                  </ActionIcon>
-                </Group>
-              </Stack>
+            {isEditing && EditMessage ? (
+              <EditMessage
+                editedContent={editedContent}
+                setEditedContent={setEditedContent}
+                setIsEditing={setIsEditing}
+              />
             ) : (
               <Text
                 style={messageItemStyles.breakText()}

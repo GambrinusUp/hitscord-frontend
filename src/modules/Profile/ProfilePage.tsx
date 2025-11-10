@@ -5,9 +5,8 @@ import {
   getApplicationsTo,
   getFriendshipList,
 } from '~/entities/friendship';
-import { CreateChat } from '~/features/createChat';
+import { CreateChat, ChatsList } from '~/features/chat';
 import { AddFriend } from '~/features/friendship';
-import { ChatsList } from '~/features/getChatsList';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { ApplicationFromList } from '~/widgets/applicationFromList';
 import { ApplicationToList } from '~/widgets/applicationToList';

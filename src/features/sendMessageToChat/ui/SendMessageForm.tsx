@@ -3,13 +3,14 @@ import { Paperclip, Send } from 'lucide-react';
 import { useState } from 'react';
 
 import { clearFiles, attachFile } from '~/entities/files';
+import { MessageType } from '~/entities/message';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { ServerMessageType } from '~/store/ServerStore';
 
 interface SendMessageFormProps {
-  CreatePoll: React.ComponentType;
+  CreatePoll: React.ComponentType<{ type: MessageType }>;
 }
 
 export const SendMessageForm = ({ CreatePoll }: SendMessageFormProps) => {
@@ -68,7 +69,7 @@ export const SendMessageForm = ({ CreatePoll }: SendMessageFormProps) => {
         <Paperclip size={20} />
         <input type="file" hidden multiple onChange={handleFileChange} />
       </ActionIcon>
-      <CreatePoll />
+      <CreatePoll type={MessageType.CHAT} />
       <Textarea
         w="100%"
         placeholder="Написать..."

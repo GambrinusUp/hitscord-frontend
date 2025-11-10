@@ -7,7 +7,6 @@ export enum MessageType {
 }
 
 export interface MessageItemProps {
-  id: number;
   type: MessageType;
   isOwnMessage: boolean;
   content: string;
@@ -18,11 +17,14 @@ export interface MessageItemProps {
   modifiedAt?: string | null;
   files: MessageFile[] | null | undefined;
   onReplyMessage: () => void;
-  EditActions?: React.FC<{
+  EditMessage?: React.FC<{
     editedContent: string;
+    setEditedContent: (value: React.SetStateAction<string>) => void;
     setIsEditing: (value: boolean) => void;
   }>;
-  DeleteActions?: React.FC<{
+  MessageActions?: React.FC<{
     setIsEditing: (value: boolean) => void;
+    setEditedContent: (value: React.SetStateAction<string>) => void;
+    messageContent: string;
   }>;
 }

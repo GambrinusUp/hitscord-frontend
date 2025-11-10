@@ -12,10 +12,8 @@ import { ArrowLeft, ArrowDown } from 'lucide-react';
 
 import { ChatMessage, setActiveChat } from '~/entities/chat';
 import { MessageType } from '~/entities/message';
-import { AddUserToChat } from '~/features/addUserToChat';
 import { AttachedFilesList } from '~/features/attachedFilesList';
-import { ChangeChatName } from '~/features/changeChatName';
-import { LeaveChat } from '~/features/leaveChat';
+import { AddUserToChat, ChangeChatName, LeaveChat } from '~/features/chat';
 import { CreatePoll } from '~/features/polls';
 import { SendMessageForm } from '~/features/sendMessageToChat';
 import { useAppDispatch, useAppSelector } from '~/hooks';

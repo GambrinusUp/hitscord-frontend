@@ -294,7 +294,7 @@ export const ChatSection = ({
               <input type="file" hidden multiple onChange={handleFileChange} />
             </ActionIcon>
           )}
-          {canWrite && <CreatePoll />}
+          {canWrite && <CreatePoll type={MessageType.CHANNEL} />}
           <Textarea
             ref={textareaRef}
             w="100%"

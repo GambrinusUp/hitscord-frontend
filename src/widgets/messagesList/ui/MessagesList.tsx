@@ -3,7 +3,7 @@ import { Flex, Loader, Stack } from '@mantine/core';
 import { ChatMessage } from '~/entities/chat';
 import { MessageItem, MessageType } from '~/entities/message';
 import { PollItem } from '~/entities/vote';
-import { DeleteMessage, EditMessage } from '~/features/message';
+import { MessageActions, EditMessage } from '~/features/message';
 import { useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import {
@@ -55,7 +55,6 @@ export const MessagesList = ({
           >
             {message.messageType === ServerMessageType.Classic ? (
               <MessageItem
-                id={message.id}
                 content={message.text!}
                 replyMessage={message.replyToMessage}
                 isOwnMessage={user.id === message.authorId}
@@ -64,11 +63,11 @@ export const MessagesList = ({
                 authorId={message.authorId}
                 channelId={message.channelId}
                 files={message.files}
-                EditActions={(props) => (
+                EditMessage={(props) => (
                   <EditMessage {...props} type={type} messageId={message.id} />
                 )}
-                DeleteActions={(props) => (
-                  <DeleteMessage
+                MessageActions={(props) => (
+                  <MessageActions
                     {...props}
                     type={type}
                     messageId={message.id}

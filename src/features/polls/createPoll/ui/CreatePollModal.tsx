@@ -14,6 +14,7 @@ import { Plus } from 'lucide-react';
 
 import { VariantItem } from './VariantItem';
 
+import { MessageType } from '~/entities/message';
 import { CreateVote } from '~/entities/vote';
 import { INITIAL_FORM } from '~/features/polls/createPoll/constants';
 import { validateDeadLine } from '~/features/polls/createPoll/lib';
@@ -27,14 +28,20 @@ import { useWebSocket } from '~/shared/lib/websocket';
 import { ServerMessageType } from '~/store/ServerStore';
 
 interface CreatePollModalProps {
+  type: MessageType;
   opened: boolean;
   close: () => void;
 }
 
-export const CreatePollModal = ({ opened, close }: CreatePollModalProps) => {
+export const CreatePollModal = ({
+  type,
+  opened,
+  close,
+}: CreatePollModalProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentChannelId } = useAppSelector((state) => state.testServerStore);
-  const { sendMessage } = useWebSocket();
+  const { activeChat } = useAppSelector((state) => state.chatsStore);
+  const { sendMessage, sendChatMessage } = useWebSocket();
 
   const form = useForm<CreateVote>({
     initialValues: INITIAL_FORM,
@@ -62,33 +69,48 @@ export const CreatePollModal = ({ opened, close }: CreatePollModalProps) => {
   const fields = form.getValues().variants;
 
   const handleSubmit = async (values: CreateVote) => {
-    console.log(values.deadLine);
-
-    if (!currentChannelId) {
-      return;
-    }
-
     const { title, content, isAnonimous, multiple, deadLine, variants } =
       values;
 
     const isoDate = deadLine ? new Date(deadLine).toISOString() : undefined;
 
-    sendMessage({
-      Token: accessToken,
-      ChannelId: currentChannelId,
-      Vote: {
-        Title: title,
-        Content: content,
-        IsAnonimous: isAnonimous,
-        Multiple: multiple,
-        Deadline: isoDate,
-        Variants: variants.map((variant) => ({
-          Number: variant.number,
-          Content: variant.content,
-        })),
-      },
-      MessageType: ServerMessageType.Vote,
-    });
+    if (type === MessageType.CHANNEL && currentChannelId) {
+      sendMessage({
+        Token: accessToken,
+        ChannelId: currentChannelId,
+        Vote: {
+          Title: title,
+          Content: content,
+          IsAnonimous: isAnonimous,
+          Multiple: multiple,
+          Deadline: isoDate,
+          Variants: variants.map((variant) => ({
+            Number: variant.number,
+            Content: variant.content,
+          })),
+        },
+        MessageType: ServerMessageType.Vote,
+      });
+    }
+
+    if (type === MessageType.CHAT && activeChat) {
+      sendChatMessage({
+        Token: accessToken,
+        ChannelId: activeChat,
+        Vote: {
+          Title: title,
+          Content: content,
+          IsAnonimous: isAnonimous,
+          Multiple: multiple,
+          Deadline: isoDate,
+          Variants: variants.map((variant) => ({
+            Number: variant.number,
+            Content: variant.content,
+          })),
+        },
+        MessageType: ServerMessageType.Vote,
+      });
+    }
 
     form.reset();
     close();

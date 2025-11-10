@@ -1,5 +1,7 @@
-import { ActionIcon } from '@mantine/core';
+import { ActionIcon, Group, Stack, Textarea } from '@mantine/core';
 import { Check, X } from 'lucide-react';
+
+import { editMessageStyles } from './EditMessage.style';
 
 import { MessageType } from '~/entities/message';
 import { useAppSelector } from '~/hooks';
@@ -7,6 +9,7 @@ import { useWebSocket } from '~/shared/lib/websocket';
 
 interface EditMessageProps {
   editedContent: string;
+  setEditedContent: (value: React.SetStateAction<string>) => void;
   setIsEditing: (value: boolean) => void;
   messageId: number;
   type: MessageType;
@@ -14,6 +17,7 @@ interface EditMessageProps {
 
 export const EditMessage = ({
   editedContent,
+  setEditedContent,
   setIsEditing,
   messageId,
   type,
@@ -50,14 +54,34 @@ export const EditMessage = ({
     setIsEditing(false);
   };
 
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleChangeMessage = (
+    event: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setEditedContent(event.currentTarget.value);
+  };
+
   return (
-    <>
-      <ActionIcon variant="subtle" onClick={handleEdit}>
-        <Check size={12} />
-      </ActionIcon>
-      <ActionIcon variant="subtle" onClick={() => setIsEditing(false)}>
-        <X size={12} />
-      </ActionIcon>
-    </>
+    <Stack gap="xs">
+      <Textarea
+        radius="md"
+        value={editedContent}
+        onChange={handleChangeMessage}
+        autosize
+        minRows={1}
+        style={editMessageStyles.textarea()}
+      />
+      <Group gap="xs" justify="flex-end">
+        <ActionIcon variant="filled" color="green" onClick={handleEdit}>
+          <Check size={12} />
+        </ActionIcon>
+        <ActionIcon variant="filled" color="red" onClick={handleCancelEdit}>
+          <X size={12} />
+        </ActionIcon>
+      </Group>
+    </Stack>
   );
 };

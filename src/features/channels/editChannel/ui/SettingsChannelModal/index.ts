@@ -1,1 +1,0 @@
-export { SettingsChannelModal } from './SettingsChannelModal';

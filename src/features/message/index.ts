@@ -1,2 +1,2 @@
+export { MessageActions } from './messageActions';
 export { EditMessage } from './editMessage';
-export { DeleteMessage } from './deleteMessage';

@@ -63,7 +63,7 @@ export const ChatsSlice = createSlice({
       const { channelId } = action.payload;
 
       if (channelId === state.activeChat) {
-        if(state.remainingBottomMessagesCount <= 0) {
+        if (state.remainingBottomMessagesCount <= 0) {
           state.messages.push(action.payload);
         }
       }
@@ -154,6 +154,15 @@ export const ChatsSlice = createSlice({
 
       if (state.activeChat === chatId) {
         state.chat.icon = icon;
+      }
+    },
+    updateChatVoteWs: (state, action: PayloadAction<ChatMessage>) => {
+      const index = state.messages.findIndex(
+        (message) => message.id === action.payload.id,
+      );
+
+      if (index !== -1) {
+        state.messages[index] = action.payload;
       }
     },
   },
@@ -374,6 +383,7 @@ export const {
   addUserInChatWs,
   addChat,
   updateChatIcon,
+  updateChatVoteWs,
 } = ChatsSlice.actions;
 
 export const chatsReducer = ChatsSlice.reducer;

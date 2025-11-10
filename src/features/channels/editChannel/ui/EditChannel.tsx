@@ -3,8 +3,8 @@ import { useDisclosure } from '@mantine/hooks';
 import { Settings } from 'lucide-react';
 
 import { editChannelStyles } from './EditChannel.style';
+import { SettingsChannelModal } from './SettingsChannelModal';
 
-import { SettingsChannelModal } from '~/components/SettingsChannelModal';
 import { useAppSelector } from '~/hooks';
 import { ChannelType } from '~/store/ServerStore';
 

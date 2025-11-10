@@ -1,21 +1,25 @@
-import { ActionIcon } from '@mantine/core';
+import { Menu } from '@mantine/core';
 import { Edit2, Trash2 } from 'lucide-react';
 
 import { MessageType } from '~/entities/message';
 import { useAppSelector } from '~/hooks';
 import { useWebSocket } from '~/shared/lib/websocket';
 
-interface DeleteMessageProps {
-  setIsEditing: (value: boolean) => void;
+interface MessageActionsProps {
   messageId: number;
   type: MessageType;
+  setIsEditing: (value: boolean) => void;
+  setEditedContent: (value: React.SetStateAction<string>) => void;
+  messageContent: string;
 }
 
-export const DeleteMessage = ({
-  setIsEditing,
+export const MessageActions = ({
   messageId,
   type,
-}: DeleteMessageProps) => {
+  setIsEditing,
+  setEditedContent,
+  messageContent,
+}: MessageActionsProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentChannelId } = useAppSelector((state) => state.testServerStore);
   const { activeChat } = useAppSelector((state) => state.chatsStore);
@@ -40,14 +44,19 @@ export const DeleteMessage = ({
     }
   };
 
+  const handleEdit = () => {
+    setEditedContent(messageContent);
+    setIsEditing(true);
+  };
+
   return (
     <>
-      <ActionIcon variant="subtle" onClick={() => setIsEditing(true)}>
-        <Edit2 size={12} />
-      </ActionIcon>
-      <ActionIcon variant="subtle" onClick={handleDelete}>
-        <Trash2 size={12} />
-      </ActionIcon>
+      <Menu.Item leftSection={<Edit2 size={12} />} onClick={handleEdit}>
+        Редактировать
+      </Menu.Item>
+      <Menu.Item leftSection={<Trash2 size={12} />} onClick={handleDelete}>
+        Удалить
+      </Menu.Item>
     </>
   );
 };

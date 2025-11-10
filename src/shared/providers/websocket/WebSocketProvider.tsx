@@ -11,6 +11,7 @@ import {
   editChatMessageWS,
   readOwnChatMessage,
   updateChatIcon,
+  updateChatVoteWs,
 } from '~/entities/chat';
 import { Vote } from '~/entities/vote';
 import { formatMessage, formatNotification, formatUser } from '~/helpers';
@@ -332,7 +333,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         if (data.MessageType === 'New message in chat') {
           const formattedMessage = formatChatMessage(data.Payload);
 
-          if (formattedMessage.id && formattedMessage.text) {
+          if (formattedMessage.id) {
             dispatch(addChatMessage(formattedMessage));
 
             if (formattedMessage.authorId !== user.id) {
@@ -458,12 +459,21 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         }
 
         if (
-          data.MessageType === 'User voted' ||
-          data.MessageType === 'User unvoted'
+          data.MessageType === 'User voted in channel' ||
+          data.MessageType === 'User unvoted in channel'
         ) {
           const formattedMessage = formatMessage(data.Payload);
 
           dispatch(updateVoteWs(formattedMessage));
+        }
+
+        if (
+          data.MessageType === 'User voted in chat' ||
+          data.MessageType === 'User unvoted in chat'
+        ) {
+          const formattedMessage = formatChatMessage(data.Payload);
+
+          dispatch(updateChatVoteWs(formattedMessage));
         }
       };
 
