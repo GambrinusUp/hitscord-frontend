@@ -23,14 +23,19 @@ export const MainPage = () => {
   const { accessToken, isLoggedIn } = useAppSelector(
     (state) => state.userStore,
   );
-  const { currentServerId, currentChannelId, startMessageId } = useAppSelector(
-    (state) => state.testServerStore,
-  );
+  const {
+    currentServerId,
+    currentChannelId,
+    currentNotificationChannelId,
+    startMessageId,
+  } = useAppSelector((state) => state.testServerStore);
   const [sidebarOpened, { open, close }] = useDisclosure(false);
   const [
     detailsPanelOpened,
     { open: openDetailsPanel, close: closeDetailsPanel },
   ] = useDisclosure(false);
+
+  const activeChannelId = currentChannelId ?? currentNotificationChannelId;
 
   useEffect(() => {
     if (!isLoggedIn) navigate('/');
@@ -47,22 +52,20 @@ export const MainPage = () => {
   }, [accessToken, currentServerId, dispatch]);
 
   useEffect(() => {
-    if (currentChannelId && accessToken) {
+    if (activeChannelId && accessToken) {
       const isFirstLoad = startMessageId === 0;
-
-      console.log(startMessageId, currentChannelId, isFirstLoad);
 
       dispatch(
         getChannelMessages({
           accessToken,
-          channelId: currentChannelId,
+          channelId: activeChannelId,
           number: MAX_MESSAGE_NUMBER,
           fromMessageId: startMessageId,
           down: isFirstLoad,
         }),
       );
     }
-  }, [accessToken, currentChannelId, dispatch]);
+  }, [accessToken, activeChannelId, dispatch]);
 
   return (
     <Box style={{ display: 'flex', height: '100dvh' }}>

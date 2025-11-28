@@ -8,8 +8,13 @@ import {
   readChatMessageWs,
 } from '~/entities/chat';
 import { MessageType } from '~/entities/message';
+import { getSubChatMessages } from '~/entities/subChat';
 import { useAppDispatch, useAppSelector } from '~/hooks';
-import { useChannelData, useChatData } from '~/shared/lib/hooks';
+import {
+  useChannelData,
+  useChatData,
+  useSubChatData,
+} from '~/shared/lib/hooks';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { getMoreMessages, readMessageWs } from '~/store/ServerStore';
 
@@ -34,6 +39,20 @@ export const useMessages = (
 
   const chatData = useChatData();
   const channelData = useChannelData();
+  const subChatData = useSubChatData();
+
+  const getData = () => {
+    switch (type) {
+      case MessageType.CHANNEL:
+        return channelData;
+      case MessageType.CHAT:
+        return chatData;
+      case MessageType.SUBCHAT:
+        return subChatData;
+      default:
+        return channelData;
+    }
+  };
 
   const {
     messages,
@@ -44,7 +63,7 @@ export const useMessages = (
     remainingBottomMessagesCount,
     remainingTopMessagesCount,
     entityId,
-  } = type === MessageType.CHAT ? chatData : channelData;
+  } = getData();
 
   const firstMessageElementRef = useRef<HTMLDivElement | null>(null);
   const lastMessageElementRef = useRef<HTMLDivElement | null>(null);
@@ -67,6 +86,19 @@ export const useMessages = (
 
       dispatch(
         getChatMessages({
+          chatId: entityId,
+          number: MAX_MESSAGE_NUMBER,
+          fromMessageId: startMessageId,
+          down: isFirstLoad,
+        }),
+      );
+    }
+
+    if (type === MessageType.SUBCHAT) {
+      const isFirstLoad = startMessageId === 0;
+
+      dispatch(
+        getSubChatMessages({
           chatId: entityId,
           number: MAX_MESSAGE_NUMBER,
           fromMessageId: startMessageId,
@@ -159,8 +191,6 @@ export const useMessages = (
           );
         }
 
-        console.log(remainingBottomMessagesCount, lastBottomMessageId);
-
         if (type === MessageType.CHANNEL && entityId) {
           dispatch(
             getMoreMessages({
@@ -187,13 +217,11 @@ export const useMessages = (
   }, [entityId, remainingBottomMessagesCount, lastBottomMessageId]);
 
   useEffect(() => {
-    if (!scrollRef.current) return;
+    if (!scrollRef.current || type === MessageType.SUBCHAT) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          //console.log(entry.isIntersecting, lastReadedMessageId);
-
           if (entry.isIntersecting) {
             const messageId = Number(
               entry.target.getAttribute('data-message-id'),

@@ -11,10 +11,17 @@ import { ChannelType } from '~/store/ServerStore';
 interface EditChannelProps {
   channelName: string;
   channelId: string;
+  channelType?: ChannelType;
 }
 
-export const EditChannel = ({ channelName, channelId }: EditChannelProps) => {
-  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+export const EditChannel = ({
+  channelName,
+  channelId,
+  channelType = ChannelType.TEXT_CHANNEL,
+}: EditChannelProps) => {
+  const { currentChannelId, currentNotificationChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
   const [opened, { open, close }] = useDisclosure(false);
 
   const handleOpenChannelSettings = () => {
@@ -31,7 +38,8 @@ export const EditChannel = ({ channelName, channelId }: EditChannelProps) => {
         w="20px"
         styles={{
           root: editChannelStyles.buttonSettings(
-            currentChannelId === channelId,
+            currentChannelId === channelId ||
+              currentNotificationChannelId === channelId,
           ),
         }}
         onClick={handleOpenChannelSettings}
@@ -43,7 +51,7 @@ export const EditChannel = ({ channelName, channelId }: EditChannelProps) => {
         onClose={close}
         channelId={channelId}
         channelName={channelName}
-        channelType={ChannelType.NOTIFICATION_CHANNEL}
+        channelType={channelType}
       />
     </>
   );

@@ -8,6 +8,7 @@ export interface ServerState {
   serverData: ServerData;
   currentServerId: string | null;
   currentChannelId: string | null;
+  currentNotificationChannelId: string | null;
   currentVoiceChannelId: string | null;
   messages: ChannelMessage[];
   hasNewMessage: boolean;
@@ -30,16 +31,6 @@ export interface ServerState {
   error: string;
 }
 
-/*
- "MessageType": "Classic",
-        "ServerId": "a9d10ffb-f4be-4bd0-ba92-c92d6787edd1",
-        "ChannelId": "a3d60ffa-39aa-42d4-9d55-c5da1255aaf9",
-        "Id": 53,
-        "AuthorId": "642c3f85-d376-498a-9964-f39f54a39226",
-        "CreatedAt": "2025-10-19T08:19:33.126942Z",
-        "Text": "5"
-*/
-
 export interface ReplyMessage {
   messageType: MessageType;
   serverId: string | null;
@@ -58,6 +49,13 @@ export interface VoteVariant {
   votedUserIds: string[];
 }
 
+export interface NestedChannel {
+  subChannelId: string;
+  canUse?: boolean;
+  isNotifiable?: boolean;
+  rolesCanUse?: string[];
+}
+
 export interface ChannelMessage {
   messageType: MessageType;
   serverId: string | null;
@@ -71,7 +69,7 @@ export interface ChannelMessage {
 
   text?: string | null;
   modifiedAt?: string | null;
-  nestedChannel?: string | null;
+  nestedChannel?: NestedChannel | null;
   files?: MessageFile[] | null;
 
   title?: string | null;
@@ -163,6 +161,17 @@ export interface UserRoleOnServer {
   roleType: RoleType;
 }
 
+export interface NotificationChannel {
+  channelId: string;
+  channelName: string;
+  canWrite: boolean;
+  isNotificated: boolean;
+  isNotifiable: boolean;
+  nonReadedCount: number;
+  nonReadedTaggedCount: number;
+  lastReadedMessageId: number;
+}
+
 export interface ServerData {
   serverId: string;
   serverName: string;
@@ -185,7 +194,7 @@ export interface ServerData {
   channels: {
     textChannels: TextChannel[];
     voiceChannels: VoiceChannel[];
-    notificationChannels: [];
+    notificationChannels: NotificationChannel[];
   };
 }
 

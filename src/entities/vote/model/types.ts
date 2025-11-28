@@ -32,6 +32,7 @@ export interface PollItemProps {
   variants: VoteVariant[];
   multiple: boolean;
   deadLine?: string | null;
+  onReplyMessage: () => void;
 }
 
 export interface VoteVariantsForm {

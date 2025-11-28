@@ -1,16 +1,16 @@
 import { Collapse, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
-import { ChannelItem } from './components/ChannelItem';
 import { CollapseButton } from './components/CollapseButton';
 import { UserItem } from './components/UserItem';
 import { useActiveUsers } from './VoiceChannels.hooks';
 
 import { socket } from '~/api/socket';
-import { CreateChannelModal } from '~/components/CreateChannelModal';
 import { useMediaContext } from '~/context';
 import { useAudioContext } from '~/context/AudioContext';
+import { ChannelItem } from '~/entities/channels';
+import { EditChannel } from '~/features/channels';
 import { getUserGroups } from '~/helpers';
 import {
   useAppDispatch,
@@ -18,7 +18,6 @@ import {
   useConnect,
   useDisconnect,
 } from '~/hooks';
-import { EditModal } from '~/shared/types';
 import { setUserStreamView, toggleUserStreamView } from '~/store/AppStore';
 import { ChannelType, setCurrentVoiceChannelId } from '~/store/ServerStore';
 
@@ -28,25 +27,17 @@ export const VoiceChannels = () => {
   const { isConnected, consumers, users, setSelectedUserId } =
     useMediaContext();
   const { user, accessToken } = useAppSelector((state) => state.userStore);
-  const { serverData, currentVoiceChannelId, currentServerId } = useAppSelector(
+  const { serverData, currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
   const dispatch = useAppDispatch();
   const [opened, { toggle }] = useDisclosure(true);
-  const [
-    channelModalOpened,
-    { open: openChannelModal, close: closeChannelModal },
-  ] = useDisclosure(false);
+
   const activeUsers = useActiveUsers();
   const { setVolume, userVolumes } = useAudioContext();
   const rooms = getUserGroups(users);
   const canWorkChannels = serverData.permissions.canWorkChannels;
   const canIgnoreMaxCount = serverData.permissions.canIgnoreMaxCount;
-  const [isEditing, setIsEditing] = useState<EditModal>({
-    isEdit: false,
-    initialData: '',
-    channelId: '',
-  });
 
   const handleConnect = async (channelId: string, maxCount: number) => {
     const currentCount = rooms
@@ -102,11 +93,6 @@ export const VoiceChannels = () => {
     if (audioProducerId) {
       setVolume(audioProducerId, value);
     }
-  };
-
-  const handleAddChannel = () => {
-    setIsEditing({ isEdit: false, initialData: '', channelId: '' });
-    openChannelModal();
   };
 
   const handleKickUser = (socketId: string) => {
@@ -170,80 +156,75 @@ export const VoiceChannels = () => {
   }, [disconnect, dispatch]);
 
   return (
-    <>
-      <Stack align="flex-start" gap="xs">
-        <CollapseButton
-          opened={opened}
-          toggle={toggle}
-          canWorkChannels={canWorkChannels}
-          handleAddChannel={handleAddChannel}
-        />
-        <Collapse in={opened} w="100%">
-          <Stack gap="xs">
-            {serverData.channels.voiceChannels.map(
-              ({ channelId, channelName, maxCount }) => (
-                <React.Fragment key={channelId}>
-                  <ChannelItem
-                    channelId={channelId}
-                    channelName={channelName}
-                    maxCount={maxCount}
-                    currentCount={
-                      rooms
-                        .filter((room) => room.roomName === channelId)
-                        .flatMap((room) => Object.values(room.users)).length
-                    }
-                    canWorkChannels={canWorkChannels}
-                    handleConnect={() => handleConnect(channelId, maxCount)}
-                  />
-                  <Stack gap="xs">
-                    {rooms
+    <Stack align="flex-start" gap="xs">
+      <CollapseButton
+        opened={opened}
+        toggle={toggle}
+        canWorkChannels={canWorkChannels}
+      />
+      <Collapse in={opened} w="100%">
+        <Stack gap="xs">
+          {serverData.channels.voiceChannels.map(
+            ({ channelId, channelName, maxCount }) => (
+              <React.Fragment key={channelId}>
+                <ChannelItem
+                  key={channelId}
+                  channelId={channelId}
+                  channelName={channelName}
+                  openChannel={() => handleConnect(channelId, maxCount)}
+                  editAction={
+                    <EditChannel
+                      channelName={channelName}
+                      channelId={channelId}
+                      channelType={ChannelType.VOICE_CHANNEL}
+                    />
+                  }
+                  maxCount={maxCount}
+                  currentCount={
+                    rooms
                       .filter((room) => room.roomName === channelId)
-                      .flatMap((room) =>
-                        Object.entries(room.users).map(
-                          ([socketId, { producerIds, userName, userId }]) => {
-                            const isSpeaking = calculateIsSpeaking(
-                              producerIds,
-                              channelId,
-                            );
+                      .flatMap((room) => Object.values(room.users)).length
+                  }
+                  channelType={ChannelType.VOICE_CHANNEL}
+                />
+                <Stack gap="xs">
+                  {rooms
+                    .filter((room) => room.roomName === channelId)
+                    .flatMap((room) =>
+                      Object.entries(room.users).map(
+                        ([socketId, { producerIds, userName, userId }]) => {
+                          const isSpeaking = calculateIsSpeaking(
+                            producerIds,
+                            channelId,
+                          );
 
-                            const userVolume =
-                              calculateSliderValue(producerIds);
+                          const userVolume = calculateSliderValue(producerIds);
 
-                            return (
-                              <UserItem
-                                key={socketId}
-                                socketId={socketId}
-                                isSpeaking={isSpeaking}
-                                userName={userName}
-                                producerIds={producerIds}
-                                userVolume={userVolume}
-                                handleOpenStream={handleOpenStream}
-                                handleVolumeChange={handleVolumeChange}
-                                handleKickUser={handleKickUser}
-                                channelId={channelId}
-                                userId={userId}
-                                handleMuteUser={handleMuteUser}
-                              />
-                            );
-                          },
-                        ),
-                      )}
-                  </Stack>
-                </React.Fragment>
-              ),
-            )}
-          </Stack>
-        </Collapse>
-      </Stack>
-      {currentServerId && (
-        <CreateChannelModal
-          opened={channelModalOpened}
-          onClose={closeChannelModal}
-          isEdit={isEditing}
-          serverId={currentServerId}
-          channelType={ChannelType.VOICE_CHANNEL}
-        />
-      )}
-    </>
+                          return (
+                            <UserItem
+                              key={socketId}
+                              socketId={socketId}
+                              isSpeaking={isSpeaking}
+                              userName={userName}
+                              producerIds={producerIds}
+                              userVolume={userVolume}
+                              handleOpenStream={handleOpenStream}
+                              handleVolumeChange={handleVolumeChange}
+                              handleKickUser={handleKickUser}
+                              channelId={channelId}
+                              userId={userId}
+                              handleMuteUser={handleMuteUser}
+                            />
+                          );
+                        },
+                      ),
+                    )}
+                </Stack>
+              </React.Fragment>
+            ),
+          )}
+        </Stack>
+      </Collapse>
+    </Stack>
   );
 };

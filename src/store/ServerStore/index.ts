@@ -14,6 +14,7 @@ export type {
   Role,
   ReplyMessage,
   VoteVariant,
+  NestedChannel,
 } from './ServerStore.types';
 export {
   ChannelType,
@@ -49,6 +50,7 @@ export {
   addRoleToUserWs,
   removeRoleFromUserWs,
   updateVoteWs,
+  setCurrentNotificationChannelId,
 } from './ServerStore.reducer';
 
 export {

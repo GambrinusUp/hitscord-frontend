@@ -7,7 +7,10 @@ import { CreateChannel } from '~/features/channels/createChannel';
 import { EditChannel } from '~/features/channels/editChannel';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { setUserStreamView } from '~/store/AppStore';
-import { setCurrentChannelId } from '~/store/ServerStore';
+import {
+  ChannelType,
+  setCurrentNotificationChannelId,
+} from '~/store/ServerStore';
 
 export const NotificationChannels = () => {
   const dispatch = useAppDispatch();
@@ -16,12 +19,12 @@ export const NotificationChannels = () => {
   const canWorkChannels = serverData.permissions.canWorkChannels;
 
   const handleOpenChannel = (channelId: string) => {
-    dispatch(setCurrentChannelId(channelId));
+    dispatch(setCurrentNotificationChannelId(channelId));
     dispatch(setUserStreamView(false));
   };
 
   return (
-    <Stack>
+    <Stack align="flex-start" gap="xs">
       <Group justify="space-between" w="100%" wrap="nowrap">
         <Button
           leftSection={opened ? <ChevronDown /> : <ChevronRight />}
@@ -38,7 +41,9 @@ export const NotificationChannels = () => {
         >
           Каналы оповещения
         </Button>
-        {canWorkChannels && <CreateChannel />}
+        {canWorkChannels && (
+          <CreateChannel channelType={ChannelType.NOTIFICATION_CHANNEL} />
+        )}
       </Group>
       <Collapse in={opened} w="100%">
         <Stack gap="xs">
@@ -53,8 +58,10 @@ export const NotificationChannels = () => {
                   <EditChannel
                     channelName={channelName}
                     channelId={channelId}
+                    channelType={ChannelType.NOTIFICATION_CHANNEL}
                   />
                 }
+                channelType={ChannelType.NOTIFICATION_CHANNEL}
               />
             ),
           )}

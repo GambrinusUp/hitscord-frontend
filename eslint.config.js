@@ -61,7 +61,6 @@ export default [
         ecmaFeatures: {
           jsx: true,
         },
-        project: './tsconfig.json',
         tsconfigRootDir: __dirname,
         projectService: true,
       },
@@ -79,7 +78,6 @@ export default [
   {
     plugins: {
       react,
-      '@typescript-eslint': typescriptEslint,
       'unused-imports': unusedImports,
       prettier,
       'react-hooks': fixupPluginRules(reactHooks),

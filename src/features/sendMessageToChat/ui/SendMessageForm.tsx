@@ -1,19 +1,28 @@
 import { ActionIcon, Group, Textarea } from '@mantine/core';
-import { Paperclip, Send } from 'lucide-react';
+import { MessageSquarePlus, Paperclip, Send } from 'lucide-react';
 import { useState } from 'react';
 
+import { ChatMessage } from '~/entities/chat';
 import { clearFiles, attachFile } from '~/entities/files';
 import { MessageType } from '~/entities/message';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import { useWebSocket } from '~/shared/lib/websocket';
-import { ServerMessageType } from '~/store/ServerStore';
+import { ChannelMessage, ServerMessageType } from '~/store/ServerStore';
 
 interface SendMessageFormProps {
   CreatePoll: React.ComponentType<{ type: MessageType }>;
+  setReplyMessage: React.Dispatch<
+    React.SetStateAction<ChannelMessage | ChatMessage | null>
+  >;
+  replyMessage: ChannelMessage | ChatMessage | null;
 }
 
-export const SendMessageForm = ({ CreatePoll }: SendMessageFormProps) => {
+export const SendMessageForm = ({
+  CreatePoll,
+  replyMessage,
+  setReplyMessage,
+}: SendMessageFormProps) => {
   const { sendChatMessage } = useWebSocket();
   const dispatch = useAppDispatch();
   const { accessToken } = useAppSelector((state) => state.userStore);
@@ -33,6 +42,25 @@ export const SendMessageForm = ({ CreatePoll }: SendMessageFormProps) => {
           Text: message.trim(),
           Files: uploadedFiles.map((file) => file.fileId),
           NestedChannel: false,
+        },
+        ReplyToMessageId: replyMessage ? replyMessage.id : undefined,
+        MessageType: ServerMessageType.Classic,
+      });
+      setMessage('');
+      setReplyMessage(null);
+      dispatch(clearFiles());
+    }
+  };
+
+  const handleCreateSubchat = () => {
+    if (message.trim() && chat.chatId) {
+      sendChatMessage({
+        Token: accessToken,
+        ChannelId: chat.chatId,
+        Classic: {
+          Text: message.trim(),
+          Files: uploadedFiles.map((file) => file.fileId),
+          NestedChannel: true,
         },
         MessageType: ServerMessageType.Classic,
       });
@@ -70,6 +98,9 @@ export const SendMessageForm = ({ CreatePoll }: SendMessageFormProps) => {
         <input type="file" hidden multiple onChange={handleFileChange} />
       </ActionIcon>
       <CreatePoll type={MessageType.CHAT} />
+      <ActionIcon size="xl" variant="transparent" onClick={handleCreateSubchat}>
+        <MessageSquarePlus size={20} />
+      </ActionIcon>
       <Textarea
         w="100%"
         placeholder="Написать..."

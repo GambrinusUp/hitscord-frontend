@@ -10,7 +10,7 @@ import {
   Text,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { EllipsisVertical, Trash2 } from 'lucide-react';
+import { EllipsisVertical, Reply, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 import { pollItemStyles } from './PollItem.style';
@@ -40,15 +40,19 @@ export const PollItem = ({
   variants,
   multiple,
   deadLine,
+  onReplyMessage,
 }: PollItemProps) => {
   const { accessToken, user } = useAppSelector((state) => state.userStore);
-  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+  const { currentChannelId, currentNotificationChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
   const { activeChat } = useAppSelector((state) => state.chatsStore);
   const { getUsername, getUserIcon } = useMessageAuthor(type);
   const { getVotedUsers } = useVotes();
   const { vote, unVote, deleteMessage, deleteChatMessage } = useWebSocket();
   const [isHovered, setIsHovered] = useState(false);
 
+  const activeChannelId = currentChannelId ?? currentNotificationChannelId;
   const userId = user.id;
   const form = useForm<VoteVariantsForm>({
     initialValues: {
@@ -95,7 +99,7 @@ export const PollItem = ({
       case MessageType.CHANNEL:
         deleteMessage({
           Token: accessToken,
-          ChannelId: currentChannelId!,
+          ChannelId: activeChannelId!,
           MessageId: pollId,
         });
         break;
@@ -126,6 +130,13 @@ export const PollItem = ({
           transition: 'opacity 0.3s ease',
         }}
       >
+        <ActionIcon
+          variant="subtle"
+          aria-label="reply"
+          onClick={onReplyMessage}
+        >
+          <Reply size={20} />
+        </ActionIcon>
         <Menu position="bottom-start" shadow="md" width={150} offset={-30}>
           <Menu.Target>
             <ActionIcon variant="subtle" aria-label="edit" onClick={() => {}}>

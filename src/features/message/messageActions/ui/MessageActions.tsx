@@ -21,16 +21,21 @@ export const MessageActions = ({
   messageContent,
 }: MessageActionsProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+  const { currentChannelId, currentNotificationChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
   const { activeChat } = useAppSelector((state) => state.chatsStore);
+  const { currentSubChatId } = useAppSelector((state) => state.subChatStore);
   const { deleteMessage, deleteChatMessage } = useWebSocket();
+
+  const activeChannelId = currentChannelId ?? currentNotificationChannelId;
 
   const handleDelete = () => {
     switch (type) {
       case MessageType.CHANNEL:
         deleteMessage({
           Token: accessToken,
-          ChannelId: currentChannelId!,
+          ChannelId: activeChannelId!,
           MessageId: messageId,
         });
         break;
@@ -38,6 +43,13 @@ export const MessageActions = ({
         deleteChatMessage({
           Token: accessToken,
           ChannelId: activeChat!,
+          MessageId: messageId,
+        });
+        break;
+      case MessageType.SUBCHAT:
+        deleteMessage({
+          Token: accessToken,
+          ChannelId: currentSubChatId!,
           MessageId: messageId,
         });
         break;

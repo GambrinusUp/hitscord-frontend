@@ -1,19 +1,17 @@
 import { ActionIcon, Divider, Flex, ScrollArea, Stack } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
-import { CirclePlus, Home, LogOut } from 'lucide-react';
+import { Home, LogOut } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { CreateServerModal } from './components/CreateServerModal';
 import { ServerItem } from './components/ServerItem';
 
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { setOpenHome } from '~/store/AppStore';
 import { getUserServers } from '~/store/ServerStore';
 import { logoutUser } from '~/store/UserStore';
+import { CreateServer } from '~/features/server';
 
 export const ServerPanel = () => {
-  const [opened, { open, close }] = useDisclosure(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { serversList } = useAppSelector((state) => state.testServerStore);
@@ -28,7 +26,9 @@ export const ServerPanel = () => {
   };
 
   useEffect(() => {
-    if (accessToken) dispatch(getUserServers({ accessToken }));
+    if (accessToken) {
+      dispatch(getUserServers({ accessToken }));
+    }
   }, [accessToken, dispatch]);
 
   return (
@@ -65,14 +65,11 @@ export const ServerPanel = () => {
           </Stack>
         </ScrollArea.Autosize>
         <Divider my="sm" />
-        <ActionIcon size="lg" variant="transparent" onClick={open}>
-          <CirclePlus size={24} color="#fff" />
-        </ActionIcon>
+        <CreateServer />
       </Flex>
       <ActionIcon size="lg" variant="transparent" onClick={handleLogout}>
         <LogOut size={24} color="#fff" />
       </ActionIcon>
-      <CreateServerModal opened={opened} onClose={close} />
     </Flex>
   );
 };

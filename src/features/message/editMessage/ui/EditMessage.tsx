@@ -23,9 +23,14 @@ export const EditMessage = ({
   type,
 }: EditMessageProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+  const { currentChannelId, currentNotificationChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
   const { activeChat } = useAppSelector((state) => state.chatsStore);
+  const { currentSubChatId } = useAppSelector((state) => state.subChatStore);
   const { editMessage, editChatMessage } = useWebSocket();
+
+  const activeChannelId = currentChannelId ?? currentNotificationChannelId;
 
   const handleEdit = () => {
     if (!editedContent.trim()) {
@@ -36,7 +41,7 @@ export const EditMessage = ({
       case MessageType.CHANNEL:
         editMessage({
           Token: accessToken,
-          ChannelId: currentChannelId!,
+          ChannelId: activeChannelId!,
           MessageId: messageId,
           Text: editedContent.trim(),
         });
@@ -45,6 +50,14 @@ export const EditMessage = ({
         editChatMessage({
           Token: accessToken,
           ChannelId: activeChat!,
+          MessageId: messageId,
+          Text: editedContent.trim(),
+        });
+        break;
+      case MessageType.SUBCHAT:
+        editMessage({
+          Token: accessToken,
+          ChannelId: currentSubChatId!,
           MessageId: messageId,
           Text: editedContent.trim(),
         });

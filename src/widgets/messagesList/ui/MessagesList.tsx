@@ -63,6 +63,7 @@ export const MessagesList = ({
                 authorId={message.authorId}
                 channelId={message.channelId}
                 files={message.files}
+                nestedChannel={message.nestedChannel}
                 EditMessage={(props) => (
                   <EditMessage {...props} type={type} messageId={message.id} />
                 )}
@@ -88,6 +89,7 @@ export const MessagesList = ({
                 variants={message.variants!}
                 multiple={message.multiple!}
                 deadLine={message.deadline}
+                onReplyMessage={() => replyToMessage(message)}
               />
             )}
           </div>

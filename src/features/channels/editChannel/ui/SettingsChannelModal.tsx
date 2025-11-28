@@ -129,7 +129,6 @@ export const SettingsChannelModal = ({
               onClose={onClose}
             />
           )}
-
           {activeSetting === 'count' && (
             <EditChannelUserCount
               channelId={channelId}

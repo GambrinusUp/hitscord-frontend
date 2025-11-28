@@ -13,6 +13,7 @@ import {
   updateChatIcon,
   updateChatVoteWs,
 } from '~/entities/chat';
+import { addSubChatMessage } from '~/entities/subChat';
 import { Vote } from '~/entities/vote';
 import { formatMessage, formatNotification, formatUser } from '~/helpers';
 import { formatChatMessage, formatMessageFile } from '~/helpers/formatMessage';
@@ -83,7 +84,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
   useEffect(() => {
     if (accessToken) {
       const ws = new WebSocket(
-        `wss://hitscord-backend.online/api/wss?accessToken=${accessToken}`,
+        `wss://166664.msk.web.highserver.ru/api/wss?accessToken=${accessToken}`,
       );
 
       ws.onopen = () => {
@@ -304,7 +305,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           }
         }
 
-        if (data.MessageType === 'New message') {
+        if (data.MessageType === 'New message in text channel') {
           const formattedMessage = formatMessage(data.Payload);
 
           if (formattedMessage.id) {
@@ -327,6 +328,40 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                 }),
               );
             }
+          }
+        }
+
+        if (data.MessageType === 'New message in notification channel') {
+          const formattedMessage = formatMessage(data.Payload);
+
+          if (formattedMessage.id) {
+            dispatch(addMessage(formattedMessage));
+
+            if (formattedMessage.authorId !== user.id) {
+              dispatch(
+                changeReadedCount({
+                  channelId: formattedMessage.channelId,
+                  readedMessageId: formattedMessage.id,
+                  serverId: formattedMessage.serverId!,
+                }),
+              );
+            } else {
+              dispatch(
+                readOwnMessage({
+                  channelId: formattedMessage.channelId,
+                  readedMessageId: formattedMessage.id,
+                  serverId: formattedMessage.serverId!,
+                }),
+              );
+            }
+          }
+        }
+
+        if (data.MessageType === 'New message in sub channel') {
+          const formattedMessage = formatMessage(data.Payload);
+
+          if (formattedMessage.id) {
+            dispatch(addSubChatMessage(formattedMessage));
           }
         }
 

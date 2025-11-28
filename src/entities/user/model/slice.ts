@@ -30,6 +30,7 @@ const initialState: UserState = {
     nonFriendMessage: false,
     icon: null,
     notificationLifeTime: 0,
+    systemRoles: []
   },
   accessToken: loadTokenFromLocalStorage(TokenType.ACCESS),
   refreshToken: loadTokenFromLocalStorage(TokenType.REFRESH),

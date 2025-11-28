@@ -24,7 +24,9 @@ export const useChannelData = () => {
     (state) => state.testServerStore.allMessagesCount,
   );
   const entityId = useAppSelector(
-    (state) => state.testServerStore.currentChannelId,
+    (state) =>
+      state.testServerStore.currentChannelId ??
+      state.testServerStore.currentNotificationChannelId,
   );
 
   return {

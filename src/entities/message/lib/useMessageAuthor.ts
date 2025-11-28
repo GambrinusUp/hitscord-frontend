@@ -26,6 +26,13 @@ export const useMessageAuthor = (type: MessageType) => {
 
           return userName;
         }
+        case MessageType.SUBCHAT: {
+          const userName = usersOnServer.find(
+            (user) => user.userId === authorId,
+          )?.userName;
+
+          return userName;
+        }
         default:
           return '';
       }

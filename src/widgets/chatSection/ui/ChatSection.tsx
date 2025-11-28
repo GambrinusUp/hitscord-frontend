@@ -7,17 +7,20 @@ import {
   Text,
   Box,
   Group,
+  Notification,
 } from '@mantine/core';
 import { ArrowLeft, ArrowDown } from 'lucide-react';
+import { useState } from 'react';
 
 import { ChatMessage, setActiveChat } from '~/entities/chat';
-import { MessageType } from '~/entities/message';
+import { MessageType, useMessageAuthor } from '~/entities/message';
 import { AttachedFilesList } from '~/features/attachedFilesList';
 import { AddUserToChat, ChangeChatName, LeaveChat } from '~/features/chat';
 import { CreatePoll } from '~/features/polls';
 import { SendMessageForm } from '~/features/sendMessageToChat';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { useScrollToBottom } from '~/shared/lib/hooks';
+import { ChannelMessage } from '~/store/ServerStore';
 
 interface ChatSectionProps {
   MessagesList: React.ComponentType<{
@@ -34,6 +37,11 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
   );
   const { scrollRef, isAtBottom, showButton, handleScroll, scrollToBottom } =
     useScrollToBottom({ messagesStatus, dependencies: [messages] });
+  const { getUsername } = useMessageAuthor(MessageType.CHAT);
+
+  const [replyMessage, setReplyMessage] = useState<
+    ChatMessage | ChannelMessage | null
+  >(null);
 
   const handleBack = () => {
     dispatch(setActiveChat(null));
@@ -78,7 +86,7 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
         <MessagesList
           scrollRef={scrollRef}
           type={MessageType.CHAT}
-          replyToMessage={() => {}}
+          replyToMessage={(message) => setReplyMessage(message)}
         />
       </ScrollArea>
       {!isAtBottom && showButton && (
@@ -101,7 +109,23 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
       )}
       <Box pos="relative">
         <AttachedFilesList />
-        <SendMessageForm CreatePoll={CreatePoll} />
+        {replyMessage && (
+          <Box p={6}>
+            <Notification
+              title={getUsername(replyMessage.authorId)}
+              onClose={() => setReplyMessage(null)}
+            >
+              <Text lineClamp={2}>
+                {replyMessage.text || replyMessage.title}
+              </Text>
+            </Notification>
+          </Box>
+        )}
+        <SendMessageForm
+          CreatePoll={CreatePoll}
+          replyMessage={replyMessage}
+          setReplyMessage={setReplyMessage}
+        />
       </Box>
     </Box>
   );

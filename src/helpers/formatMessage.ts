@@ -1,5 +1,11 @@
 import { ChatMessage, MessageFile } from '~/entities/chat';
-import { MessageType, VoteVariant, ReplyMessage } from '~/store/ServerStore';
+import {
+  MessageType,
+  VoteVariant,
+  ReplyMessage,
+  ChannelMessage,
+  NestedChannel,
+} from '~/store/ServerStore';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatMessageFile = (rawFile: any): MessageFile => ({
@@ -27,6 +33,11 @@ export const formatVoteVariant = (rawVariant: any): VoteVariant => ({
   content: rawVariant.Content,
   totalVotes: rawVariant.TotalVotes,
   votedUserIds: rawVariant.VotedUserIds, // Предполагается массив строк/чисел
+});
+
+const formatNestedChannel = (rawNestedChannel: any): NestedChannel => ({
+  subChannelId: rawNestedChannel.SubChannelId,
+  rolesCanUse: rawNestedChannel.RolesCanUse,
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,7 +97,9 @@ export const formatVoteVariant = (rawVariant: any): VoteVariant => ({
 };*/
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const formatMessage = (rawMessage: any): ChatMessage => {
+export const formatMessage = (
+  rawMessage: any,
+): ChatMessage | ChannelMessage => {
   const messageType = rawMessage.MessageType;
 
   const baseMessage = {
@@ -108,7 +121,9 @@ export const formatMessage = (rawMessage: any): ChatMessage => {
       ...baseMessage,
       text: rawMessage.Text || null,
       modifiedAt: rawMessage.ModifiedAt || null,
-      nestedChannel: rawMessage.NestedChannel || null,
+      nestedChannel: rawMessage.NestedChannel
+        ? formatNestedChannel(rawMessage.NestedChannel)
+        : null,
       files: rawMessage.Files ? rawMessage.Files.map(formatMessageFile) : null,
     };
   } else if (messageType === MessageType.Vote) {
@@ -154,7 +169,9 @@ export const formatChatMessage = (rawMessage: any): ChatMessage => {
       ...baseMessage,
       text: rawMessage.Text || null,
       modifiedAt: rawMessage.ModifiedAt || null,
-      nestedChannel: rawMessage.NestedChannel || null,
+      nestedChannel: rawMessage.NestedChannel
+        ? formatNestedChannel(rawMessage.NestedChannel)
+        : null,
       files: rawMessage.Files ? rawMessage.Files.map(formatMessageFile) : null,
     };
   } else if (messageType === MessageType.Vote) {

@@ -1,6 +1,7 @@
 import { Button, Group, Modal, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 
+import { getModalTitle } from '~/features/channels/createChannel/lib/getModalTitle';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import {
   combineValidators,
@@ -65,10 +66,7 @@ export const CreateChannelModal = ({
     <Modal
       opened={opened}
       onClose={onClose}
-      /*title={`Создание ${
-        channelType === ChannelType.TEXT_CHANNEL ? 'текстового' : 'голосового'
-      } канала`}*/
-      title="Создание канала для оповещений"
+      title={getModalTitle(channelType)}
       centered
       c="#ffffff"
       styles={{

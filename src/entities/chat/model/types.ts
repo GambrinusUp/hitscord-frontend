@@ -1,5 +1,6 @@
 import { FileResponse } from '~/entities/files';
 import { LoadingState } from '~/shared/types';
+import { NestedChannel } from '~/store/ServerStore';
 
 export interface Chat {
   chatId: string;
@@ -81,7 +82,7 @@ export interface ChatMessage {
 
   text?: string | null;
   modifiedAt?: string | null;
-  nestedChannel?: string | null;
+  nestedChannel?: NestedChannel | null;
   files?: MessageFile[] | null;
 
   title?: string | null;

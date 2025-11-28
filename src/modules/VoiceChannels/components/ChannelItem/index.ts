@@ -1,1 +1,0 @@
-export { ChannelItem } from './ChannelItem';

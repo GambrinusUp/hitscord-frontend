@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
-import { useChannelData } from './useChannelData';
+import { useChannelData } from './useChannelMessagesData';
 import { useChatData } from './useChatData';
 
 import { getMoreChatMessages } from '~/entities/chat';

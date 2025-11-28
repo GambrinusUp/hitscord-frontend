@@ -77,6 +77,7 @@ const initialState: ServerState = {
   },
   currentServerId: null,
   currentChannelId: null,
+  currentNotificationChannelId: null,
   currentVoiceChannelId: null,
   messages: [],
   hasNewMessage: false,
@@ -116,6 +117,8 @@ const testServerSlice = createSlice({
       const channelId = action.payload;
       state.currentChannelId = channelId;
 
+      state.currentNotificationChannelId = null;
+
       if (channelId) {
         const textChannel = state.serverData.channels.textChannels.find(
           (channel) => channel.channelId === channelId,
@@ -134,13 +137,44 @@ const testServerSlice = createSlice({
       state.lastBottomMessageId = 0;
       state.messages = [];
     },
+    setCurrentNotificationChannelId: (
+      state,
+      action: PayloadAction<string | null>,
+    ) => {
+      const channelId = action.payload;
+      state.currentNotificationChannelId = channelId;
+
+      state.currentChannelId = null;
+
+      if (channelId) {
+        const notifChannel =
+          state.serverData.channels.notificationChannels.find(
+            (channel) => channel.channelId === channelId,
+          );
+
+        if (notifChannel) {
+          state.startMessageId = notifChannel.lastReadedMessageId;
+        }
+      }
+
+      state.numberOfMessages = 0;
+      state.remainingTopMessagesCount = 0;
+      state.lastTopMessageId = 0;
+      state.allMessagesCount = 0;
+      state.remainingBottomMessagesCount = MAX_MESSAGE_NUMBER;
+      state.lastBottomMessageId = 0;
+      state.messages = [];
+    },
     setCurrentVoiceChannelId: (state, action: PayloadAction<string | null>) => {
       state.currentVoiceChannelId = action.payload;
     },
     addMessage: (state, action: PayloadAction<ChannelMessage>) => {
       const { channelId } = action.payload;
 
-      if (channelId === state.currentChannelId) {
+      if (
+        channelId === state.currentChannelId ||
+        channelId === state.currentNotificationChannelId
+      ) {
         if (state.remainingBottomMessagesCount <= 0) {
           state.messages.push(action.payload);
         }
@@ -959,6 +993,7 @@ export const {
   addRoleToUserWs,
   removeRoleFromUserWs,
   updateVoteWs,
+  setCurrentNotificationChannelId,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

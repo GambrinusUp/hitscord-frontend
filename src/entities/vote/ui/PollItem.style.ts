@@ -14,12 +14,19 @@ export const pollItemStyles = {
   }),
   box: (disabled: boolean): MantineStyleProp => ({
     position: 'relative',
-    borderRadius: 9999,
+    borderRadius: 12,
     overflow: 'hidden',
     border: '1px solid rgba(255,255,255,0.1)',
     background: 'rgba(255,255,255,0.04)',
     transition: 'background 0.2s ease',
     cursor: disabled ? 'not-allowed' : 'pointer',
+
+    minHeight: 44,
+    width: '100%',
+
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,
   }),
   vote: (usersVotedPercent: number): MantineStyleProp => ({
     position: 'absolute',

@@ -2,6 +2,7 @@ import {
   ActionIcon,
   Avatar,
   Box,
+  Button,
   Group,
   Menu,
   Notification,
@@ -17,7 +18,9 @@ import { messageItemStyles } from './MessageItem.style';
 import { formatMessage } from '~/entities/message/lib/formatMessage';
 import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
 import { MessageItemProps } from '~/entities/message/model/types';
+import { setCurrentSubChatId } from '~/entities/subChat';
 import { formatDateTime } from '~/helpers';
+import { useAppDispatch } from '~/hooks';
 import { useIcon } from '~/shared/lib/hooks';
 
 export const MessageItem = ({
@@ -33,7 +36,9 @@ export const MessageItem = ({
   onReplyMessage,
   EditMessage,
   MessageActions,
+  nestedChannel,
 }: MessageItemProps) => {
+  const dispatch = useAppDispatch();
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
@@ -49,6 +54,10 @@ export const MessageItem = ({
   );
 
   const { iconBase64 } = useIcon(userIcon);
+
+  const handleOpenSubChat = (subChannelId: string | undefined) => {
+    dispatch(setCurrentSubChatId(subChannelId!));
+  };
 
   return (
     <Group
@@ -150,6 +159,16 @@ export const MessageItem = ({
             )}
             {files && files.length > 0 && (
               <MessageFiles files={files} channelId={channelId} />
+            )}
+            {nestedChannel && nestedChannel.canUse && (
+              <Button
+                radius="md"
+                variant="default"
+                color="gray"
+                onClick={() => handleOpenSubChat(nestedChannel?.subChannelId)}
+              >
+                Открыть подчат
+              </Button>
             )}
           </Box>
         </Stack>

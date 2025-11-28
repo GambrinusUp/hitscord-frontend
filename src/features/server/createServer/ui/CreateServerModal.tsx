@@ -1,6 +1,8 @@
-import { Modal, Tabs, TextInput, Button, Group } from '@mantine/core';
+import { Modal, Tabs, TextInput, Button, Group, Select } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
+import { ServerTypeEnum } from '~/entities/servers';
+import { SystemRoleTypeEnum } from '~/entities/user';
 
 import { useAppSelector, useAppDispatch } from '~/hooks';
 import {
@@ -23,13 +25,18 @@ export const CreateServerModal = ({
   opened,
   onClose,
 }: CreateServerModalProps) => {
+  const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState<string | null>('create');
   const { user, accessToken } = useAppSelector((state) => state.userStore);
-  const dispatch = useAppDispatch();
+
+  const isStudent = !!user.systemRoles.find(
+    (role) => role.type === SystemRoleTypeEnum.Student,
+  );
 
   const form = useForm({
     initialValues: {
       name: '',
+      serverType: String(ServerTypeEnum.Student),
     },
     validate: {
       name: combineValidators(
@@ -119,6 +126,21 @@ export const CreateServerModal = ({
               description="от 6 до 50 символов"
               maxLength={50}
               {...form.getInputProps('name')}
+            />
+            <Select
+              label="Тип сервера"
+              disabled={isStudent}
+              data={[
+                {
+                  value: String(ServerTypeEnum.Student),
+                  label: 'Студенческий',
+                },
+                {
+                  value: String(ServerTypeEnum.Teacher),
+                  label: 'Преподавательский',
+                },
+              ]}
+              {...form.getInputProps('serverType')}
             />
             <Group justify="flex-end" mt="md">
               <Button variant="outline" onClick={onClose}>

@@ -40,6 +40,7 @@ export const CreatePollModal = ({
 }: CreatePollModalProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentChannelId } = useAppSelector((state) => state.testServerStore);
+  const { currentSubChatId } = useAppSelector((state) => state.subChatStore);
   const { activeChat } = useAppSelector((state) => state.chatsStore);
   const { sendMessage, sendChatMessage } = useWebSocket();
 
@@ -78,6 +79,25 @@ export const CreatePollModal = ({
       sendMessage({
         Token: accessToken,
         ChannelId: currentChannelId,
+        Vote: {
+          Title: title,
+          Content: content,
+          IsAnonimous: isAnonimous,
+          Multiple: multiple,
+          Deadline: isoDate,
+          Variants: variants.map((variant) => ({
+            Number: variant.number,
+            Content: variant.content,
+          })),
+        },
+        MessageType: ServerMessageType.Vote,
+      });
+    }
+
+    if (type === MessageType.SUBCHAT && currentSubChatId) {
+      sendMessage({
+        Token: accessToken,
+        ChannelId: currentSubChatId,
         Vote: {
           Title: title,
           Content: content,

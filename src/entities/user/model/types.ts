@@ -17,6 +17,16 @@ export interface LoginResponse {
   refreshToken: string;
 }
 
+export enum SystemRoleTypeEnum {
+  Student,
+  Teacher,
+}
+
+export interface SystemRole {
+  name: string;
+  type: SystemRoleTypeEnum;
+}
+
 export interface User {
   id: string;
   name: string;
@@ -28,6 +38,7 @@ export interface User {
   nonFriendMessage: boolean;
   icon: FileResponse | null;
   notificationLifeTime: number;
+  systemRoles: SystemRole[];
 }
 
 export enum SettingType {

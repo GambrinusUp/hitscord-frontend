@@ -6,7 +6,11 @@ import { CreateChannelModal } from './CreateChannelModal';
 
 import { ChannelType } from '~/store/ServerStore';
 
-export const CreateChannel = () => {
+interface CreateChannelProps {
+  channelType: ChannelType;
+}
+
+export const CreateChannel = ({ channelType }: CreateChannelProps) => {
   const [opened, { open, close }] = useDisclosure(false);
 
   const handleCreate = () => {
@@ -21,7 +25,7 @@ export const CreateChannel = () => {
       <CreateChannelModal
         opened={opened}
         onClose={close}
-        channelType={ChannelType.NOTIFICATION_CHANNEL}
+        channelType={channelType}
       />
     </>
   );

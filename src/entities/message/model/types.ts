@@ -1,9 +1,10 @@
 import { MessageFile } from '~/entities/chat';
-import { ReplyMessage } from '~/store/ServerStore';
+import { NestedChannel, ReplyMessage } from '~/store/ServerStore';
 
 export enum MessageType {
   CHAT = 'CHAT',
   CHANNEL = 'CHANNEL',
+  SUBCHAT = 'SUBCHAT',
 }
 
 export interface MessageItemProps {
@@ -16,6 +17,7 @@ export interface MessageItemProps {
   channelId: string;
   modifiedAt?: string | null;
   files: MessageFile[] | null | undefined;
+  nestedChannel: NestedChannel | null | undefined;
   onReplyMessage: () => void;
   EditMessage?: React.FC<{
     editedContent: string;
