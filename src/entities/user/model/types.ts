@@ -1,4 +1,5 @@
 import { FileResponse } from '~/entities/files';
+import { SystemRoleTypeEnum } from '~/entities/presets';
 import { LoadingState } from '~/shared';
 
 export interface RegisterCredentials {
@@ -17,12 +18,7 @@ export interface LoginResponse {
   refreshToken: string;
 }
 
-export enum SystemRoleTypeEnum {
-  Student,
-  Teacher,
-}
-
-export interface SystemRole {
+export interface UserSystemRole {
   name: string;
   type: SystemRoleTypeEnum;
 }
@@ -38,7 +34,7 @@ export interface User {
   nonFriendMessage: boolean;
   icon: FileResponse | null;
   notificationLifeTime: number;
-  systemRoles: SystemRole[];
+  systemRoles: UserSystemRole[];
 }
 
 export enum SettingType {

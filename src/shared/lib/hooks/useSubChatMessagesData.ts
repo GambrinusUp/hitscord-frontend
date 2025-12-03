@@ -37,5 +37,6 @@ export const useSubChatData = () => {
     startMessageId,
     allMessagesCount,
     entityId,
+    lastReadedMessageId: 0,
   };
 };

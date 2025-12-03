@@ -15,6 +15,7 @@ export type {
   ReplyMessage,
   VoteVariant,
   NestedChannel,
+  UserRoleOnServer,
 } from './ServerStore.types';
 export {
   ChannelType,
@@ -82,4 +83,6 @@ export {
   getChannelMessages,
   changeServerIcon,
   changeNotificationChannelSettings,
+  changeServerIsClosed,
+  changeNotifiable,
 } from './ServerStore.actions';

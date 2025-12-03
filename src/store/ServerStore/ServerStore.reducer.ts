@@ -4,9 +4,11 @@ import {
   addRole,
   changeChannelName,
   changeNameOnServer,
+  changeNotifiable,
   changeNotificationChannelSettings,
   changeRole,
   changeServerIcon,
+  changeServerIsClosed,
   changeServerName,
   changeTextChannelSettings,
   changeVoiceChannelMaxCount,
@@ -45,6 +47,7 @@ import {
 } from './ServerStore.types';
 
 import { MAX_MESSAGE_NUMBER } from '~/constants';
+import { ServerTypeEnum } from '~/entities/servers';
 import { LoadingState } from '~/shared';
 import { UpdateRole } from '~/store/RolesStore/RolesStore.types';
 
@@ -53,6 +56,7 @@ const initialState: ServerState = {
   serverData: {
     serverId: '',
     serverName: '',
+    serverType: ServerTypeEnum.Student,
     icon: null,
     isClosed: false,
     roles: [],
@@ -220,6 +224,7 @@ const testServerSlice = createSlice({
       state.serverData = {
         serverId: '',
         serverName: '',
+        serverType: ServerTypeEnum.Student,
         icon: null,
         isClosed: false,
         roles: [],
@@ -406,15 +411,30 @@ const testServerSlice = createSlice({
     readMessageWs: (state, action: PayloadAction<ReadedMessageWs>) => {
       const { readChannelId, readedMessageId, serverId } = action.payload;
 
-      const indexChannel = state.serverData.channels.textChannels.findIndex(
+      const indexTextChannel = state.serverData.channels.textChannels.findIndex(
         (channel) => channel.channelId === readChannelId,
       );
 
-      if (indexChannel >= 0) {
-        state.serverData.channels.textChannels[indexChannel].nonReadedCount -=
-          1;
+      if (indexTextChannel >= 0) {
         state.serverData.channels.textChannels[
-          indexChannel
+          indexTextChannel
+        ].nonReadedCount -= 1;
+        state.serverData.channels.textChannels[
+          indexTextChannel
+        ].lastReadedMessageId = readedMessageId;
+      }
+
+      const indexNotificationChannel =
+        state.serverData.channels.notificationChannels?.findIndex(
+          (channel) => channel.channelId === readChannelId,
+        );
+
+      if (indexNotificationChannel >= 0) {
+        state.serverData.channels.notificationChannels[
+          indexNotificationChannel
+        ].nonReadedCount -= 1;
+        state.serverData.channels.notificationChannels[
+          indexNotificationChannel
         ].lastReadedMessageId = readedMessageId;
       }
 
@@ -429,13 +449,25 @@ const testServerSlice = createSlice({
     changeReadedCount: (state, action: PayloadAction<ChangeReadedCount>) => {
       const { channelId, serverId } = action.payload;
 
-      const indexChannel = state.serverData.channels.textChannels.findIndex(
+      const indexTextChannel = state.serverData.channels.textChannels.findIndex(
         (channel) => channel.channelId === channelId,
       );
 
-      if (indexChannel >= 0) {
-        state.serverData.channels.textChannels[indexChannel].nonReadedCount +=
-          1;
+      if (indexTextChannel >= 0) {
+        state.serverData.channels.textChannels[
+          indexTextChannel
+        ].nonReadedCount += 1;
+      }
+
+      const indexNotificationChannel =
+        state.serverData.channels.notificationChannels?.findIndex(
+          (channel) => channel.channelId === channelId,
+        );
+
+      if (indexNotificationChannel >= 0) {
+        state.serverData.channels.notificationChannels[
+          indexNotificationChannel
+        ].nonReadedCount += 1;
       }
 
       const indexServer = state.serversList.findIndex(
@@ -449,13 +481,24 @@ const testServerSlice = createSlice({
     readOwnMessage: (state, action: PayloadAction<ChangeReadedCount>) => {
       const { channelId, readedMessageId } = action.payload;
 
-      const indexChannel = state.serverData.channels.textChannels.findIndex(
+      const indexTextChannel = state.serverData.channels.textChannels.findIndex(
         (channel) => channel.channelId === channelId,
       );
 
-      if (indexChannel >= 0) {
+      if (indexTextChannel >= 0) {
         state.serverData.channels.textChannels[
-          indexChannel
+          indexTextChannel
+        ].lastReadedMessageId = readedMessageId;
+      }
+
+      const indexNotificationChannel =
+        state.serverData.channels.notificationChannels?.findIndex(
+          (channel) => channel.channelId === channelId,
+        );
+
+      if (indexNotificationChannel >= 0) {
+        state.serverData.channels.notificationChannels[
+          indexNotificationChannel
         ].lastReadedMessageId = readedMessageId;
       }
     },
@@ -548,6 +591,7 @@ const testServerSlice = createSlice({
         state.serverData = {
           serverId: '',
           serverName: '',
+          serverType: ServerTypeEnum.Student,
           icon: null,
           isClosed: false,
           roles: [],
@@ -918,6 +962,17 @@ const testServerSlice = createSlice({
       .addCase(changeServerIcon.rejected, (state, action) => {
         state.error = action.payload as string;
       })
+      .addCase(changeServerIsClosed.fulfilled, (state) => {
+        state.serverData.isClosed = !state.serverData.isClosed;
+        state.error = '';
+      })
+      .addCase(changeNotifiable.fulfilled, (state, { meta }) => {
+        const { serverId } = meta.arg;
+
+        if (state.currentServerId === serverId) {
+          state.serverData.isNotifiable = !state.serverData.isNotifiable;
+        }
+      })
 
       .addMatcher(
         isAnyOf(getChannelSettings.fulfilled),
@@ -935,6 +990,8 @@ const testServerSlice = createSlice({
           unbanUser.pending,
           changeVoiceChannelMaxCount.pending,
           changeNotificationChannelSettings.pending,
+          changeServerIsClosed.pending,
+          changeNotifiable.pending,
         ),
         (state) => {
           state.error = '';
@@ -959,6 +1016,8 @@ const testServerSlice = createSlice({
           unbanUser.rejected,
           changeVoiceChannelMaxCount.rejected,
           changeNotificationChannelSettings.rejected,
+          changeServerIsClosed.rejected,
+          changeNotifiable.rejected,
         ),
         (state, action) => {
           state.error = action.payload as string;

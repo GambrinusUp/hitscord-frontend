@@ -1,10 +1,11 @@
+import { FileResponse } from '~/entities/files';
 import { LoadingState } from '~/shared';
 
 export interface Friend {
   userId: string;
   userName: string;
   userTag: string;
-  mail: string;
+  icon: FileResponse | null;
   notifiable: boolean;
   friendshipApplication: boolean;
   nonFriendMessage: boolean;

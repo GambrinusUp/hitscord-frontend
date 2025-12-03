@@ -70,7 +70,6 @@ export const ChangeNameModal = ({ opened, onClose }: ChangeNameModalProps) => {
       }}
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        {' '}
         <Stack gap="xs">
           <TextInput
             label="Новое имя"

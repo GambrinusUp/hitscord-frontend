@@ -35,12 +35,12 @@ export const formatVoteVariant = (rawVariant: any): VoteVariant => ({
   votedUserIds: rawVariant.VotedUserIds, // Предполагается массив строк/чисел
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formatNestedChannel = (rawNestedChannel: any): NestedChannel => ({
   subChannelId: rawNestedChannel.SubChannelId,
   rolesCanUse: rawNestedChannel.RolesCanUse,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 /*export const formatMessage = (rawMessage: any): ChannelMessage => {
   let messageType: MessageType = MessageType.Classic;
   let poll: Poll | null = null;
@@ -96,8 +96,8 @@ const formatNestedChannel = (rawNestedChannel: any): NestedChannel => ({
   }
 };*/
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatMessage = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rawMessage: any,
 ): ChatMessage | ChannelMessage => {
   const messageType = rawMessage.MessageType;

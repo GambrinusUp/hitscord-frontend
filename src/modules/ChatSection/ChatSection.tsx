@@ -77,10 +77,6 @@ export const ChatSection = ({
     useChannelSettings();
   const activeChannelId = currentChannelId ?? currentNotificationChannelId;
 
-  /* const canWrite = channelSettings?.canWrite;
-  const canWriteSub = channelSettings?.canWriteSub;
-  const nonReadedCount = channelSettings?.nonReadedCount;
-  const nonReadedTaggedCount = channelSettings?.nonReadedTaggedCount;*/
   const [newMessage, setNewMessage] = useState('');
   const [replyMessage, setReplyMessage] = useState<
     ChatMessage | ChannelMessage | null
@@ -110,7 +106,7 @@ export const ChatSection = ({
   });
 
   const handleSendMessage = (nestedChannel: boolean) => {
-    if (newMessage.trim() && currentServerId && activeChannelId) {
+    if (currentServerId && activeChannelId) {
       sendMessage({
         Token: accessToken,
         ChannelId: activeChannelId,

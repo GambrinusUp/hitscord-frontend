@@ -1,9 +1,9 @@
 import { Modal, Tabs, TextInput, Button, Group, Select } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useState } from 'react';
-import { ServerTypeEnum } from '~/entities/servers';
-import { SystemRoleTypeEnum } from '~/entities/user';
+import { useEffect, useState } from 'react';
 
+import { SystemRoleTypeEnum } from '~/entities/presets';
+import { ServerTypeEnum } from '~/entities/servers';
 import { useAppSelector, useAppDispatch } from '~/hooks';
 import {
   combineValidators,
@@ -29,9 +29,12 @@ export const CreateServerModal = ({
   const [activeTab, setActiveTab] = useState<string | null>('create');
   const { user, accessToken } = useAppSelector((state) => state.userStore);
 
-  const isStudent = !!user.systemRoles.find(
-    (role) => role.type === SystemRoleTypeEnum.Student,
-  );
+  const isStudent =
+    user.systemRoles.length > 0
+      ? !!user.systemRoles.find(
+          (role) => role.type === SystemRoleTypeEnum.Student,
+        )
+      : true;
 
   const form = useForm({
     initialValues: {
@@ -47,10 +50,14 @@ export const CreateServerModal = ({
   });
 
   const connectForm = useForm({
-    initialValues: { serverId: '' },
+    initialValues: {
+      serverId: '',
+      userName: user.name,
+    },
     validate: {
       serverId: (value) =>
         value.trim().length === 0 ? 'Введите ID сервера' : null,
+      userName: combineValidators(minLength(6, 'Имя'), maxLength(50, 'Имя')),
     },
   });
 
@@ -59,6 +66,7 @@ export const CreateServerModal = ({
       createServer({
         accessToken,
         name: values.name,
+        serverType: Number(values.serverType),
       }),
     );
 
@@ -74,7 +82,7 @@ export const CreateServerModal = ({
       subscribeToServer({
         accessToken,
         serverId: values.serverId.trim(),
-        userName: user.name,
+        userName: values.userName,
       }),
     );
 
@@ -84,6 +92,10 @@ export const CreateServerModal = ({
       onClose();
     }
   };
+
+  useEffect(() => {
+    connectForm.setFieldValue('userName', user.name);
+  }, [user.name]);
 
   return (
     <Modal
@@ -156,6 +168,11 @@ export const CreateServerModal = ({
               label="ID сервера"
               placeholder="Введите ID сервера"
               {...connectForm.getInputProps('serverId')}
+            />
+            <TextInput
+              label="Имя на сервере"
+              placeholder="Введите имя на сервере"
+              {...connectForm.getInputProps('userName')}
             />
             <Group justify="flex-end" mt="md">
               <Button variant="outline" onClick={onClose}>

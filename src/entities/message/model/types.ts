@@ -28,5 +28,6 @@ export interface MessageItemProps {
     setIsEditing: (value: boolean) => void;
     setEditedContent: (value: React.SetStateAction<string>) => void;
     messageContent: string;
+    isOwnMessage: boolean;
   }>;
 }

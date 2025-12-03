@@ -11,6 +11,7 @@ interface MessageActionsProps {
   setIsEditing: (value: boolean) => void;
   setEditedContent: (value: React.SetStateAction<string>) => void;
   messageContent: string;
+  isOwnMessage: boolean;
 }
 
 export const MessageActions = ({
@@ -19,6 +20,7 @@ export const MessageActions = ({
   setIsEditing,
   setEditedContent,
   messageContent,
+  isOwnMessage,
 }: MessageActionsProps) => {
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentChannelId, currentNotificationChannelId } = useAppSelector(
@@ -63,9 +65,11 @@ export const MessageActions = ({
 
   return (
     <>
-      <Menu.Item leftSection={<Edit2 size={12} />} onClick={handleEdit}>
-        Редактировать
-      </Menu.Item>
+      {isOwnMessage && (
+        <Menu.Item leftSection={<Edit2 size={12} />} onClick={handleEdit}>
+          Редактировать
+        </Menu.Item>
+      )}
       <Menu.Item leftSection={<Trash2 size={12} />} onClick={handleDelete}>
         Удалить
       </Menu.Item>

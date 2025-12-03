@@ -13,10 +13,16 @@ import { setCurrentChannelId, setCurrentServerId } from '~/store/ServerStore';
 export const useNotification = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.userStore);
-  const {currentChannelId} = useAppSelector((state) => state.testServerStore)
+  const { currentChannelId, currentNotificationChannelId } = useAppSelector(
+    (state) => state.testServerStore,
+  );
 
   const handleOpenChannel = (serverId: string, channelId: string) => {
-    if(currentChannelId === channelId) return
+    const activeChannelId = currentNotificationChannelId ?? currentChannelId;
+
+    if (activeChannelId === channelId) {
+      return;
+    }
 
     dispatch(setCurrentServerId(serverId));
     dispatch(setCurrentChannelId(channelId));

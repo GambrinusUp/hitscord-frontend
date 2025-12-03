@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
+import { useSound } from 'use-sound';
 
 import { WebSocketContext } from './WebSocketContext';
 
@@ -13,9 +14,21 @@ import {
   updateChatIcon,
   updateChatVoteWs,
 } from '~/entities/chat';
-import { addSubChatMessage } from '~/entities/subChat';
+import {
+  addApplicationTo,
+  approveApplicationFrom,
+  removeApplicationFrom,
+  removeFriend,
+} from '~/entities/friendship';
+import {
+  addSubChatMessage,
+  deleteSubChatMessageWS,
+  editSubChatMessageWS,
+  updateSubChatVoteWs,
+} from '~/entities/subChat';
 import { Vote } from '~/entities/vote';
 import { formatMessage, formatNotification, formatUser } from '~/helpers';
+import { formatApplication } from '~/helpers/formatApplication';
 import { formatChatMessage, formatMessageFile } from '~/helpers/formatMessage';
 import {
   useAppDispatch,
@@ -23,6 +36,7 @@ import {
   useAppSelector,
   useDisconnect,
 } from '~/hooks';
+import sound from '~/shared/static/zapsplat_multimedia_notification_alert_ping_bright_chime_001_93276.mp3';
 import { setOpenHome } from '~/store/AppStore';
 import {
   addMessage,
@@ -48,20 +62,23 @@ import {
   addRoleToUserWs,
   removeRoleFromUserWs,
   updateVoteWs,
+  UserRoleOnServer,
 } from '~/store/ServerStore';
 
 export const WebSocketProvider = (props: React.PropsWithChildren) => {
+  const [play] = useSound(sound);
   const dispatch = useAppDispatch();
   const disconnect = useDisconnect();
   const { showMessage, showError } = useNotification();
   const { accessToken, user } = useAppSelector((state) => state.userStore);
-  const { currentServerId, currentVoiceChannelId } = useAppSelector(
+  const { currentServerId, currentVoiceChannelId, serverData } = useAppSelector(
     (state) => state.testServerStore,
   );
   const wsRef = useRef<WebSocket | null>(null);
 
   const serverIdRef = useRef<string | null>(null);
   const userIdRef = useRef<string | undefined>(undefined);
+  const userRolesIds = useRef<UserRoleOnServer[]>([]);
   const currentVoiceChannelIdRef = useRef(currentVoiceChannelId);
   const notificationLifeTimeRef = useRef(0);
 
@@ -80,6 +97,10 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
   useEffect(() => {
     notificationLifeTimeRef.current = user.notificationLifeTime;
   }, [user.notificationLifeTime]);
+
+  useEffect(() => {
+    userRolesIds.current = serverData.userRoles;
+  }, [serverData]);
 
   useEffect(() => {
     if (accessToken) {
@@ -102,9 +123,9 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         const data = JSON.parse(event.data);
 
         const currentServerIdValue = serverIdRef.current;
-        const currentUserIdValue = userIdRef.current;
         const currentVoiceChannelIdValue = currentVoiceChannelIdRef.current;
         const notificationLifeTimeValue = notificationLifeTimeRef.current;
+        const userRolesIdsValue = userRolesIds.current;
 
         console.log(data);
 
@@ -235,22 +256,14 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           }
         }
 
-        if (data.MessageType === 'Text channel settings edited') {
-          const { ServerId, RoleId } = data.Payload;
-
-          if (currentUserIdValue === RoleId) {
-            if (currentServerIdValue && currentServerIdValue === ServerId) {
-              dispatch(
-                getServerData({ accessToken, serverId: currentServerIdValue }),
-              );
-            }
-          }
-        }
-
         if (data.MessageType === 'Voice channel settings edited') {
           const { ServerId, RoleId } = data.Payload;
 
-          if (currentUserIdValue === RoleId) {
+          const containsRole = userRolesIdsValue.find(
+            (role) => role.roleId === RoleId,
+          );
+
+          if (containsRole) {
             if (currentServerIdValue && currentServerIdValue === ServerId) {
               dispatch(
                 getServerData({ accessToken, serverId: currentServerIdValue }),
@@ -270,9 +283,13 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         }
 
         if (data.MessageType === 'Updated role settings') {
-          const { ServerId, Id } = data.Payload.Role;
+          const { ServerId, RoleId } = data.Payload.Role;
 
-          if (currentUserIdValue === Id) {
+          const containsRole = userRolesIdsValue.find(
+            (role) => role.roleId === RoleId,
+          );
+
+          if (containsRole) {
             if (currentServerIdValue && currentServerIdValue === ServerId) {
               dispatch(
                 getServerData({ accessToken, serverId: currentServerIdValue }),
@@ -284,7 +301,11 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         if (data.MessageType === 'Voice channel settings edited') {
           const { ServerId, RoleId } = data.Payload;
 
-          if (currentUserIdValue === RoleId) {
+          const containsRole = userRolesIdsValue.find(
+            (role) => role.roleId === RoleId,
+          );
+
+          if (containsRole) {
             if (currentServerIdValue && currentServerIdValue === ServerId) {
               dispatch(
                 getServerData({ accessToken, serverId: currentServerIdValue }),
@@ -296,7 +317,27 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         if (data.MessageType === 'Text channel settings edited') {
           const { ServerId, RoleId } = data.Payload;
 
-          if (currentUserIdValue === RoleId) {
+          const containsRole = userRolesIdsValue.find(
+            (role) => role.roleId === RoleId,
+          );
+
+          if (containsRole) {
+            if (currentServerIdValue && currentServerIdValue === ServerId) {
+              dispatch(
+                getServerData({ accessToken, serverId: currentServerIdValue }),
+              );
+            }
+          }
+        }
+
+        if (data.MessageType === 'Notification channel settings edited') {
+          const { ServerId, RoleId } = data.Payload;
+
+          const containsRole = userRolesIdsValue.find(
+            (role) => role.roleId === RoleId,
+          );
+
+          if (containsRole) {
             if (currentServerIdValue && currentServerIdValue === ServerId) {
               dispatch(
                 getServerData({ accessToken, serverId: currentServerIdValue }),
@@ -389,9 +430,21 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           }
         }
 
-        if (data.MessageType === 'Deleted message') {
+        if (
+          data.MessageType === 'Deleted message in text channel' ||
+          data.MessageType === 'Deleted message in notification channel'
+        ) {
           dispatch(
             deleteMessageWs({
+              channelId: data.Payload.ChannelId,
+              messageId: data.Payload.MessageId,
+            }),
+          );
+        }
+
+        if (data.MessageType === 'Deleted message in sub channel') {
+          dispatch(
+            deleteSubChatMessageWS({
               channelId: data.Payload.ChannelId,
               messageId: data.Payload.MessageId,
             }),
@@ -407,7 +460,10 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           );
         }
 
-        if (data.MessageType === 'Updated message') {
+        if (
+          data.MessageType === 'Updated message in text channel' ||
+          data.MessageType === 'Updated message in notification channel'
+        ) {
           const formattedMessage = formatMessage(data.Payload);
           dispatch(editMessageWs(formattedMessage));
         }
@@ -417,13 +473,18 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           dispatch(editChatMessageWS(formattedMessage));
         }
 
+        if (data.MessageType === 'Updated message in sub channel') {
+          const formattedMessage = formatMessage(data.Payload);
+          dispatch(editSubChatMessageWS(formattedMessage));
+        }
+
         if (data.MessageType === 'User notified') {
-          if (showMessage) {
-            showMessage(
-              formatNotification(data.Payload),
-              notificationLifeTimeValue,
-            );
-          }
+          play();
+
+          showMessage(
+            formatNotification(data.Payload),
+            notificationLifeTimeValue,
+          );
         }
 
         if (data.MessageType === 'ErrorWithMessage') {
@@ -494,12 +555,23 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         }
 
         if (
-          data.MessageType === 'User voted in channel' ||
-          data.MessageType === 'User unvoted in channel'
+          data.MessageType === 'User voted in text channel' ||
+          data.MessageType === 'User unvoted in text channel' ||
+          data.MessageType === 'User voted in notification channel' ||
+          data.MessageType === 'User unvoted in notification channel'
         ) {
           const formattedMessage = formatMessage(data.Payload);
 
           dispatch(updateVoteWs(formattedMessage));
+        }
+
+        if (
+          data.MessageType === 'User voted in sub channel' ||
+          data.MessageType === 'User unvoted in sub channel'
+        ) {
+          const formattedMessage = formatMessage(data.Payload);
+
+          dispatch(updateSubChatVoteWs(formattedMessage));
         }
 
         if (
@@ -509,6 +581,26 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           const formattedMessage = formatChatMessage(data.Payload);
 
           dispatch(updateChatVoteWs(formattedMessage));
+        }
+
+        if (data.MessageType === 'New friendship application') {
+          const formattedApplication = formatApplication(data.Payload);
+
+          dispatch(addApplicationTo(formattedApplication));
+        }
+
+        if (data.MessageType === 'Friendship application declined') {
+          dispatch(removeApplicationFrom(data.Payload.Id));
+        }
+
+        if (data.MessageType === 'Friendship application approved') {
+          const formattedApplication = formatApplication(data.Payload);
+
+          dispatch(approveApplicationFrom(formattedApplication));
+        }
+
+        if (data.MessageType === 'Friendship deleted') {
+          dispatch(removeFriend(data.Payload.UserId));
         }
       };
 

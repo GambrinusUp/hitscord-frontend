@@ -1,5 +1,6 @@
 import { MessageFile } from '~/entities/chat';
 import { FileResponse } from '~/entities/files';
+import { ServerTypeEnum } from '~/entities/servers';
 import { LoadingState } from '~/shared';
 import { RoleType } from '~/store/RolesStore';
 
@@ -175,6 +176,7 @@ export interface NotificationChannel {
 export interface ServerData {
   serverId: string;
   serverName: string;
+  serverType: ServerTypeEnum;
   icon: FileResponse | null;
   isClosed: boolean;
   roles: Role[];

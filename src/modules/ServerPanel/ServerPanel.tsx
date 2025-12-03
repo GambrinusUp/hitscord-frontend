@@ -5,11 +5,11 @@ import { useNavigate } from 'react-router-dom';
 
 import { ServerItem } from './components/ServerItem';
 
+import { CreateServer } from '~/features/server';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { setOpenHome } from '~/store/AppStore';
 import { getUserServers } from '~/store/ServerStore';
 import { logoutUser } from '~/store/UserStore';
-import { CreateServer } from '~/features/server';
 
 export const ServerPanel = () => {
   const dispatch = useAppDispatch();

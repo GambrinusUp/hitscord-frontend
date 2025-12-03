@@ -1,4 +1,26 @@
-import { UserOnServer } from '~/store/ServerStore/ServerStore.types';
+import { FileResponse } from '~/entities/files';
+import {
+  UserOnServer,
+  UserRoleOnServer,
+} from '~/store/ServerStore/ServerStore.types';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const formatUserRole = (rawRole: any): UserRoleOnServer => ({
+  roleId: rawRole.RoleId,
+  roleName: rawRole.RoleName,
+  roleType: rawRole.RoleType,
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const formatIcon = (rawIcon: any): FileResponse => {
+  return {
+    fileId: rawIcon.FileId,
+    fileName: rawIcon.FileName,
+    fileType: rawIcon.FileType,
+    fileSize: rawIcon.FileSize,
+    base64File: rawIcon.Base64File,
+  };
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatUser = (rawMessage: any): UserOnServer => ({
@@ -6,10 +28,10 @@ export const formatUser = (rawMessage: any): UserOnServer => ({
   userId: rawMessage.UserId,
   userName: rawMessage.UserName,
   userTag: rawMessage.UserTag,
-  icon: rawMessage.Icon,
+  icon: rawMessage.Icon ? formatIcon(rawMessage.Icon) : null,
   notifiable: rawMessage.Notifiable,
   friendshipApplication: rawMessage.FriendshipApplication,
   nonFriendMessage: rawMessage.NonFriendMessage,
-  roles: rawMessage.Roles,
+  roles: rawMessage.Roles ? rawMessage.Roles.map(formatUserRole) : [],
   isFriend: rawMessage.IsFriend,
 });

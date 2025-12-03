@@ -1,4 +1,10 @@
-export type { Chat, ChatInfo, ChatMessage, MessageFile } from './model/types';
+export type {
+  Chat,
+  ChatInfo,
+  ChatMessage,
+  MessageFile,
+  UserInChat,
+} from './model/types';
 
 export {
   getChats,

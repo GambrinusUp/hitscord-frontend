@@ -15,16 +15,17 @@ import { useUserServer } from './lib/useUserServer';
 import { userItemStyles } from './UserItem.style';
 
 import { UserMiniProfile } from '~/components/UserMiniProfile';
+import { UserInChat } from '~/entities/chat';
 import { useIcon, useRoleColor } from '~/shared/lib/hooks';
 
 interface UserItemProps {
-  user: UserOnServer;
+  user: UserOnServer | UserInChat;
 }
 
 export const UserItem = ({ user }: UserItemProps) => {
   const { getRoleColor } = useRoleColor();
   const { getUserIcon } = useUserServer();
-  const { userName, roles, userId } = user;
+  const { userName, userId } = user;
 
   const userIcon = useMemo(() => getUserIcon(userId), [getUserIcon, userId]);
 
@@ -32,7 +33,7 @@ export const UserItem = ({ user }: UserItemProps) => {
 
   const [opened, setOpened] = useState(false);
 
-  const role = roles[0];
+  const role = 'roles' in user ? user.roles[0] : null;
 
   return (
     <Popover opened={opened} onChange={setOpened} position="left" radius="md">
@@ -50,15 +51,17 @@ export const UserItem = ({ user }: UserItemProps) => {
                 {userName}
               </Text>
             </Tooltip>
-            <Tooltip label={role.roleName} position="top" withArrow>
-              <Badge
-                variant="light"
-                color={getRoleColor(role.roleId)}
-                style={userItemStyles.badge()}
-              >
-                {role.roleName}
-              </Badge>
-            </Tooltip>
+            {role && (
+              <Tooltip label={role.roleName} position="top" withArrow>
+                <Badge
+                  variant="light"
+                  color={getRoleColor(role.roleId)}
+                  style={userItemStyles.badge()}
+                >
+                  {role.roleName}
+                </Badge>
+              </Tooltip>
+            )}
           </Stack>
         </Group>
       </Popover.Target>

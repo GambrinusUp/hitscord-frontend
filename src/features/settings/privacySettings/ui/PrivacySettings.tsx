@@ -29,7 +29,7 @@ export const PrivacySettings = ({ isEdit, form }: PrivacySettingsProps) => {
       <Text c="dimmed">
         Управляйте тем, как другие пользователи могут взаимодействовать с вами
       </Text>
-      <ScrollArea.Autosize w="100%" h="100%s">
+      <ScrollArea.Autosize w="100%" h="100%">
         <Group justify="space-between" mt="lg">
           <Stack gap={0}>
             <Text>Уведомления</Text>

@@ -58,13 +58,13 @@ export const getServerData = createAsyncThunk<
 
 export const createServer = createAsyncThunk<
   void,
-  { accessToken: string; name: string },
+  { accessToken: string; name: string; serverType: number },
   { rejectValue: string }
 >(
   'testServerSlice/createServer',
-  async ({ accessToken, name }, { rejectWithValue }) => {
+  async ({ accessToken, name, serverType }, { rejectWithValue }) => {
     try {
-      await ServerAPI.createServer(accessToken, name);
+      await ServerAPI.createServer(accessToken, name, serverType);
     } catch (e) {
       return rejectWithValue(
         e instanceof Error ? e.message : 'Неизвестная ошибка',
@@ -686,6 +686,53 @@ export const changeServerIcon = createAsyncThunk<
       }
 
       return rejectWithValue(ERROR_MESSAGES.DEFAULT);
+    }
+  },
+);
+
+export const changeServerIsClosed = createAsyncThunk<
+  void,
+  {
+    accessToken: string;
+    serverId: string;
+    isClosed: boolean;
+    isApprove?: boolean;
+  },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeServerIsClosed',
+  async (
+    { accessToken, serverId, isClosed, isApprove },
+    { rejectWithValue },
+  ) => {
+    try {
+      await ServerAPI.changeServerIsClosed(
+        accessToken,
+        serverId,
+        isClosed,
+        isApprove,
+      );
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const changeNotifiable = createAsyncThunk<
+  void,
+  { accessToken: string; serverId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeNotifiable',
+  async ({ accessToken, serverId }, { rejectWithValue }) => {
+    try {
+      await ServerAPI.changeNotifiable(accessToken, serverId);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
     }
   },
 );

@@ -1,55 +1,56 @@
 import {
-  Avatar,
-  Badge,
   Button,
-  Card,
-  Flex,
-  Grid,
   Group,
   Modal,
   NavLink,
-  Pagination,
   ScrollArea,
   Select,
   Stack,
   Text,
   TextInput,
 } from '@mantine/core';
-import { Calendar, ImageUp, Plus, UserCheck, UserMinus } from 'lucide-react';
+import {
+  FileUser,
+  ImageUp,
+  LockOpen,
+  Plus,
+  UserCheck,
+  UserMinus,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { ServerSettingsModalProps } from './ServerSettingsModal.types';
 import { UserRoleItem } from './UserRoleItem';
 
-import { formatDateTime } from '~/helpers';
+import {
+  ChangeServerIsClosed,
+  ServerApplications,
+  UnbanUser,
+} from '~/features/server';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { IconChange } from '~/modules/SideBar/components/IconChange';
 import { LoadingState } from '~/shared';
 import { getRoles } from '~/store/RolesStore';
-import {
-  changeServerName,
-  deleteUserFromServer,
-  getBannedUsers,
-  unbanUser,
-} from '~/store/ServerStore';
+import { changeServerName, deleteUserFromServer } from '~/store/ServerStore';
 
 export const ServerSettingsModal = ({
   opened,
   onClose,
 }: ServerSettingsModalProps) => {
   const dispatch = useAppDispatch();
-  const {
-    serverData,
-    currentServerId,
-    error,
-    bannedUsers,
-    pageBannedUsers,
-    totalPagesBannedUsers,
-  } = useAppSelector((state) => state.testServerStore);
+  const { serverData, currentServerId, error } = useAppSelector(
+    (state) => state.testServerStore,
+  );
   const { rolesLoading } = useAppSelector((state) => state.rolesStore);
   const { accessToken, user } = useAppSelector((state) => state.userStore);
   const [activeSetting, setActiveSetting] = useState<
-    'name' | 'roles' | 'deleteUser' | 'unbanUser' | 'changeIcon'
+    | 'name'
+    | 'roles'
+    | 'deleteUser'
+    | 'unbanUser'
+    | 'changeIcon'
+    | 'changeIsClosed'
+    | 'serverApplications'
   >('roles');
   //const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
   //const [assignRoleId, setAssignRoleId] = useState<string | null>('');
@@ -63,6 +64,7 @@ export const ServerSettingsModal = ({
   const canChangeRole = serverData.permissions.canChangeRole;
   const canCreateRoles = serverData.permissions.canCreateRoles;
   const users = serverData.users;
+  const serverIsClosed = serverData.isClosed;
 
   /*const assignRole = async () => {
     if (!assignRoleUserId || !assignRoleId) return;
@@ -131,52 +133,6 @@ export const ServerSettingsModal = ({
     }
   };
 
-  const handleUnbanUser = async (userId: string) => {
-    if (currentServerId) {
-      setLoading(true);
-
-      const result = await dispatch(
-        unbanUser({
-          accessToken,
-          serverId: currentServerId,
-          userId: userId,
-        }),
-      );
-
-      if (result.meta.requestStatus === 'fulfilled') {
-        setLoading(false);
-        showSuccess('Пользователь успешно разблокирован');
-        onClose();
-      }
-    }
-  };
-
-  const handleChangePage = () => {
-    if (pageBannedUsers < totalPagesBannedUsers && currentServerId) {
-      dispatch(
-        getBannedUsers({
-          accessToken,
-          serverId: currentServerId,
-          page: pageBannedUsers + 1,
-          size: 5,
-        }),
-      );
-    }
-  };
-
-  useEffect(() => {
-    if (canDeleteUsers && accessToken && currentServerId && opened) {
-      dispatch(
-        getBannedUsers({
-          accessToken,
-          serverId: currentServerId,
-          page: 1,
-          size: 5,
-        }),
-      );
-    }
-  }, [canDeleteUsers, currentServerId, opened]);
-
   useEffect(() => {
     if (
       canCreateRoles &&
@@ -242,6 +198,22 @@ export const ServerSettingsModal = ({
               leftSection={<ImageUp size={16} />}
               active={activeSetting === 'changeIcon'}
               onClick={() => setActiveSetting('changeIcon')}
+            />
+          )}
+          {isCreator && (
+            <NavLink
+              label="Изменить закрытость сервера"
+              leftSection={<LockOpen size={16} />}
+              active={activeSetting === 'changeIsClosed'}
+              onClick={() => setActiveSetting('changeIsClosed')}
+            />
+          )}
+          {serverIsClosed && (
+            <NavLink
+              label="Заявки на вступление"
+              leftSection={<FileUser size={16} />}
+              active={activeSetting === 'serverApplications'}
+              onClick={() => setActiveSetting('serverApplications')}
             />
           )}
         </Stack>
@@ -311,75 +283,15 @@ export const ServerSettingsModal = ({
             </Stack>
           )}
           {activeSetting === 'unbanUser' && canDeleteUsers && (
-            <Stack gap="md">
-              <Text size="lg" w={500}>
-                Разблокировать пользователя
-              </Text>
-              {bannedUsers.length < 1 && (
-                <Text>Нет заблокированных пользователей</Text>
-              )}
-              {bannedUsers &&
-                bannedUsers.map((user) => (
-                  <Card key={user.userId} withBorder>
-                    <Group gap="md">
-                      <Grid>
-                        <Grid.Col span={2}>
-                          <Group>
-                            <Avatar radius="xl" size="lg" color="blue">
-                              {user.userName[0]}
-                            </Avatar>
-                            <Stack gap={0}>
-                              <Text>{user.userName}</Text>
-                              <Text c="dimmed">{user.userTag}</Text>
-                            </Stack>
-                          </Group>
-                        </Grid.Col>
-                        <Grid.Col span={8}>
-                          {user.banReason && (
-                            <Badge
-                              style={{
-                                wordWrap: 'break-word',
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                              }}
-                            >
-                              {user.banReason}
-                            </Badge>
-                          )}
-                        </Grid.Col>
-                        <Grid.Col span={1}>
-                          <Group>
-                            <Calendar />
-                            <Text>{formatDateTime(user.banTime)}</Text>
-                          </Group>
-                        </Grid.Col>
-                        <Grid.Col span={1}>
-                          <Button
-                            variant="light"
-                            onClick={() => handleUnbanUser(user.userId)}
-                            loading={loading}
-                            disabled={loading}
-                          >
-                            Разблокировать
-                          </Button>
-                        </Grid.Col>
-                      </Grid>
-                    </Group>
-                  </Card>
-                ))}
-              <Flex w="100%" justify="center">
-                {bannedUsers.length > 0 && (
-                  <Pagination
-                    total={totalPagesBannedUsers}
-                    value={pageBannedUsers}
-                    onChange={handleChangePage}
-                  />
-                )}
-              </Flex>
-            </Stack>
+            <UnbanUser
+              opened={opened}
+              loading={loading}
+              setLoading={setLoading}
+            />
           )}
-
           {activeSetting === 'changeIcon' && <IconChange />}
+          {activeSetting === 'changeIsClosed' && <ChangeServerIsClosed />}
+          {activeSetting === 'serverApplications' && <ServerApplications />}
         </ScrollArea>
       </Group>
     </Modal>

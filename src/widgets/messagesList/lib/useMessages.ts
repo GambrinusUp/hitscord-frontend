@@ -18,7 +18,7 @@ import {
 import { useWebSocket } from '~/shared/lib/websocket';
 import { getMoreMessages, readMessageWs } from '~/store/ServerStore';
 
-/* Переписать */
+/* Добавить поддержку currentNotificationChannelId и поправить lastReadedMessageId у всех типов  */
 export const useMessages = (
   scrollRef: React.RefObject<HTMLDivElement>,
   type: MessageType,
@@ -27,15 +27,13 @@ export const useMessages = (
   const { readMessage } = useWebSocket();
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { activeChat } = useAppSelector((state) => state.chatsStore);
-  const { currentChannelId, currentServerId } = useAppSelector(
-    (state) => state.testServerStore,
-  );
-  const textChannels = useAppSelector(
+  const { currentServerId } = useAppSelector((state) => state.testServerStore);
+  /*const textChannels = useAppSelector(
     (state) => state.testServerStore.serverData.channels.textChannels,
   );
   const lastReadedMessageId =
     textChannels.find((channel) => channel.channelId === currentChannelId)
-      ?.lastReadedMessageId || 0;
+      ?.lastReadedMessageId || 0;*/
 
   const chatData = useChatData();
   const channelData = useChannelData();
@@ -63,6 +61,7 @@ export const useMessages = (
     remainingBottomMessagesCount,
     remainingTopMessagesCount,
     entityId,
+    lastReadedMessageId,
   } = getData();
 
   const firstMessageElementRef = useRef<HTMLDivElement | null>(null);
@@ -228,11 +227,13 @@ export const useMessages = (
             );
 
             const isChannel = type === MessageType.CHANNEL;
-            const targetId = isChannel ? currentChannelId : activeChat;
+            const targetId = isChannel ? entityId : activeChat;
 
             if (!targetId) return;
 
             if (messageId > lastReadedMessageId) {
+              console.log('read message', messageId);
+
               readMessage({
                 Token: accessToken,
                 isChannel: isChannel,

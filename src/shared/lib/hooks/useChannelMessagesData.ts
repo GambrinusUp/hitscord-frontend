@@ -23,11 +23,42 @@ export const useChannelData = () => {
   const allMessagesCount = useAppSelector(
     (state) => state.testServerStore.allMessagesCount,
   );
-  const entityId = useAppSelector(
+  /*const entityId = useAppSelector(
     (state) =>
       state.testServerStore.currentChannelId ??
       state.testServerStore.currentNotificationChannelId,
+  );*/
+  const textChannels = useAppSelector(
+    (state) => state.testServerStore.serverData.channels.textChannels,
   );
+  const currentChannelId = useAppSelector(
+    (state) => state.testServerStore.currentChannelId,
+  );
+  const currentNotificationChannelId = useAppSelector(
+    (state) => state.testServerStore.currentNotificationChannelId,
+  );
+
+  const entityId = currentChannelId ?? currentNotificationChannelId;
+
+  const getLastReadedMessageId = () => {
+    if (currentChannelId) {
+      const textChannel = textChannels.find(
+        (channel) => channel.channelId === currentChannelId,
+      );
+
+      return textChannel?.lastReadedMessageId || 0;
+    }
+
+    if (currentNotificationChannelId) {
+      const notificationChannel = textChannels.find(
+        (channel) => channel.channelId === currentNotificationChannelId,
+      );
+
+      return notificationChannel?.lastReadedMessageId || 0;
+    }
+
+    return 0;
+  };
 
   return {
     messages,
@@ -39,5 +70,6 @@ export const useChannelData = () => {
     startMessageId,
     allMessagesCount,
     entityId,
+    lastReadedMessageId: getLastReadedMessageId(),
   };
 };

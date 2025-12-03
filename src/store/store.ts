@@ -7,6 +7,8 @@ import { ServerReducer } from './ServerStore';
 import { chatsReducer } from '~/entities/chat';
 import { filesReducer } from '~/entities/files';
 import { friendshipReducer } from '~/entities/friendship';
+import { presetsReducer } from '~/entities/presets';
+import { serverApplicationsReducer } from '~/entities/serverApplications';
 import { subChatReducer } from '~/entities/subChat';
 import { userReducer } from '~/entities/user';
 
@@ -20,6 +22,8 @@ const store = configureStore({
     filesStore: filesReducer,
     friendshipStore: friendshipReducer,
     subChatStore: subChatReducer,
+    presetsStore: presetsReducer,
+    serverApplicationsStore: serverApplicationsReducer,
   },
 });
 

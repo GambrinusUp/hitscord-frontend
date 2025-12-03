@@ -9,6 +9,8 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
+  Bell,
+  BookUser,
   ChevronDown,
   Copy,
   DoorOpen,
@@ -27,6 +29,9 @@ import { ServerSettingsModal } from './components/ServerSettingsModal';
 import { UnsubscribeModal } from './components/UnsubscribeModal';
 import { SideBarProps } from './SideBarProps.types';
 
+import { ServerTypeEnum } from '~/entities/servers';
+import { ManagePresetsModal } from '~/features/presets';
+import { ChangeNotificationSetting } from '~/features/server';
 import { useAppDispatch, useAppSelector, useDisconnect } from '~/hooks';
 import { TextChannels } from '~/modules/TextChannels';
 import { VoiceChannels } from '~/modules/VoiceChannels';
@@ -63,6 +68,17 @@ export const SideBar = ({ onClose }: SideBarProps) => {
     rolesPermissionsModalOpened,
     { open: openRolesPermissionsModal, close: closeRolesPermissionsModal },
   ] = useDisclosure(false);
+  const [
+    managePresetsModalOpened,
+    { open: openManagePresetsModal, close: closeManagePresetsModal },
+  ] = useDisclosure(false);
+  const [
+    changeNotificationSettingOpened,
+    {
+      open: openChangeNotificationSettingModal,
+      close: closeChangeNotificationSettingModal,
+    },
+  ] = useDisclosure(false);
   const { serverData, isLoading, currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
@@ -71,6 +87,7 @@ export const SideBar = ({ onClose }: SideBarProps) => {
   const canDeleteUsers = serverData.permissions.canDeleteUsers;
   const canCreateRole = serverData.permissions.canCreateRoles;
   const isCreator = serverData.isCreator;
+  const isTeacherServer = serverData.serverType === ServerTypeEnum.Teacher;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -121,6 +138,14 @@ export const SideBar = ({ onClose }: SideBarProps) => {
                 Настройки сервера
               </Menu.Item>
             )}
+            {isCreator && isTeacherServer && (
+              <Menu.Item
+                onClick={() => openManagePresetsModal()}
+                leftSection={<BookUser size={16} />}
+              >
+                Пресеты ролей
+              </Menu.Item>
+            )}
             {(canChangeRole || canCreateRole) && (
               <Menu.Item
                 onClick={() => openRolesModal()}
@@ -140,6 +165,12 @@ export const SideBar = ({ onClose }: SideBarProps) => {
               leftSection={<UserPen size={16} />}
             >
               Изменить имя на сервере
+            </Menu.Item>
+            <Menu.Item
+              onClick={openChangeNotificationSettingModal}
+              leftSection={<Bell size={16} />}
+            >
+              Настройка уведомлений
             </Menu.Item>
             <Menu.Item
               onClick={() => copyToClipboard(serverData.serverId)}
@@ -186,6 +217,14 @@ export const SideBar = ({ onClose }: SideBarProps) => {
       <RolesPermissionsModal
         opened={rolesPermissionsModalOpened}
         onClose={closeRolesPermissionsModal}
+      />
+      <ManagePresetsModal
+        opened={managePresetsModalOpened}
+        onClose={closeManagePresetsModal}
+      />
+      <ChangeNotificationSetting
+        opened={changeNotificationSettingOpened}
+        onClose={closeChangeNotificationSettingModal}
       />
     </>
   );

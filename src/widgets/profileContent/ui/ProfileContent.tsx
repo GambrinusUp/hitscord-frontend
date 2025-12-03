@@ -7,7 +7,7 @@ import { MessageType } from '~/entities/message';
 import { useAppSelector } from '~/hooks';
 
 interface ProfileContentProps {
-  activeLink: 'friends' | 'settings' | 'chats';
+  activeLink: 'friends' | 'settings' | 'chats' | 'serverApplications';
   ChatSection: React.ComponentType<{
     MessagesList: React.ComponentType<{
       scrollRef: React.RefObject<HTMLDivElement>;
@@ -27,6 +27,7 @@ interface ProfileContentProps {
   ChatsList: React.ComponentType<{ onCreateChatClick: () => void }>;
   CreateChat: React.ComponentType<{ opened: boolean; onClose: () => void }>;
   AddFriend: React.ComponentType;
+  UserApplications: React.ComponentType;
 }
 
 export const ProfileContent = ({
@@ -40,6 +41,7 @@ export const ProfileContent = ({
   ChatsList,
   CreateChat,
   AddFriend,
+  UserApplications,
 }: ProfileContentProps) => {
   const [opened, { open, close }] = useDisclosure(false);
   const { activeChat } = useAppSelector((state) => state.chatsStore);
@@ -102,6 +104,7 @@ export const ProfileContent = ({
             </Tabs>
           </Stack>
         )}
+        {activeLink === 'serverApplications' && <UserApplications />}
       </Flex>
     </Box>
   );

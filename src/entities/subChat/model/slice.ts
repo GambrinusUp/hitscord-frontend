@@ -38,17 +38,17 @@ export const SubChatSlice = createSlice({
         }
       }
     },
-    deleteChatMessageWS: (
+    deleteSubChatMessageWS: (
       state,
-      action: PayloadAction<{ chatId: string; messageId: number }>,
+      action: PayloadAction<{ channelId: string; messageId: number }>,
     ) => {
-      if (state.currentSubChatId === action.payload.chatId) {
+      if (state.currentSubChatId === action.payload.channelId) {
         state.messages = state.messages.filter(
           (message) => message.id !== action.payload.messageId,
         );
       }
     },
-    editChatMessageWS: (state, action: PayloadAction<ChannelMessage>) => {
+    editSubChatMessageWS: (state, action: PayloadAction<ChannelMessage>) => {
       if (state.currentSubChatId === action.payload.channelId) {
         const index = state.messages.findIndex(
           (message) => message.id === action.payload.id,
@@ -57,6 +57,15 @@ export const SubChatSlice = createSlice({
         if (index !== -1) {
           state.messages[index] = action.payload;
         }
+      }
+    },
+    updateSubChatVoteWs: (state, action: PayloadAction<ChannelMessage>) => {
+      const index = state.messages.findIndex(
+        (message) => message.id === action.payload.id,
+      );
+
+      if (index !== -1) {
+        state.messages[index] = action.payload;
       }
     },
   },
@@ -151,6 +160,12 @@ export const SubChatSlice = createSlice({
   },
 });
 
-export const { addSubChatMessage, setCurrentSubChatId } = SubChatSlice.actions;
+export const {
+  addSubChatMessage,
+  setCurrentSubChatId,
+  editSubChatMessageWS,
+  deleteSubChatMessageWS,
+  updateSubChatVoteWs,
+} = SubChatSlice.actions;
 
 export const subChatReducer = SubChatSlice.reducer;

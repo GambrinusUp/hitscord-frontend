@@ -17,13 +17,14 @@ import { Profile } from '~/widgets/profile';
 import { ProfileContent } from '~/widgets/profileContent';
 import { ProfileMenu } from '~/widgets/profileMenu';
 import { Settings } from '~/widgets/settings';
+import { UserApplications } from '~/widgets/userApplications';
 import { ChatUsers } from '~/widgets/сhatUsers';
 
 export const ProfilePage = () => {
   const dispatch = useAppDispatch();
   const { activeChat } = useAppSelector((state) => state.chatsStore);
   const [activeLink, setActiveLink] = useState<
-    'friends' | 'settings' | 'chats'
+    'friends' | 'settings' | 'chats' | 'serverApplications'
   >('chats');
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export const ProfilePage = () => {
         ChatsList={ChatsList}
         CreateChat={CreateChat}
         AddFriend={AddFriend}
+        UserApplications={UserApplications}
       />
       {activeChat && <ChatUsers />}
       {!activeChat && activeLink !== 'settings' && <Profile />}

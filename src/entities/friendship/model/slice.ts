@@ -1,4 +1,4 @@
-import { createSlice, isAnyOf } from '@reduxjs/toolkit';
+import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
 
 import {
   approveApplication,
@@ -11,7 +11,7 @@ import {
   getFriendshipList,
 } from './actions';
 import { FRIENDSHIP_SLICE_NAME } from './const';
-import { FriendshipState } from './types';
+import { Application, FriendshipState } from './types';
 
 import { LoadingState } from '~/shared';
 
@@ -26,7 +26,30 @@ const initialState: FriendshipState = {
 export const FriendshipSlice = createSlice({
   name: FRIENDSHIP_SLICE_NAME,
   initialState,
-  reducers: {},
+  reducers: {
+    addApplicationTo: (state, action: PayloadAction<Application>) => {
+      state.applicationTo.push(action.payload);
+    },
+    removeApplicationFrom: (state, action: PayloadAction<string>) => {
+      state.applicationFrom = state.applicationFrom.filter(
+        (application) => application.id !== action.payload,
+      );
+    },
+    approveApplicationFrom: (state, action: PayloadAction<Application>) => {
+      const { user } = action.payload;
+
+      state.applicationFrom = state.applicationFrom.filter(
+        (application) => application.id !== action.payload.id,
+      );
+
+      state.friendshipList.push(user);
+    },
+    removeFriend: (state, action: PayloadAction<string>) => {
+      state.friendshipList = state.friendshipList.filter(
+        (friend) => friend.userId !== action.payload,
+      );
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getApplicationsFrom.fulfilled, (state, action) => {
@@ -102,5 +125,12 @@ export const FriendshipSlice = createSlice({
       );
   },
 });
+
+export const {
+  addApplicationTo,
+  removeApplicationFrom,
+  approveApplicationFrom,
+  removeFriend,
+} = FriendshipSlice.actions;
 
 export const friendshipReducer = FriendshipSlice.reducer;

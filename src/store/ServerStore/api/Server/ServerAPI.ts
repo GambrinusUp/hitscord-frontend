@@ -61,7 +61,11 @@ export const getServerData = async (
   }
 };
 
-export const createServer = async (accessToken: string, name: string) => {
+export const createServer = async (
+  accessToken: string,
+  name: string,
+  serverType: number,
+) => {
   try {
     const response = await fetch(`${API_URL}/api/server/create`, {
       method: 'POST',
@@ -70,7 +74,8 @@ export const createServer = async (accessToken: string, name: string) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: name,
+        name,
+        serverType,
       }),
     });
 
@@ -439,4 +444,66 @@ export const changeServerIcon = async (
   });
 
   return data;
+};
+
+export const changeServerIsClosed = async (
+  accessToken: string,
+  serverId: string,
+  isClosed: boolean,
+  isApprove?: boolean,
+): Promise<void> => {
+  try {
+    const formData = new FormData();
+    formData.append('ServerId', serverId);
+    formData.append('IsClosed', isClosed.toString());
+
+    if (isApprove !== undefined) {
+      formData.append('IsApprove', isApprove.toString());
+    }
+
+    const response = await fetch(`${API_URL}/api/server/isClosed`, {
+      method: 'PUT',
+      body: formData,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change server is closed:', error);
+    throw error;
+  }
+};
+
+export const changeNotifiable = async (
+  accessToken: string,
+  serverId: string,
+) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/api/server/settings/nonnotifiable`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: serverId,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change notifiable:', error);
+    throw error;
+  }
 };

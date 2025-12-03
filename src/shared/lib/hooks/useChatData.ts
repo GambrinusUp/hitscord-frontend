@@ -24,6 +24,9 @@ export const useChatData = () => {
     (state) => state.chatsStore.allMessagesCount,
   );
   const entityId = useAppSelector((state) => state.chatsStore.activeChat);
+  const lastReadedMessageId = useAppSelector(
+    (state) => state.chatsStore.chat.lastReadedMessageId,
+  );
 
   return {
     messages,
@@ -35,5 +38,6 @@ export const useChatData = () => {
     startMessageId,
     allMessagesCount,
     entityId,
+    lastReadedMessageId,
   };
 };

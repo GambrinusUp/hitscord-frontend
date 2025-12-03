@@ -12,7 +12,7 @@ import {
 import { EllipsisVertical, Reply } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { MessageFiles } from './MessageFiles';
+import { MessageFiles } from './NewMessageFiles';
 import { messageItemStyles } from './MessageItem.style';
 
 import { formatMessage } from '~/entities/message/lib/formatMessage';
@@ -20,8 +20,9 @@ import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
 import { MessageItemProps } from '~/entities/message/model/types';
 import { setCurrentSubChatId } from '~/entities/subChat';
 import { formatDateTime } from '~/helpers';
-import { useAppDispatch } from '~/hooks';
+import { useAppDispatch, useAppSelector } from '~/hooks';
 import { useIcon } from '~/shared/lib/hooks';
+import { useChannelPermissions } from '~/widgets/messagesList/lib/useChannelPermissions';
 
 export const MessageItem = ({
   type,
@@ -39,10 +40,19 @@ export const MessageItem = ({
   nestedChannel,
 }: MessageItemProps) => {
   const dispatch = useAppDispatch();
+  const { serverData, currentChannelId, currentNotificationChannelId } =
+    useAppSelector((state) => state.testServerStore);
+  const activeChannelId = currentChannelId ?? currentNotificationChannelId;
+  const canDeleteOthersMessages =
+    serverData.permissions.canDeleteOthersMessages;
+  const canEditMessage =
+    isOwnMessage || (activeChannelId && canDeleteOthersMessages);
+
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
   const { getUsername, getUserIcon } = useMessageAuthor(type);
+  const { canWrite } = useChannelPermissions();
 
   const userName = useMemo(
     () => getUsername(authorId),
@@ -76,29 +86,34 @@ export const MessageItem = ({
           transition: 'opacity 0.3s ease',
         }}
       >
-        <ActionIcon
-          variant="subtle"
-          aria-label="reply"
-          onClick={onReplyMessage}
-        >
-          <Reply size={20} />
-        </ActionIcon>
-        <Menu position="bottom-start" shadow="md" width={150} offset={-30}>
-          <Menu.Target>
-            <ActionIcon variant="subtle" aria-label="edit" onClick={() => {}}>
-              <EllipsisVertical size={20} />
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            {MessageActions && (
-              <MessageActions
-                setIsEditing={setIsEditing}
-                setEditedContent={setEditedContent}
-                messageContent={content}
-              />
-            )}
-          </Menu.Dropdown>
-        </Menu>
+        {canWrite && (
+          <ActionIcon
+            variant="subtle"
+            aria-label="reply"
+            onClick={onReplyMessage}
+          >
+            <Reply size={20} />
+          </ActionIcon>
+        )}
+        {canEditMessage && (
+          <Menu position="bottom-start" shadow="md" width={150} offset={-30}>
+            <Menu.Target>
+              <ActionIcon variant="subtle" aria-label="edit" onClick={() => {}}>
+                <EllipsisVertical size={20} />
+              </ActionIcon>
+            </Menu.Target>
+            <Menu.Dropdown>
+              {MessageActions && (
+                <MessageActions
+                  setIsEditing={setIsEditing}
+                  setEditedContent={setEditedContent}
+                  messageContent={content}
+                  isOwnMessage={isOwnMessage}
+                />
+              )}
+            </Menu.Dropdown>
+          </Menu>
+        )}
       </Group>
       <Group
         flex={1}
@@ -113,7 +128,6 @@ export const MessageItem = ({
           gap="xs"
           align={isOwnMessage ? 'flex-end' : 'flex-start'}
           style={{ flex: 1 }}
-          //w="100%"
         >
           <Group
             gap="xs"

@@ -1,5 +1,5 @@
 import { ActionIcon, Group, Textarea } from '@mantine/core';
-import { MessageSquarePlus, Paperclip, Send } from 'lucide-react';
+import { Paperclip, Send } from 'lucide-react';
 import { useState } from 'react';
 
 import { ChatMessage } from '~/entities/chat';
@@ -52,23 +52,6 @@ export const SendMessageForm = ({
     }
   };
 
-  const handleCreateSubchat = () => {
-    if (message.trim() && chat.chatId) {
-      sendChatMessage({
-        Token: accessToken,
-        ChannelId: chat.chatId,
-        Classic: {
-          Text: message.trim(),
-          Files: uploadedFiles.map((file) => file.fileId),
-          NestedChannel: true,
-        },
-        MessageType: ServerMessageType.Classic,
-      });
-      setMessage('');
-      dispatch(clearFiles());
-    }
-  };
-
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
@@ -98,9 +81,6 @@ export const SendMessageForm = ({
         <input type="file" hidden multiple onChange={handleFileChange} />
       </ActionIcon>
       <CreatePoll type={MessageType.CHAT} />
-      <ActionIcon size="xl" variant="transparent" onClick={handleCreateSubchat}>
-        <MessageSquarePlus size={20} />
-      </ActionIcon>
       <Textarea
         w="100%"
         placeholder="Написать..."

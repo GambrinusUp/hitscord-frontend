@@ -15,13 +15,14 @@ import { Check, Copy, UserPlus } from 'lucide-react';
 
 import { stylesUserMiniProfile } from './UserMiniProfile.style';
 
+import { UserInChat } from '~/entities/chat';
 import { createApplication } from '~/entities/friendship';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { useRoleColor } from '~/shared/lib/hooks';
 import { UserOnServer } from '~/store/ServerStore';
 
 interface UserMiniProfileProps {
-  userOnServer: UserOnServer;
+  userOnServer: UserOnServer | UserInChat;
   userIcon: string | null;
 }
 
@@ -37,7 +38,7 @@ export const UserMiniProfile = ({
 
   const { userName, userTag, userId, notifiable, nonFriendMessage } =
     userOnServer;
-  const userRoles = userOnServer.roles;
+  const userRoles = 'roles' in userOnServer ? userOnServer.roles : [];
 
   const application = applicationFrom.find((app) => app.user.userId === userId);
 

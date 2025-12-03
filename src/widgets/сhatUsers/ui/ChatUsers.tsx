@@ -1,15 +1,7 @@
-import {
-  Avatar,
-  Box,
-  Card,
-  Divider,
-  Group,
-  ScrollArea,
-  Stack,
-  Text,
-} from '@mantine/core';
+import { Box, Divider, ScrollArea, Stack, Text } from '@mantine/core';
 
 import { useAppSelector } from '~/hooks';
+import { UserItem } from '~/modules/DetailsPanel';
 
 export const ChatUsers = () => {
   const { chat } = useAppSelector((state) => state.chatsStore);
@@ -27,14 +19,7 @@ export const ChatUsers = () => {
         <ScrollArea.Autosize mah="100%" maw="100%">
           <Stack gap="xs">
             {chat.users.map((user) => (
-              <Card key={user.userId} radius="md">
-                <Group>
-                  <Avatar size="md" color="blue">
-                    {user.userName ? user.userName[0] : '?'}
-                  </Avatar>
-                  <Text>{user.userName}</Text>
-                </Group>
-              </Card>
+              <UserItem key={user.userId} user={user} />
             ))}
           </Stack>
         </ScrollArea.Autosize>

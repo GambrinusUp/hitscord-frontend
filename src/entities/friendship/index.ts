@@ -1,4 +1,10 @@
-export { friendshipReducer } from './model/slice';
+export {
+  friendshipReducer,
+  addApplicationTo,
+  removeApplicationFrom,
+  approveApplicationFrom,
+  removeFriend,
+} from './model/slice';
 
 export {
   createApplication,
@@ -12,3 +18,5 @@ export {
 } from './model/actions';
 
 export { UserCard } from './ui/UserCard';
+
+export type { Application, Friend } from './model/types';

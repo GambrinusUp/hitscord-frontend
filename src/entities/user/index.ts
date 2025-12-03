@@ -1,7 +1,7 @@
 export { userReducer, clearTokens } from './model/slice';
 
-export type { SettingsForm } from './model/types';
-export { SettingType, SystemRoleTypeEnum } from './model/types';
+export type { SettingsForm, User } from './model/types';
+export { SettingType } from './model/types';
 
 export {
   changeSettings,
@@ -12,4 +12,5 @@ export {
   refreshTokens,
   changeNotificationLifetime,
   changeProfileIcon,
+  registerUser,
 } from './model/actions';
