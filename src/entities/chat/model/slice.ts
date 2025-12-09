@@ -9,6 +9,8 @@ import {
   getMoreChatMessages,
   goOutFromChat,
   addUserInChat,
+  changeChatIcon,
+  changeChatNotifiable,
 } from './actions';
 import {
   ChatsState,
@@ -91,23 +93,40 @@ export const ChatsSlice = createSlice({
     },
     readChatMessageWs: (
       state,
-      action: PayloadAction<{ readChatId: string; readedMessageId: number }>,
+      action: PayloadAction<{
+        readChatId: string;
+        readedMessageId: number;
+        isTagged: boolean;
+      }>,
     ) => {
-      const { readChatId, readedMessageId } = action.payload;
+      const { readChatId, readedMessageId, isTagged } = action.payload;
 
       if (state.activeChat === readChatId) {
         state.chat.nonReadedCount -= 1;
+
+        if (isTagged) {
+          state.chat.nonReadedTaggedCount -= 1;
+        }
+
         state.chat.lastReadedMessageId = readedMessageId;
       }
     },
     changeChatReadedCount: (
       state,
-      action: PayloadAction<{ readChatId: string; readedMessageId: number }>,
+      action: PayloadAction<{
+        readChatId: string;
+        readedMessageId: number;
+        isTagged: boolean;
+      }>,
     ) => {
-      const { readChatId } = action.payload;
+      const { readChatId, isTagged } = action.payload;
 
       if (state.activeChat === readChatId) {
         state.chat.nonReadedCount += 1;
+
+        if (isTagged) {
+          state.chat.nonReadedTaggedCount += 1;
+        }
       }
 
       const chatIndex = state.chatsList.findIndex(
@@ -116,6 +135,10 @@ export const ChatsSlice = createSlice({
 
       if (chatIndex >= 0) {
         state.chatsList[chatIndex].nonReadedCount += 1;
+
+        if (isTagged) {
+          state.chatsList[chatIndex].nonReadedTaggedCount += 1;
+        }
       }
     },
     readOwnChatMessage: (
@@ -297,6 +320,8 @@ export const ChatsSlice = createSlice({
             if (lastMessage?.id === allMessagesCount) {
               state.remainingBottomMessagesCount = 0;
             }
+          } else if (allMessagesCount === 0) {
+            state.remainingBottomMessagesCount = 0;
           }
 
           state.allMessagesCount = allMessagesCount;
@@ -354,8 +379,22 @@ export const ChatsSlice = createSlice({
         state.error = '';
       })
 
+      .addCase(changeChatIcon.fulfilled, (state, action) => {
+        state.chat.icon = action.payload;
+        state.error = '';
+      })
+
+      .addCase(changeChatNotifiable.fulfilled, (state) => {
+        state.chat.nonNotifiable = !state.chat.nonNotifiable;
+      })
+
       .addMatcher(
-        isAnyOf(addUserInChat.pending, goOutFromChat.pending),
+        isAnyOf(
+          addUserInChat.pending,
+          goOutFromChat.pending,
+          changeChatIcon.pending,
+          changeChatNotifiable.pending,
+        ),
         (state) => {
           state.error = '';
         },
@@ -364,7 +403,12 @@ export const ChatsSlice = createSlice({
         state.error = '';
       })
       .addMatcher(
-        isAnyOf(addUserInChat.rejected, goOutFromChat.rejected),
+        isAnyOf(
+          addUserInChat.rejected,
+          goOutFromChat.rejected,
+          changeChatIcon.rejected,
+          changeChatNotifiable.rejected,
+        ),
         (state, action) => {
           state.error = action.payload as string;
         },

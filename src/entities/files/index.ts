@@ -1,6 +1,6 @@
-export { filesReducer, removeFile, clearFiles } from './model/slice';
+export { filesReducer, clearFiles } from './model/slice';
 
-export { attachFile } from './model/actions';
+export { attachFile, removeFile } from './model/actions';
 
 export { getFile, getIcon } from './api/files';
 

@@ -52,6 +52,7 @@ export {
   removeRoleFromUserWs,
   updateVoteWs,
   setCurrentNotificationChannelId,
+  updateServerIcon,
 } from './ServerStore.reducer';
 
 export {
@@ -85,4 +86,7 @@ export {
   changeNotificationChannelSettings,
   changeServerIsClosed,
   changeNotifiable,
+  deleteServer,
+  changeChannelNotifiable,
+  changeSubChannelSettings,
 } from './ServerStore.actions';

@@ -4,6 +4,7 @@ import { ServerItemProps } from './ServerItem.types';
 
 import { socket } from '~/api/socket';
 import { useAppDispatch, useAppSelector } from '~/hooks';
+import { useIcon } from '~/shared/lib/hooks';
 import { setOpenHome, setUserStreamView } from '~/store/AppStore';
 import { setCurrentServerId } from '~/store/ServerStore';
 
@@ -12,9 +13,12 @@ export const ServerItem = ({
   serverName,
   nonReadedCount,
   nonReadedTaggedCount,
+  serverIcon,
 }: ServerItemProps) => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.userStore);
+
+  const { iconBase64 } = useIcon(serverIcon?.fileId);
 
   const handleClick = () => {
     dispatch(setCurrentServerId(serverId));
@@ -35,7 +39,7 @@ export const ServerItem = ({
         variant="transparent"
         onClick={handleClick}
       >
-        <Avatar size="md" color="blue">
+        <Avatar size="md" color="blue" src={iconBase64}>
           {serverName.charAt(0).toUpperCase()}
         </Avatar>
       </ActionIcon>

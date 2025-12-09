@@ -8,19 +8,21 @@ import {
   Text,
   Textarea,
 } from '@mantine/core';
-import { ArrowDown, Paperclip, Send, Settings } from 'lucide-react';
+import { ArrowDown, Paperclip, Send } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import { ChatMessage } from '~/entities/chat';
 import { attachFile, clearFiles } from '~/entities/files';
 import { MessageType, useMessageAuthor } from '~/entities/message';
-import { setCurrentSubChatId } from '~/entities/subChat';
+import { setCurrentSubChatId, setSubChatInfo } from '~/entities/subChat';
 import { AttachedFilesList } from '~/features/attachedFilesList';
 import { CreatePoll } from '~/features/polls';
+import { EditSettings } from '~/features/subChat';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { formatTagMessage } from '~/modules/ChatSection/ChatSection.utils';
 import { LoadingState } from '~/shared';
 import { useScrollToBottom } from '~/shared/lib/hooks';
+import { useFileUploadNotification } from '~/shared/lib/hooks/useFileUploadNotification';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { ChannelMessage, ServerMessageType } from '~/store/ServerStore';
 
@@ -43,6 +45,8 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
   const { uploadedFiles, loading } = useAppSelector(
     (state) => state.filesStore,
   );
+
+  useFileUploadNotification(loading === LoadingState.PENDING);
 
   const { getUsername } = useMessageAuthor(MessageType.SUBCHAT);
   const { scrollRef, isAtBottom, showButton, handleScroll, scrollToBottom } =
@@ -99,6 +103,7 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
 
   const handleClose = () => {
     dispatch(setCurrentSubChatId(null));
+    dispatch(setSubChatInfo(null));
   };
 
   return (
@@ -117,9 +122,7 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
         <Modal.Header>
           <Modal.Title>Подчат</Modal.Title>
           <Group gap="xs">
-            <ActionIcon variant="transparent" color="gray">
-              <Settings />
-            </ActionIcon>
+            <EditSettings />
             <Modal.CloseButton />
           </Group>
         </Modal.Header>

@@ -4,6 +4,7 @@ import {
   GetChatMessages,
   GetChats,
 } from '~/entities/chat/model/types';
+import { FileResponse } from '~/entities/files';
 import { api } from '~/shared/api';
 
 export const createChat = async (userTag: string): Promise<Chat> => {
@@ -53,4 +54,27 @@ export const addUserInChat = async (
 
 export const goOutFromChat = async (id: string): Promise<void> => {
   await api.delete('/chat/goout', { data: { id } });
+};
+
+export const changeChatIcon = async (
+  chatId: string,
+  icon: File,
+): Promise<FileResponse> => {
+  const formData = new FormData();
+  formData.append('ChatID', chatId);
+  formData.append('Icon', icon);
+
+  const { data } = await api.put('/chat/icon', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return data;
+};
+
+export const changeChatNotifiable = async (chatId: string): Promise<void> => {
+  await api.put('/chat/settings/nonnotifiable', {
+    id: chatId,
+  });
 };

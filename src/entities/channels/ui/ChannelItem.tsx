@@ -1,4 +1,4 @@
-import { Box, Button } from '@mantine/core';
+import { Box, Button, Tooltip } from '@mantine/core';
 import { useState } from 'react';
 
 import { channelItemStyles } from './ChannelItem.styles';
@@ -37,37 +37,44 @@ export const ChannelItem = ({
   const [isHovered, setIsHovered] = useState('');
 
   return (
-    <Box
-      key={channelId}
-      style={channelItemStyles.channelBox()}
-      onMouseEnter={() => setIsHovered(channelId)}
-      onMouseLeave={() => setIsHovered('')}
-    >
-      <Button
-        leftSection={getLeftSection(channelType, nonReadedCount)}
-        rightSection={
-          channelType === ChannelType.VOICE_CHANNEL
-            ? `${currentCount}/${maxCount}`
-            : undefined
-        }
-        variant="subtle"
-        p={0}
-        color="#ffffff"
-        justify="flex-start"
-        styles={{
-          root: channelItemStyles.buttonRoot(
-            isHovered === channelId,
-            currentChannelId === channelId ||
-              currentNotificationChannelId === channelId,
-          ),
-          label: channelItemStyles.breakLabel(),
-        }}
-        fullWidth
-        onClick={openChannel}
+    <Tooltip label={channelName}>
+      <Box
+        key={channelId}
+        style={channelItemStyles.channelBox()}
+        onMouseEnter={() => setIsHovered(channelId)}
+        onMouseLeave={() => setIsHovered('')}
       >
-        {channelName}
-      </Button>
-      {canWorkChannels && isHovered === channelId && editAction}
-    </Box>
+        <Button
+          leftSection={getLeftSection(channelType, nonReadedCount)}
+          rightSection={
+            channelType === ChannelType.VOICE_CHANNEL
+              ? `${currentCount}/${maxCount}`
+              : undefined
+          }
+          variant="subtle"
+          p={0}
+          color="#ffffff"
+          justify="flex-start"
+          styles={{
+            root: channelItemStyles.buttonRoot(
+              isHovered === channelId,
+              currentChannelId === channelId ||
+                currentNotificationChannelId === channelId,
+            ),
+            label: channelItemStyles.breakLabel(),
+          }}
+          fullWidth
+          onClick={openChannel}
+        >
+          {channelName}
+        </Button>
+        {isHovered === channelId &&
+          !(
+            canWorkChannels === false &&
+            channelType === ChannelType.VOICE_CHANNEL
+          ) &&
+          editAction}
+      </Box>
+    </Tooltip>
   );
 };

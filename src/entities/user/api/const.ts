@@ -12,3 +12,5 @@ export const CHANGE_SETTINGS = (type: SettingType) =>
 export const CHANGE_NOTIFICATION_LIFETIME = `${BASE_PATH}/settings/notification/lifetime`;
 export const CHANGE_PROFILE = `${BASE_PATH}/profile/change`;
 export const CHANGE_PROFILE_ICON = `${BASE_PATH}/icon`;
+export const GET_USER_DATA = (userId: string) =>
+  `${BASE_PATH}/data?UserId=${userId}`;

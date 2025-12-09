@@ -5,6 +5,7 @@ import { BellRing, CircleCheck, CircleX } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from './redux';
 
 import { socket } from '~/api';
+import { setActiveChat } from '~/entities/chat';
 import { formatMessage } from '~/entities/message';
 import { NotificationData } from '~/entities/notifications';
 import { setOpenHome, setUserStreamView } from '~/store/AppStore';
@@ -12,19 +13,32 @@ import { setCurrentChannelId, setCurrentServerId } from '~/store/ServerStore';
 
 export const useNotification = () => {
   const dispatch = useAppDispatch();
+  // Передавать user?
   const { user } = useAppSelector((state) => state.userStore);
-  const { currentChannelId, currentNotificationChannelId } = useAppSelector(
-    (state) => state.testServerStore,
-  );
 
-  const handleOpenChannel = (serverId: string, channelId: string) => {
-    const activeChannelId = currentNotificationChannelId ?? currentChannelId;
+  const handleOpenChannel = (
+    serverId: string | null,
+    channelId: string,
+    activeChannelId: string | null,
+    isChat: boolean = false,
+  ) => {
+    if (isChat) {
+      if (activeChannelId !== channelId) {
+        dispatch(setOpenHome(true));
+        dispatch(setActiveChat(channelId));
+      }
 
-    if (activeChannelId === channelId) {
       return;
     }
 
-    dispatch(setCurrentServerId(serverId));
+    if (activeChannelId === channelId) {
+      dispatch(setUserStreamView(false));
+      dispatch(setOpenHome(false));
+
+      return;
+    }
+
+    dispatch(setCurrentServerId(serverId!));
     dispatch(setCurrentChannelId(channelId));
     dispatch(setUserStreamView(false));
     dispatch(setOpenHome(false));
@@ -58,7 +72,12 @@ export const useNotification = () => {
     });
   };
 
-  const showMessage = (notification: NotificationData, closeTime: number) => {
+  const showMessage = (
+    notification: NotificationData,
+    closeTime: number,
+    activeChannelId: string | null,
+    isChat: boolean = false,
+  ) => {
     notifications.show({
       title: (
         <Group gap="xs">
@@ -84,7 +103,12 @@ export const useNotification = () => {
             radius="md"
             mt="xs"
             onClick={() =>
-              handleOpenChannel(notification.serverId, notification.channelId)
+              handleOpenChannel(
+                notification.serverId,
+                notification.channelId,
+                activeChannelId,
+                isChat,
+              )
             }
           >
             Перейти к сообщению

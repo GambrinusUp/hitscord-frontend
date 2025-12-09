@@ -15,6 +15,7 @@ export interface MessageItemProps {
   time: string;
   authorId: string;
   channelId: string;
+  isTagged: boolean | undefined;
   modifiedAt?: string | null;
   files: MessageFile[] | null | undefined;
   nestedChannel: NestedChannel | null | undefined;

@@ -1,14 +1,16 @@
+import { changeChatIcon } from '~/entities/chat';
 import { changeProfileIcon } from '~/entities/user';
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { changeServerIcon } from '~/store/ServerStore';
 
 interface UseUploadIconProps {
-  type: 'profile' | 'server';
+  type: 'profile' | 'server' | 'chat';
 }
 
 export const useUploadIcon = ({ type }: UseUploadIconProps) => {
   const dispatch = useAppDispatch();
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
+  const { activeChat } = useAppSelector((state) => state.chatsStore);
   const { showSuccess, showError } = useNotification();
 
   const validateAndUpload = async (file: File) => {
@@ -49,13 +51,25 @@ export const useUploadIcon = ({ type }: UseUploadIconProps) => {
       if (result.meta.requestStatus === 'fulfilled') {
         showSuccess('Аватарка успешно установлена');
       }
-    } else if (currentServerId) {
+    }
+
+    if (type === 'server' && currentServerId) {
       const result = await dispatch(
         changeServerIcon({ serverId: currentServerId, icon: file }),
       );
 
       if (result.meta.requestStatus === 'fulfilled') {
         showSuccess('Иконка сервера успешно установлена');
+      }
+    }
+
+    if (type === 'chat' && activeChat) {
+      const result = await dispatch(
+        changeChatIcon({ chatId: activeChat, icon: file }),
+      );
+
+      if (result.meta.requestStatus === 'fulfilled') {
+        showSuccess('Иконка чата успешно установлена');
       }
     }
   };

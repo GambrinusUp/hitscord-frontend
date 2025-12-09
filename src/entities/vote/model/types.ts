@@ -28,6 +28,7 @@ export interface PollItemProps {
   type: MessageType;
   time: string;
   title: string;
+  totalUsers: number;
   content?: string | null;
   variants: VoteVariant[];
   multiple: boolean;

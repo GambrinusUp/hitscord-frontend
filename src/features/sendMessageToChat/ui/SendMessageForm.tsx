@@ -7,6 +7,7 @@ import { clearFiles, attachFile } from '~/entities/files';
 import { MessageType } from '~/entities/message';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
+import { useFileUploadNotification } from '~/shared/lib/hooks/useFileUploadNotification';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { ChannelMessage, ServerMessageType } from '~/store/ServerStore';
 
@@ -30,6 +31,8 @@ export const SendMessageForm = ({
   const { uploadedFiles, loading } = useAppSelector(
     (state) => state.filesStore,
   );
+
+  useFileUploadNotification(loading === LoadingState.PENDING);
 
   const [message, setMessage] = useState('');
 

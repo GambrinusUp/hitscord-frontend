@@ -1,4 +1,4 @@
-import { Stack } from '@mantine/core';
+import { Card, Divider, ScrollArea, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useState } from 'react';
 
@@ -42,12 +42,23 @@ export const Settings = () => {
 
   return (
     <Stack p="xl" gap="md" w="100%">
-      <ProfileSettings
-        isEdit={isEdit}
-        form={form}
-        updateAction={<UpdateIcon type={'profile'} />}
-      />
-      <PrivacySettings isEdit={isEdit} form={form} />
+      <Card
+        withBorder
+        radius="md"
+        w="100%"
+        styles={{ root: { backgroundColor: '#1a1b1e' } }}
+      >
+        <ScrollArea.Autosize w="100%" h="100%" offsetScrollbars>
+          <ProfileSettings
+            isEdit={isEdit}
+            form={form}
+            systemRoles={user.systemRoles}
+            updateAction={<UpdateIcon type={'profile'} />}
+          />
+          <Divider mt="md" mb="md" />
+          <PrivacySettings isEdit={isEdit} form={form} />
+        </ScrollArea.Autosize>
+      </Card>
       <EditSettings isEdit={isEdit} setIsEdit={setIsEdit} form={form} />
     </Stack>
   );

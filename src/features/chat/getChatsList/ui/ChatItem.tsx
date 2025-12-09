@@ -12,6 +12,7 @@ import { ArrowRight } from 'lucide-react';
 
 import { Chat, setActiveChat } from '~/entities/chat';
 import { useAppDispatch } from '~/hooks';
+import { useIcon } from '~/shared/lib/hooks';
 
 interface ChatItemProps {
   chat: Chat;
@@ -20,7 +21,9 @@ interface ChatItemProps {
 export const ChatItem = ({ chat }: ChatItemProps) => {
   const dispatch = useAppDispatch();
 
-  const { chatName, nonReadedCount, nonReadedTaggedCount, chatId } = chat;
+  const { chatName, nonReadedCount, nonReadedTaggedCount, chatId, icon } = chat;
+
+  const { iconBase64 } = useIcon(icon?.fileId);
 
   const handleOpenChat = () => {
     dispatch(setActiveChat(chatId));
@@ -30,7 +33,7 @@ export const ChatItem = ({ chat }: ChatItemProps) => {
     <Card bg="#1a1b1e" padding="xs" radius="md" c="#fff" p="md" w="100%">
       <Group justify="space-between">
         <Group>
-          <Avatar src={null} alt="no image here" size="xl" />
+          <Avatar  src={iconBase64} alt="no image here" size="xl" />
           <Stack>
             <Title order={3}>{chatName}</Title>
             <Group>

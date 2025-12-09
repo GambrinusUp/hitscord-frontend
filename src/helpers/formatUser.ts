@@ -1,4 +1,5 @@
 import { FileResponse } from '~/entities/files';
+import { SystemRole } from '~/entities/presets';
 import {
   UserOnServer,
   UserRoleOnServer,
@@ -22,6 +23,16 @@ export const formatIcon = (rawIcon: any): FileResponse => {
   };
 };
 
+export const formatSystemRoles = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rawSystemRoles: any,
+): Omit<SystemRole, 'id' | 'childRoles'> => {
+  return {
+    name: rawSystemRoles.Name,
+    type: rawSystemRoles.Type,
+  };
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const formatUser = (rawMessage: any): UserOnServer => ({
   serverId: rawMessage.ServerId,
@@ -34,4 +45,5 @@ export const formatUser = (rawMessage: any): UserOnServer => ({
   nonFriendMessage: rawMessage.NonFriendMessage,
   roles: rawMessage.Roles ? rawMessage.Roles.map(formatUserRole) : [],
   isFriend: rawMessage.IsFriend,
+  systemRoles: rawMessage.SystemRoles.map(formatSystemRoles),
 });

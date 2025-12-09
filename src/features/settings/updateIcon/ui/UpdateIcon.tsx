@@ -5,7 +5,7 @@ import { useRef } from 'react';
 import { useUploadIcon } from '~/features/settings/updateIcon/lib';
 
 interface UpdateIconProps {
-  type: 'profile' | 'server';
+  type: 'profile' | 'server' | 'chat';
 }
 
 export const UpdateIcon = ({ type }: UpdateIconProps) => {

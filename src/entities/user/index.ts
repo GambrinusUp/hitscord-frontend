@@ -1,6 +1,6 @@
 export { userReducer, clearTokens } from './model/slice';
 
-export type { SettingsForm, User } from './model/types';
+export type { SettingsForm, User, UserSystemRole } from './model/types';
 export { SettingType } from './model/types';
 
 export {
@@ -14,3 +14,5 @@ export {
   changeProfileIcon,
   registerUser,
 } from './model/actions';
+
+export { getUserData } from './api';

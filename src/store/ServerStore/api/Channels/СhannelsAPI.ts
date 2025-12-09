@@ -336,3 +336,56 @@ export const changeVoiceChannelMaxCount = async (
     throw error;
   }
 };
+
+export const changeChannelNotifiable = async (
+  accessToken: string,
+  channelId: string,
+) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/api/channel/settings/nonnotifiable`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: channelId,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change notifiable:', error);
+    throw error;
+  }
+};
+
+export const changeSubChannelSettings = async (
+  accessToken: string,
+  settings: ChannelSettings,
+) => {
+  try {
+    const response = await fetch(`${API_URL}/api/channel/settings/change/sub`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(settings),
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || `Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error change sub channel settings:', error);
+    throw error;
+  }
+};

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-import { attachFile } from './actions';
+import { attachFile, removeFile } from './actions';
 import { FILES_SLICE_NAME } from './const';
 import { FileResponse, FilesState } from './types';
 
@@ -16,13 +16,6 @@ export const FilesSlice = createSlice({
   name: FILES_SLICE_NAME,
   initialState,
   reducers: {
-    removeFile: (state, action: PayloadAction<{ fileId: string }>) => {
-      const { fileId } = action.payload;
-
-      state.uploadedFiles = state.uploadedFiles.filter(
-        (file) => file.fileId !== fileId,
-      );
-    },
     clearFiles: (state) => {
       state.uploadedFiles = [];
     },
@@ -44,10 +37,23 @@ export const FilesSlice = createSlice({
       .addCase(attachFile.rejected, (state, action) => {
         state.loading = LoadingState.REJECTED;
         state.error = action.payload as string;
+      })
+      .addCase(removeFile.pending, (state) => {
+        state.error = '';
+      })
+      .addCase(removeFile.fulfilled, (state, { meta }) => {
+        const { fileId } = meta.arg;
+        state.uploadedFiles = state.uploadedFiles.filter(
+          (file) => file.fileId !== fileId,
+        );
+        state.error = '';
+      })
+      .addCase(removeFile.rejected, (state, action) => {
+        state.error = action.payload as string;
       });
   },
 });
 
-export const { removeFile, clearFiles } = FilesSlice.actions;
+export const { clearFiles } = FilesSlice.actions;
 
 export const filesReducer = FilesSlice.reducer;

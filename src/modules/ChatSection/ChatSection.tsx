@@ -10,7 +10,6 @@ import {
   Stack,
   Text,
   Textarea,
-  TextInput,
   Notification,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -19,7 +18,6 @@ import {
   Menu,
   MessageSquarePlus,
   Paperclip,
-  Search,
   Send,
   Users,
 } from 'lucide-react';
@@ -39,6 +37,7 @@ import { CreatePoll } from '~/features/polls';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import { useScrollToBottom } from '~/shared/lib/hooks';
+import { useFileUploadNotification } from '~/shared/lib/hooks/useFileUploadNotification';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { ChannelMessage, ServerMessageType } from '~/store/ServerStore';
 import { MessagesList } from '~/widgets/messagesList';
@@ -75,6 +74,8 @@ export const ChatSection = ({
   const [opened, { open, close }] = useDisclosure(false);
   const { canWrite, canWriteSub, nonReadedCount, nonReadedTaggedCount } =
     useChannelSettings();
+  useFileUploadNotification(loading === LoadingState.PENDING);
+
   const activeChannelId = currentChannelId ?? currentNotificationChannelId;
 
   const [newMessage, setNewMessage] = useState('');
@@ -200,10 +201,6 @@ export const ChatSection = ({
           >
             <Menu size={20} />
           </ActionIcon>
-          <TextInput
-            leftSection={<Search size={16} />}
-            placeholder="Поиск..."
-          />
           <ActionIcon
             variant="transparent"
             onClick={openDetailsPanel}

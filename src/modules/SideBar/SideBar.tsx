@@ -6,6 +6,7 @@ import {
   Skeleton,
   Stack,
   Text,
+  Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -123,14 +124,26 @@ export const SideBar = ({ onClose }: SideBarProps) => {
       >
         <Menu shadow="md" width={200}>
           <Menu.Target>
-            <Group justify="space-between" style={{ cursor: 'pointer' }}>
-              {isLoading ? (
-                <Skeleton height={10} width="40%" radius="md" />
-              ) : (
-                <Text>{serverData.serverName}</Text>
-              )}
-              <ChevronDown />
-            </Group>
+            <Tooltip label={serverData.serverName}>
+              <Group justify="space-between" style={{ cursor: 'pointer' }}>
+                {isLoading ? (
+                  <Skeleton height={10} width="40%" radius="md" />
+                ) : (
+                  <Text
+                    style={{
+                      wordWrap: 'break-word',
+                      whiteSpace: 'pre-wrap',
+                      wordBreak: 'break-word',
+                      maxWidth: 190,
+                    }}
+                    lineClamp={1}
+                  >
+                    {serverData.serverName}
+                  </Text>
+                )}
+                <ChevronDown />
+              </Group>
+            </Tooltip>
           </Menu.Target>
           <Menu.Dropdown>
             {(canChangeRole || isCreator || canDeleteUsers) && (

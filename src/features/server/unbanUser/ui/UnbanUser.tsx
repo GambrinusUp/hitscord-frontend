@@ -8,6 +8,7 @@ import {
   Pagination,
   Stack,
   Text,
+  Tooltip,
 } from '@mantine/core';
 import { Calendar } from 'lucide-react';
 import { useEffect } from 'react';
@@ -85,7 +86,7 @@ export const UnbanUser = ({ opened, loading, setLoading }: UnbanUserProps) => {
 
   return (
     <Stack gap="md">
-      <Text size="lg" w={500}>
+      <Text size="lg" fw={500}>
         Разблокировать пользователя
       </Text>
       {bannedUsers.length < 1 && <Text>Нет заблокированных пользователей</Text>}
@@ -106,9 +107,14 @@ export const UnbanUser = ({ opened, loading, setLoading }: UnbanUserProps) => {
                   </Stack>
 
                   {user.banReason && (
-                    <Badge variant="light" style={stylesUnbanUser.banReason()}>
-                      {user.banReason}
-                    </Badge>
+                    <Tooltip multiline w={400} label={user.banReason}>
+                      <Badge
+                        variant="light"
+                        style={stylesUnbanUser.banReason()}
+                      >
+                        {user.banReason}
+                      </Badge>
+                    </Tooltip>
                   )}
                 </Stack>
               </Group>

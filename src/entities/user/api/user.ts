@@ -4,6 +4,7 @@ import {
   CHANGE_PROFILE_ICON,
   CHANGE_SETTINGS,
   GET_PROFILE,
+  GET_USER_DATA,
   LOGIN_USER,
   LOGOUT,
   REFRESH,
@@ -18,6 +19,7 @@ import {
   RegisterCredentials,
   SettingType,
   User,
+  UserData,
 } from '~/entities/user/model/types';
 import { api } from '~/shared/api';
 
@@ -90,6 +92,12 @@ export const changeProfileIcon = async (icon: File): Promise<FileResponse> => {
       'Content-Type': 'multipart/form-data',
     },
   });
+
+  return data;
+};
+
+export const getUserData = async (userId: string): Promise<UserData> => {
+  const { data } = await api.get(GET_USER_DATA(userId));
 
   return data;
 };

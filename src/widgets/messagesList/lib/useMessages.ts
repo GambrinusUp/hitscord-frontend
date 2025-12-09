@@ -141,6 +141,17 @@ export const useMessages = (
           );
         }
 
+        if (type === MessageType.CHAT && entityId) {
+          dispatch(
+            getMoreChatMessages({
+              chatId: entityId,
+              number: numberToLoad + 1,
+              fromMessageId: lastBottomMessageId,
+              down: true,
+            }),
+          );
+        }
+
         requestAnimationFrame(() => {
           if (!scrollRef.current || prevScrollHeightRef.current === null) {
             return;
@@ -225,6 +236,10 @@ export const useMessages = (
             const messageId = Number(
               entry.target.getAttribute('data-message-id'),
             );
+            const attributeValue = entry.target.getAttribute(
+              'data-message-is-tagged',
+            );
+            const isTagged = attributeValue === 'true';
 
             const isChannel = type === MessageType.CHANNEL;
             const targetId = isChannel ? entityId : activeChat;
@@ -247,6 +262,7 @@ export const useMessages = (
                     readChannelId: targetId,
                     readedMessageId: messageId,
                     serverId: currentServerId,
+                    isTagged,
                   }),
                 );
               } else {
@@ -254,6 +270,7 @@ export const useMessages = (
                   readChatMessageWs({
                     readChatId: targetId,
                     readedMessageId: messageId,
+                    isTagged,
                   }),
                 );
               }

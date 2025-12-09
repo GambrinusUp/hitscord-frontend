@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { UserInChat } from '~/entities/chat';
 import { MentionSuggestion } from '~/modules/ChatSection/ChatSection.types';
 import { UserOnServer, Role } from '~/store/ServerStore';
 
 interface UseMentionSuggestionsProps {
-  users: UserOnServer[];
-  roles: Role[];
+  users: UserOnServer[] | UserInChat[];
+  roles: Role[] | undefined;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
   newMessage: string;
   setNewMessage: (value: React.SetStateAction<string>) => void;
@@ -68,20 +69,22 @@ export const useMentionSuggestions = ({
       }));
 
     const roleMatches = roles
-      .filter(
-        (r) =>
-          r.name.toLowerCase().includes(text) ||
-          r.tag.toLowerCase().includes(text),
-      )
-      .slice(0, 5)
-      .map((r) => ({
-        type: 'role' as const,
-        id: r.id,
-        display: r.name,
-        tag: r.tag,
-        startIndex: mention.startIndex,
-        searchText: mention.searchText,
-      }));
+      ? roles
+          .filter(
+            (r) =>
+              r.name.toLowerCase().includes(text) ||
+              r.tag.toLowerCase().includes(text),
+          )
+          .slice(0, 5)
+          .map((r) => ({
+            type: 'role' as const,
+            id: r.id,
+            display: r.name,
+            tag: r.tag,
+            startIndex: mention.startIndex,
+            searchText: mention.searchText,
+          }))
+      : [];
 
     return [...userMatches, ...roleMatches];
   };

@@ -1,4 +1,5 @@
 export { SystemRoleTypeEnum } from './model/types';
+export type { SystemRole } from './model/types';
 
 export { presetsReducer } from './model/slice';
 

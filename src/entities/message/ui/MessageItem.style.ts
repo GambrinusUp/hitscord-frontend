@@ -1,7 +1,11 @@
 import { MantineStyleProp } from '@mantine/core';
 
 export const messageItemStyles = {
-  box: (isOwnMessage: boolean, isEditing: boolean): MantineStyleProp => ({
+  box: (
+    isOwnMessage: boolean,
+    isEditing: boolean,
+    isTagged: boolean | undefined,
+  ): MantineStyleProp => ({
     position: 'relative',
     backgroundColor: isOwnMessage ? '#4A90E2' : '#454950',
     color: 'white',
@@ -11,6 +15,8 @@ export const messageItemStyles = {
     display: 'flex',
     flexDirection: 'column',
     width: isEditing ? '100%' : 'auto',
+    border: isTagged ? '1px solid rgba(250, 204, 21, 0.5)' : 'none',
+    boxShadow: isTagged ? '0 0 6px rgba(250, 204, 21, 0.2)' : 'none',
   }),
 
   breakText: (): MantineStyleProp => ({

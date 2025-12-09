@@ -36,8 +36,14 @@ export const UserMiniProfile = ({
   const { applicationFrom } = useAppSelector((state) => state.friendshipStore);
   const { user } = useAppSelector((state) => state.userStore);
 
-  const { userName, userTag, userId, notifiable, nonFriendMessage } =
-    userOnServer;
+  const {
+    userName,
+    userTag,
+    userId,
+    notifiable,
+    nonFriendMessage,
+    systemRoles,
+  } = userOnServer;
   const userRoles = 'roles' in userOnServer ? userOnServer.roles : [];
 
   const application = applicationFrom.find((app) => app.user.userId === userId);
@@ -119,6 +125,19 @@ export const UserMiniProfile = ({
           <Text fw={700}>{nonFriendMessage ? 'Включены' : 'Отключены'}</Text>
         </Stack>
       </SimpleGrid>
+      <Divider color="dimmed" w="100%" />
+      <Group gap="sm">
+        {systemRoles.map((role) => (
+          <Badge
+            key={role.name}
+            radius="md"
+            variant="light"
+            style={stylesUserMiniProfile.roleName()}
+          >
+            {role.name}
+          </Badge>
+        ))}
+      </Group>
     </Stack>
   );
 };

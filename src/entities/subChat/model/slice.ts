@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 import { getMoreSubChatMessages, getSubChatMessages } from './actions';
 import { SUB_CHAT_SLICE_NAME } from './const';
-import { GetSubChatMessages, SubChatState } from './types';
+import { GetSubChatMessages, SubChatInfo, SubChatState } from './types';
 
 import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { LoadingState } from '~/shared';
@@ -11,6 +11,7 @@ import { ChannelMessage } from '~/store/ServerStore';
 const initialState: SubChatState = {
   error: '',
   currentSubChatId: null,
+  subChatInfo: null,
   messages: [],
   messagesStatus: LoadingState.IDLE,
   messageIsLoading: LoadingState.IDLE,
@@ -28,6 +29,9 @@ export const SubChatSlice = createSlice({
   reducers: {
     setCurrentSubChatId(state, action: PayloadAction<string | null>) {
       state.currentSubChatId = action.payload;
+    },
+    setSubChatInfo(state, action: PayloadAction<SubChatInfo | null>) {
+      state.subChatInfo = action.payload;
     },
     addSubChatMessage: (state, action: PayloadAction<ChannelMessage>) => {
       const { channelId } = action.payload;
@@ -109,6 +113,8 @@ export const SubChatSlice = createSlice({
             if (lastMessage?.id === allMessagesCount) {
               state.remainingBottomMessagesCount = 0;
             }
+          } else if (allMessagesCount === 0) {
+            state.remainingBottomMessagesCount = 0;
           }
 
           state.allMessagesCount = allMessagesCount;
@@ -166,6 +172,7 @@ export const {
   editSubChatMessageWS,
   deleteSubChatMessageWS,
   updateSubChatVoteWs,
+  setSubChatInfo,
 } = SubChatSlice.actions;
 
 export const subChatReducer = SubChatSlice.reducer;

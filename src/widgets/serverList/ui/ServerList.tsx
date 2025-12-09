@@ -49,6 +49,7 @@ export const ServerList = () => {
                 serverName={server.serverName}
                 nonReadedCount={server.nonReadedCount}
                 nonReadedTaggedCount={server.nonReadedTaggedCount}
+                serverIcon={server.icon}
               />
             ))}
           </Stack>

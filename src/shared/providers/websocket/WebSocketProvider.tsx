@@ -1,3 +1,5 @@
+import { notifications } from '@mantine/notifications';
+import { CircleAlert } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import { useSound } from 'use-sound';
 
@@ -30,6 +32,7 @@ import { Vote } from '~/entities/vote';
 import { formatMessage, formatNotification, formatUser } from '~/helpers';
 import { formatApplication } from '~/helpers/formatApplication';
 import { formatChatMessage, formatMessageFile } from '~/helpers/formatMessage';
+import { formatSystemRoles } from '~/helpers/formatUser';
 import {
   useAppDispatch,
   useNotification,
@@ -63,17 +66,23 @@ import {
   removeRoleFromUserWs,
   updateVoteWs,
   UserRoleOnServer,
+  updateServerIcon,
 } from '~/store/ServerStore';
 
 export const WebSocketProvider = (props: React.PropsWithChildren) => {
-  const [play] = useSound(sound);
+  const [play] = useSound(sound, { volume: 0.35 });
   const dispatch = useAppDispatch();
   const disconnect = useDisconnect();
   const { showMessage, showError } = useNotification();
   const { accessToken, user } = useAppSelector((state) => state.userStore);
-  const { currentServerId, currentVoiceChannelId, serverData } = useAppSelector(
-    (state) => state.testServerStore,
-  );
+  const {
+    currentServerId,
+    currentVoiceChannelId,
+    serverData,
+    currentChannelId,
+    currentNotificationChannelId,
+  } = useAppSelector((state) => state.testServerStore);
+  const { activeChat } = useAppSelector((state) => state.chatsStore);
   const wsRef = useRef<WebSocket | null>(null);
 
   const serverIdRef = useRef<string | null>(null);
@@ -81,6 +90,9 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
   const userRolesIds = useRef<UserRoleOnServer[]>([]);
   const currentVoiceChannelIdRef = useRef(currentVoiceChannelId);
   const notificationLifeTimeRef = useRef(0);
+  const currentChannelIdRef = useRef<string | null>(null);
+  const currentNotificationChannelIdRef = useRef<string | null>(null);
+  const currentChatIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     serverIdRef.current = currentServerId;
@@ -101,6 +113,18 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
   useEffect(() => {
     userRolesIds.current = serverData.userRoles;
   }, [serverData]);
+
+  useEffect(() => {
+    currentChannelIdRef.current = currentChannelId;
+  }, [currentChannelId]);
+
+  useEffect(() => {
+    currentNotificationChannelIdRef.current = currentNotificationChannelId;
+  }, [currentNotificationChannelId]);
+
+  useEffect(() => {
+    currentChatIdRef.current = activeChat;
+  }, [activeChat]);
 
   useEffect(() => {
     if (accessToken) {
@@ -126,6 +150,10 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         const currentVoiceChannelIdValue = currentVoiceChannelIdRef.current;
         const notificationLifeTimeValue = notificationLifeTimeRef.current;
         const userRolesIdsValue = userRolesIds.current;
+        const currentNotificationChannelIdValue =
+          currentNotificationChannelIdRef.current;
+        const currentChannelIdValue = currentChannelIdRef.current;
+        const currentChatIdValue = currentChatIdRef.current;
 
         console.log(data);
 
@@ -181,7 +209,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         }
 
         if (data.MessageType === 'New server name') {
-          if (currentServerIdValue === data.Payload.ServerId) {
+          if (currentServerIdValue === data.Payload.Id) {
             dispatch(setNewServerName({ name: data.Payload.Name }));
           }
         }
@@ -204,9 +232,35 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         }
 
         if (data.MessageType === 'You removed from server') {
+          notifications.show({
+            title: 'Уведомление',
+            message: 'Вы были исключены из сервера',
+            position: 'top-center',
+            color: 'red',
+            radius: 'md',
+            autoClose: 2000,
+            icon: <CircleAlert />,
+          });
+
           if (data.Payload.IsNeedRemoveFromVC) {
             disconnect(accessToken, currentVoiceChannelIdValue!);
           }
+          dispatch(setOpenHome(true));
+          dispatch(removeServer({ serverId: data.Payload.ServerId }));
+        }
+
+        if (data.MessageType === 'Server deleted') {
+          notifications.show({
+            title: 'Уведомление',
+            message: `Сервер ${data.Payload.ServerName} был удален`,
+            position: 'top-center',
+            color: 'red',
+            radius: 'md',
+            autoClose: 2000,
+            icon: <CircleAlert />,
+          });
+
+          disconnect(accessToken, currentVoiceChannelIdValue!);
           dispatch(setOpenHome(true));
           dispatch(removeServer({ serverId: data.Payload.ServerId }));
         }
@@ -330,6 +384,23 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           }
         }
 
+        // Добавить id сообщения (подчата), для изменения настройки
+        if (data.MessageType === 'Sub channel settings edited') {
+          const { ServerId, RoleId } = data.Payload;
+
+          const containsRole = userRolesIdsValue.find(
+            (role) => role.roleId === RoleId,
+          );
+
+          if (containsRole) {
+            if (currentServerIdValue && currentServerIdValue === ServerId) {
+              dispatch(
+                getServerData({ accessToken, serverId: currentServerIdValue }),
+              );
+            }
+          }
+        }
+
         if (data.MessageType === 'Notification channel settings edited') {
           const { ServerId, RoleId } = data.Payload;
 
@@ -358,6 +429,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                   channelId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
                   serverId: formattedMessage.serverId!,
+                  isTagged: formattedMessage.isTagged!,
                 }),
               );
             } else {
@@ -366,6 +438,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                   channelId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
                   serverId: formattedMessage.serverId!,
+                  isTagged: formattedMessage.isTagged!,
                 }),
               );
             }
@@ -384,6 +457,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                   channelId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
                   serverId: formattedMessage.serverId!,
+                  isTagged: formattedMessage.isTagged!,
                 }),
               );
             } else {
@@ -392,6 +466,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                   channelId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
                   serverId: formattedMessage.serverId!,
+                  isTagged: formattedMessage.isTagged!,
                 }),
               );
             }
@@ -417,6 +492,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                 changeChatReadedCount({
                   readChatId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
+                  isTagged: formattedMessage.isTagged!,
                 }),
               );
             } else {
@@ -481,9 +557,24 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         if (data.MessageType === 'User notified') {
           play();
 
+          const activeChannelId =
+            currentChannelIdValue ?? currentNotificationChannelIdValue;
+
           showMessage(
             formatNotification(data.Payload),
             notificationLifeTimeValue,
+            activeChannelId,
+          );
+        }
+
+        if (data.MessageType === 'User notified in chat') {
+          play();
+
+          showMessage(
+            formatNotification(data.Payload),
+            notificationLifeTimeValue,
+            currentChatIdValue,
+            true,
           );
         }
 
@@ -525,7 +616,8 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
               notifiable: data.Payload.Notifiable,
               friendshipApplication: data.Payload.FriendshipApplication,
               nonFriendMessage: data.Payload.NonFriendMessage,
-              isFriend: data.Payload.isFriend,
+              isFriend: data.Payload.IsFriend,
+              systemRoles: data.Payload.SystemRoles.map(formatSystemRoles),
             }),
           );
         }
@@ -554,6 +646,15 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           );
         }
 
+        if (data.MessageType === 'New icon on server') {
+          dispatch(
+            updateServerIcon({
+              serverId: data.Payload.ServerId,
+              icon: formatMessageFile(data.Payload.Icon),
+            }),
+          );
+        }
+
         if (
           data.MessageType === 'User voted in text channel' ||
           data.MessageType === 'User unvoted in text channel' ||
@@ -562,6 +663,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         ) {
           const formattedMessage = formatMessage(data.Payload);
 
+          console.log(formattedMessage);
           dispatch(updateVoteWs(formattedMessage));
         }
 

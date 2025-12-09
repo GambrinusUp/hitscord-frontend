@@ -3,6 +3,7 @@ import { createSlice, isAnyOf, PayloadAction } from '@reduxjs/toolkit';
 import {
   addRole,
   changeChannelName,
+  changeChannelNotifiable,
   changeNameOnServer,
   changeNotifiable,
   changeNotificationChannelSettings,
@@ -10,6 +11,7 @@ import {
   changeServerIcon,
   changeServerIsClosed,
   changeServerName,
+  changeSubChannelSettings,
   changeTextChannelSettings,
   changeVoiceChannelMaxCount,
   changeVoiceChannelSettings,
@@ -47,6 +49,7 @@ import {
 } from './ServerStore.types';
 
 import { MAX_MESSAGE_NUMBER } from '~/constants';
+import { FileResponse } from '~/entities/files';
 import { ServerTypeEnum } from '~/entities/servers';
 import { LoadingState } from '~/shared';
 import { UpdateRole } from '~/store/RolesStore/RolesStore.types';
@@ -119,8 +122,12 @@ const testServerSlice = createSlice({
     },
     setCurrentChannelId: (state, action: PayloadAction<string | null>) => {
       const channelId = action.payload;
-      state.currentChannelId = channelId;
 
+      if (state.currentChannelId === channelId) {
+        return;
+      }
+
+      state.currentChannelId = channelId;
       state.currentNotificationChannelId = null;
 
       if (channelId) {
@@ -146,6 +153,10 @@ const testServerSlice = createSlice({
       action: PayloadAction<string | null>,
     ) => {
       const channelId = action.payload;
+
+      if (state.currentNotificationChannelId === channelId) {
+        return;
+      }
       state.currentNotificationChannelId = channelId;
 
       state.currentChannelId = null;
@@ -409,7 +420,8 @@ const testServerSlice = createSlice({
       });
     },
     readMessageWs: (state, action: PayloadAction<ReadedMessageWs>) => {
-      const { readChannelId, readedMessageId, serverId } = action.payload;
+      const { readChannelId, readedMessageId, serverId, isTagged } =
+        action.payload;
 
       const indexTextChannel = state.serverData.channels.textChannels.findIndex(
         (channel) => channel.channelId === readChannelId,
@@ -419,6 +431,13 @@ const testServerSlice = createSlice({
         state.serverData.channels.textChannels[
           indexTextChannel
         ].nonReadedCount -= 1;
+
+        if (isTagged) {
+          state.serverData.channels.textChannels[
+            indexTextChannel
+          ].nonReadedTaggedCount -= 1;
+        }
+
         state.serverData.channels.textChannels[
           indexTextChannel
         ].lastReadedMessageId = readedMessageId;
@@ -433,6 +452,13 @@ const testServerSlice = createSlice({
         state.serverData.channels.notificationChannels[
           indexNotificationChannel
         ].nonReadedCount -= 1;
+
+        if (isTagged) {
+          state.serverData.channels.notificationChannels[
+            indexTextChannel
+          ].nonReadedTaggedCount -= 1;
+        }
+
         state.serverData.channels.notificationChannels[
           indexNotificationChannel
         ].lastReadedMessageId = readedMessageId;
@@ -447,7 +473,7 @@ const testServerSlice = createSlice({
       }
     },
     changeReadedCount: (state, action: PayloadAction<ChangeReadedCount>) => {
-      const { channelId, serverId } = action.payload;
+      const { channelId, serverId, isTagged } = action.payload;
 
       const indexTextChannel = state.serverData.channels.textChannels.findIndex(
         (channel) => channel.channelId === channelId,
@@ -457,6 +483,12 @@ const testServerSlice = createSlice({
         state.serverData.channels.textChannels[
           indexTextChannel
         ].nonReadedCount += 1;
+
+        if (isTagged) {
+          state.serverData.channels.textChannels[
+            indexTextChannel
+          ].nonReadedTaggedCount += 1;
+        }
       }
 
       const indexNotificationChannel =
@@ -468,6 +500,12 @@ const testServerSlice = createSlice({
         state.serverData.channels.notificationChannels[
           indexNotificationChannel
         ].nonReadedCount += 1;
+
+        if (isTagged) {
+          state.serverData.channels.notificationChannels[
+            indexTextChannel
+          ].nonReadedTaggedCount += 1;
+        }
       }
 
       const indexServer = state.serversList.findIndex(
@@ -565,6 +603,23 @@ const testServerSlice = createSlice({
       if (index !== -1) {
         state.messages[index] = action.payload;
       }
+    },
+    updateServerIcon: (
+      state,
+      action: PayloadAction<{
+        serverId: string;
+        icon: FileResponse;
+      }>,
+    ) => {
+      const { serverId, icon } = action.payload;
+
+      if (state.currentServerId === serverId) {
+        state.serverData.icon = icon;
+      }
+
+      state.serversList = state.serversList.map((server) =>
+        server.serverId === serverId ? { ...server, icon } : server,
+      );
     },
   },
   extraReducers: (builder) => {
@@ -974,6 +1029,32 @@ const testServerSlice = createSlice({
         }
       })
 
+      .addCase(changeChannelNotifiable.fulfilled, (state, { meta }) => {
+        const { channelId } = meta.arg;
+
+        const channelIndex = state.serverData.channels.textChannels.findIndex(
+          (channel) => channel.channelId === channelId,
+        );
+
+        if (channelIndex >= 0) {
+          state.serverData.channels.textChannels[channelIndex].isNotifiable =
+            !state.serverData.channels.textChannels[channelIndex].isNotifiable;
+        }
+
+        const notificationChannelIndex =
+          state.serverData.channels.notificationChannels.findIndex(
+            (channel) => channel.channelId === channelId,
+          );
+
+        if (notificationChannelIndex >= 0) {
+          state.serverData.channels.notificationChannels[
+            channelIndex
+          ].isNotifiable =
+            !state.serverData.channels.notificationChannels[channelIndex]
+              .isNotifiable;
+        }
+      })
+
       .addMatcher(
         isAnyOf(getChannelSettings.fulfilled),
         (state, action: PayloadAction<GetChannelSettings>) => {
@@ -985,6 +1066,7 @@ const testServerSlice = createSlice({
         isAnyOf(
           getChannelSettings.pending,
           changeTextChannelSettings.pending,
+          changeSubChannelSettings.pending,
           changeVoiceChannelSettings.pending,
           getBannedUsers.pending,
           unbanUser.pending,
@@ -992,6 +1074,7 @@ const testServerSlice = createSlice({
           changeNotificationChannelSettings.pending,
           changeServerIsClosed.pending,
           changeNotifiable.pending,
+          changeChannelNotifiable.pending,
         ),
         (state) => {
           state.error = '';
@@ -1000,6 +1083,7 @@ const testServerSlice = createSlice({
       .addMatcher(
         isAnyOf(
           changeTextChannelSettings.fulfilled,
+          changeSubChannelSettings.fulfilled,
           changeVoiceChannelSettings.fulfilled,
           changeNotificationChannelSettings.fulfilled,
         ),
@@ -1011,6 +1095,7 @@ const testServerSlice = createSlice({
         isAnyOf(
           getChannelSettings.rejected,
           changeTextChannelSettings.rejected,
+          changeSubChannelSettings.rejected,
           changeVoiceChannelSettings.rejected,
           getBannedUsers.rejected,
           unbanUser.rejected,
@@ -1018,6 +1103,7 @@ const testServerSlice = createSlice({
           changeNotificationChannelSettings.rejected,
           changeServerIsClosed.rejected,
           changeNotifiable.rejected,
+          changeChannelNotifiable.rejected,
         ),
         (state, action) => {
           state.error = action.payload as string;
@@ -1053,6 +1139,7 @@ export const {
   removeRoleFromUserWs,
   updateVoteWs,
   setCurrentNotificationChannelId,
+  updateServerIcon,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

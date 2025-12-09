@@ -1,5 +1,6 @@
 import { Flex, Group, Text } from '@mantine/core';
 import saveAs from 'file-saver';
+import { useState } from 'react';
 
 import { messageFilesStyles } from './MessageFiles.style';
 
@@ -8,6 +9,7 @@ import { getFile } from '~/entities/files';
 import { formatFileSize } from '~/entities/message/lib/formatFileSize';
 import { getFileIcon } from '~/entities/message/lib/getFileIcon';
 import { useNotification } from '~/hooks';
+import { useFileUploadNotification } from '~/shared/lib/hooks/useFileUploadNotification';
 
 interface MessageFilesProps {
   files: MessageFile[];
@@ -17,13 +19,19 @@ interface MessageFilesProps {
 /* Вынести в фичу */
 export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
   const { showError } = useNotification();
+  const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
+
+  useFileUploadNotification(loadingFileId !== null);
 
   const handleFileClick = async (file: MessageFile) => {
     try {
+      setLoadingFileId(file.fileId);
+
       const response = await getFile(channelId, file.fileId);
 
       if (!response.base64File) {
         console.error('Файл пустой или не содержит base64');
+        setLoadingFileId(null);
 
         return;
       }
@@ -39,6 +47,8 @@ export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
       saveAs(blob, response.fileName);
     } catch (error) {
       showError(`Ошибка загрузки файла: ${error}`);
+    } finally {
+      setLoadingFileId(null);
     }
   };
 

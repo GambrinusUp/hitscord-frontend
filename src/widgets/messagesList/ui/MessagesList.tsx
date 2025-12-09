@@ -52,6 +52,7 @@ export const MessagesList = ({
             }}
             key={message.id}
             data-message-id={message.id}
+            data-message-is-tagged={message.isTagged}
           >
             {message.messageType === ServerMessageType.Classic ? (
               <MessageItem
@@ -62,6 +63,7 @@ export const MessagesList = ({
                 modifiedAt={message.modifiedAt}
                 authorId={message.authorId}
                 channelId={message.channelId}
+                isTagged={message.isTagged}
                 files={message.files}
                 nestedChannel={message.nestedChannel}
                 EditMessage={(props) => (
@@ -90,6 +92,7 @@ export const MessagesList = ({
                 multiple={message.multiple!}
                 deadLine={message.deadline}
                 onReplyMessage={() => replyToMessage(message)}
+                totalUsers={message.totalUsers!}
               />
             )}
           </div>

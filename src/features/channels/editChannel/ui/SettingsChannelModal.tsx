@@ -1,5 +1,6 @@
 import { Modal, Stack, ScrollArea, Group, NavLink } from '@mantine/core';
 import {
+  Bell,
   Pencil,
   Trash2,
   UserRoundCog,
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+import { ChangeNotificationSetting } from './ChangeNotificationSetting';
 import { ChannelRoles } from './ChannelRoles';
 import { DeleteChannel } from './DeleteChannel';
 import { EditChannelName } from './EditChannelName';
@@ -34,17 +36,21 @@ export const SettingsChannelModal = ({
 }: SettingsChannelModalProps) => {
   const dispatch = useAppDispatch();
   const { accessToken } = useAppSelector((state) => state.userStore);
-  const { error } = useAppSelector((state) => state.testServerStore);
+  const { serverData, error } = useAppSelector(
+    (state) => state.testServerStore,
+  );
+  const canWorkChannels = serverData.permissions.canWorkChannels;
+
   const [activeSetting, setActiveSetting] = useState<
-    'name' | 'delete' | 'watchSettings' | 'settings' | 'count'
-  >('name');
+    'name' | 'delete' | 'watchSettings' | 'settings' | 'count' | 'notifiable'
+  >(canWorkChannels ? 'name' : 'notifiable');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (accessToken && opened) {
+    if (accessToken && canWorkChannels && opened) {
       dispatch(getChannelSettings({ accessToken, channelId }));
     }
-  }, [accessToken, opened]);
+  }, [accessToken, canWorkChannels, opened]);
 
   useEffect(() => {
     if (error !== '') {
@@ -67,30 +73,44 @@ export const SettingsChannelModal = ({
       <Group align="flex-start" gap="md">
         <Stack gap="xs" style={{ width: 200 }}>
           <NavLink
-            label="Название"
-            leftSection={<Pencil size={16} />}
-            active={activeSetting === 'name'}
-            onClick={() => setActiveSetting('name')}
+            label="Уведомления"
+            leftSection={<Bell size={16} />}
+            active={activeSetting === 'notifiable'}
+            onClick={() => setActiveSetting('notifiable')}
           />
-          <NavLink
-            label="Удаление"
-            leftSection={<Trash2 size={16} />}
-            active={activeSetting === 'delete'}
-            onClick={() => setActiveSetting('delete')}
-          />
-          <NavLink
-            label="Роли"
-            leftSection={<UserRoundCog size={16} />}
-            active={activeSetting === 'watchSettings'}
-            onClick={() => setActiveSetting('watchSettings')}
-          />
-          <NavLink
-            label="Настройки"
-            leftSection={<UserRoundPen size={16} />}
-            active={activeSetting === 'settings'}
-            onClick={() => setActiveSetting('settings')}
-          />
-          {channelType === ChannelType.VOICE_CHANNEL && (
+          {canWorkChannels && (
+            <NavLink
+              label="Название"
+              leftSection={<Pencil size={16} />}
+              active={activeSetting === 'name'}
+              onClick={() => setActiveSetting('name')}
+            />
+          )}
+          {canWorkChannels && (
+            <NavLink
+              label="Удаление"
+              leftSection={<Trash2 size={16} />}
+              active={activeSetting === 'delete'}
+              onClick={() => setActiveSetting('delete')}
+            />
+          )}
+          {canWorkChannels && (
+            <NavLink
+              label="Роли"
+              leftSection={<UserRoundCog size={16} />}
+              active={activeSetting === 'watchSettings'}
+              onClick={() => setActiveSetting('watchSettings')}
+            />
+          )}
+          {canWorkChannels && (
+            <NavLink
+              label="Настройки"
+              leftSection={<UserRoundPen size={16} />}
+              active={activeSetting === 'settings'}
+              onClick={() => setActiveSetting('settings')}
+            />
+          )}
+          {canWorkChannels && channelType === ChannelType.VOICE_CHANNEL && (
             <NavLink
               label="Настройка числа пользователей"
               leftSection={<UsersRound size={16} />}
@@ -100,6 +120,9 @@ export const SettingsChannelModal = ({
           )}
         </Stack>
         <ScrollArea>
+          {activeSetting === 'notifiable' && (
+            <ChangeNotificationSetting channelId={channelId} />
+          )}
           {activeSetting === 'name' && (
             <EditChannelName
               channelName={channelName}

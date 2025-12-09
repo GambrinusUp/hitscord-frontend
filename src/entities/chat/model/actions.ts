@@ -10,6 +10,8 @@ import {
 } from './types';
 
 import { ChatsAPI } from '~/entities/chat/api';
+import { FileResponse } from '~/entities/files';
+import { ERROR_MESSAGES } from '~/shared/constants';
 import { RootState } from '~/store/store';
 
 export const createChat = createAsyncThunk<
@@ -204,3 +206,45 @@ export const goOutFromChat = createAsyncThunk<
     return rejectWithValue('Произошла ошибка');
   }
 });
+
+export const changeChatIcon = createAsyncThunk<
+  FileResponse,
+  { chatId: string; icon: File },
+  { rejectValue: string }
+>(
+  'chatsSlice/changeChatIcon',
+  async ({ chatId, icon }, { rejectWithValue }) => {
+    try {
+      const response = await ChatsAPI.changeChatIcon(chatId, icon);
+
+      return response;
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        return rejectWithValue(
+          e.response?.data?.message || ERROR_MESSAGES.DEFAULT,
+        );
+      }
+
+      return rejectWithValue(ERROR_MESSAGES.DEFAULT);
+    }
+  },
+);
+
+export const changeChatNotifiable = createAsyncThunk<
+  void,
+  { chatId: string },
+  { rejectValue: string }
+>(
+  'chatsSlice/changeChatNotifiable',
+  async ({ chatId }, { rejectWithValue }) => {
+    try {
+      await ChatsAPI.changeChatNotifiable(chatId);
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
+    }
+  },
+);

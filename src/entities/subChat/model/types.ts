@@ -3,6 +3,7 @@ import { ChannelMessage } from '~/store/ServerStore';
 
 export interface SubChatState {
   currentSubChatId: string | null;
+  subChatInfo: SubChatInfo | null;
   messages: ChannelMessage[];
   messagesStatus: LoadingState;
   messageIsLoading: LoadingState;
@@ -28,4 +29,11 @@ export interface GetMessagesParams {
   number: number;
   fromMessageId: number;
   down: boolean;
+}
+
+export interface SubChatInfo {
+  subChannelId: string;
+  canUse: boolean;
+  isNotifiable: boolean;
+  isOwner: boolean;
 }

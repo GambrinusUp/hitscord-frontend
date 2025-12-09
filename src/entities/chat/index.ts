@@ -15,6 +15,8 @@ export {
   changeChatName,
   addUserInChat,
   goOutFromChat,
+  changeChatIcon,
+  changeChatNotifiable,
 } from './model/actions';
 
 export {

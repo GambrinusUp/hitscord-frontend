@@ -22,7 +22,6 @@ import {
   checkUserVotedAll,
 } from '~/entities/vote/lib/checkUserVoted';
 import { getInitialData } from '~/entities/vote/lib/getInitialData';
-import { useVotes } from '~/entities/vote/lib/useVotes';
 import { PollItemProps, VoteVariantsForm } from '~/entities/vote/model/types';
 import { formatDateTime } from '~/helpers';
 import { useAppSelector } from '~/hooks';
@@ -41,6 +40,7 @@ export const PollItem = ({
   multiple,
   deadLine,
   onReplyMessage,
+  totalUsers,
 }: PollItemProps) => {
   const { accessToken, user } = useAppSelector((state) => state.userStore);
   const { currentChannelId, currentNotificationChannelId } = useAppSelector(
@@ -48,7 +48,6 @@ export const PollItem = ({
   );
   const { activeChat } = useAppSelector((state) => state.chatsStore);
   const { getUsername, getUserIcon } = useMessageAuthor(type);
-  const { getVotedUsers } = useVotes();
   const { vote, unVote, deleteMessage, deleteChatMessage } = useWebSocket();
   const [isHovered, setIsHovered] = useState(false);
 
@@ -69,7 +68,9 @@ export const PollItem = ({
     [getUserIcon, authorId],
   );
   const userVoted = checkUserVotedAll(variants, userId);
-  const deadlinePassed = deadLine && new Date(deadLine).getTime() < Date.now();
+  const deadlinePassed =
+    !!deadLine && new Date(deadLine).getTime() < Date.now();
+
   const { iconBase64 } = useIcon(userIcon);
 
   const handleVote = (index: number, variantId: string) => {
@@ -197,7 +198,12 @@ export const PollItem = ({
               )}
               {variants.map((variant, index) => {
                 const userVote = checkUserVoted(variant, userId);
-                const usersVotedPercent = getVotedUsers(variant.votedUserIds);
+                const usersVotedPercent =
+                  totalUsers > 0
+                    ? Math.round(
+                        (variant.votedUserIds.length / totalUsers) * 100,
+                      )
+                    : 0;
                 const disabled =
                   deadlinePassed || (!multiple && userVoted && !userVote);
 
@@ -207,9 +213,7 @@ export const PollItem = ({
                     style={pollItemStyles.box(disabled)}
                     onClick={() => !disabled && handleVote(index, variant.id)}
                   >
-                    {userVoted && (
-                      <Box style={pollItemStyles.vote(usersVotedPercent)} />
-                    )}
+                    <Box style={pollItemStyles.vote(usersVotedPercent)} />
 
                     <Group
                       justify="space-between"
@@ -245,11 +249,9 @@ export const PollItem = ({
                         </Text>
                       </Group>
 
-                      {userVoted && (
-                        <Text size="xs" c="gray.4">
-                          {usersVotedPercent}%
-                        </Text>
-                      )}
+                      <Text size="xs" c="gray.4">
+                        {usersVotedPercent}%
+                      </Text>
                     </Group>
                   </Box>
                 );
@@ -257,12 +259,9 @@ export const PollItem = ({
             </Stack>
           </Card>
 
-          {userVoted && (
-            <Text size="xs" c="gray.5" ta="center">
-              Всего проголосовавших:{' '}
-              {variants.reduce((acc, v) => acc + v.votedUserIds.length, 0)}
-            </Text>
-          )}
+          <Text size="xs" c="gray.5" ta="center">
+            Всего проголосовавших: {totalUsers}
+          </Text>
         </Stack>
       </Group>
     </Group>

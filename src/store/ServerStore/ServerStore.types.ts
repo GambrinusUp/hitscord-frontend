@@ -1,5 +1,6 @@
 import { MessageFile } from '~/entities/chat';
 import { FileResponse } from '~/entities/files';
+import { SystemRole } from '~/entities/presets';
 import { ServerTypeEnum } from '~/entities/servers';
 import { LoadingState } from '~/shared';
 import { RoleType } from '~/store/RolesStore';
@@ -67,6 +68,7 @@ export interface ChannelMessage {
   authorId: string;
   createdAt: string;
   replyToMessage: ReplyMessage | null;
+  isTagged?: boolean;
 
   text?: string | null;
   modifiedAt?: string | null;
@@ -79,6 +81,7 @@ export interface ChannelMessage {
   multiple?: boolean;
   deadline?: string | null;
   variants?: VoteVariant[];
+  totalUsers?: number;
 }
 
 export interface GetMessage {
@@ -115,6 +118,7 @@ export interface UserOnServer {
   friendshipApplication: boolean;
   nonFriendMessage: boolean;
   isFriend: boolean;
+  systemRoles: Omit<SystemRole, 'id' | 'childRoles'>[];
 }
 
 export interface TextChannel {
@@ -126,6 +130,7 @@ export interface TextChannel {
   nonReadedCount: number;
   nonReadedTaggedCount: number;
   lastReadedMessageId: number;
+  rolesCanWrite: UserRoleOnServer[];
 }
 
 export enum MuteStatus {
@@ -302,10 +307,12 @@ export interface ChangeReadedCount {
   serverId: string;
   channelId: string;
   readedMessageId: number;
+  isTagged: boolean;
 }
 
 export interface ReadedMessageWs {
   readChannelId: string;
   readedMessageId: number;
   serverId: string | null;
+  isTagged: boolean;
 }

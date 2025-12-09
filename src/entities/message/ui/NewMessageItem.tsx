@@ -12,13 +12,13 @@ import {
 import { EllipsisVertical, Reply } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { MessageFiles } from './NewMessageFiles';
+import { MessageFiles } from './MessageFiles';
 import { messageItemStyles } from './MessageItem.style';
 
 import { formatMessage } from '~/entities/message/lib/formatMessage';
 import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
 import { MessageItemProps } from '~/entities/message/model/types';
-import { setCurrentSubChatId } from '~/entities/subChat';
+import { setCurrentSubChatId, setSubChatInfo } from '~/entities/subChat';
 import { formatDateTime } from '~/helpers';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { useIcon } from '~/shared/lib/hooks';
@@ -38,6 +38,7 @@ export const MessageItem = ({
   EditMessage,
   MessageActions,
   nestedChannel,
+  isTagged,
 }: MessageItemProps) => {
   const dispatch = useAppDispatch();
   const { serverData, currentChannelId, currentNotificationChannelId } =
@@ -67,6 +68,14 @@ export const MessageItem = ({
 
   const handleOpenSubChat = (subChannelId: string | undefined) => {
     dispatch(setCurrentSubChatId(subChannelId!));
+    dispatch(
+      setSubChatInfo({
+        subChannelId: subChannelId!,
+        canUse: nestedChannel!.canUse!,
+        isNotifiable: nestedChannel!.isNotifiable!,
+        isOwner: isOwnMessage,
+      }),
+    );
   };
 
   return (
@@ -143,7 +152,7 @@ export const MessageItem = ({
               </Text>
             )}
           </Group>
-          <Box style={messageItemStyles.box(isOwnMessage, isEditing)}>
+          <Box style={messageItemStyles.box(isOwnMessage, isEditing, isTagged)}>
             {replyMessage && (
               <Notification
                 title={
@@ -167,7 +176,7 @@ export const MessageItem = ({
               <Text
                 style={messageItemStyles.breakText()}
                 dangerouslySetInnerHTML={{
-                  __html: formatMessage(content),
+                  __html: content ? formatMessage(content) : '',
                 }}
               />
             )}

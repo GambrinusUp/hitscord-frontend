@@ -1,4 +1,4 @@
-import { ATTACH_FILE, GET_FILE, GET_ICON } from './const';
+import { ATTACH_FILE, GET_FILE, GET_ICON, REMOVE_FILE } from './const';
 
 import { FileResponse } from '~/entities/files/model/types';
 import { api } from '~/shared/api';
@@ -33,4 +33,12 @@ export const attachFile = async (
   });
 
   return data;
+};
+
+export const removeFile = async (fileId: string): Promise<void> => {
+  await api.delete(REMOVE_FILE, {
+    data: {
+      id: fileId,
+    },
+  });
 };

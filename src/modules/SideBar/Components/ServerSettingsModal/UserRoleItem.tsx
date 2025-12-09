@@ -12,6 +12,7 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { RoleType } from '~/store/RolesStore';
 import { addRole, removeRole, UserOnServer } from '~/store/ServerStore';
 
 export interface UserRoleItemProps {
@@ -30,12 +31,14 @@ export const UserRoleItem = ({ user }: UserRoleItemProps) => {
   const [newRole, setNewRole] = useState<string | null>(null);
 
   const { roles } = serverData;
-  const rolesValues = roles.map((role) => {
-    return {
-      value: role.id,
-      label: role.name,
-    };
-  });
+  const rolesValues = roles
+    .filter((role) => role.type !== RoleType.Creator)
+    .map((role) => {
+      return {
+        value: role.id,
+        label: role.name,
+      };
+    });
 
   const handleAddRole = async () => {
     setLoading(true);

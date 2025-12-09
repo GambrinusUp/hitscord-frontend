@@ -736,3 +736,37 @@ export const changeNotifiable = createAsyncThunk<
     }
   },
 );
+
+export const changeChannelNotifiable = createAsyncThunk<
+  void,
+  { accessToken: string; channelId: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeChannelNotifiable',
+  async ({ accessToken, channelId }, { rejectWithValue }) => {
+    try {
+      await ChannelsAPI.changeChannelNotifiable(accessToken, channelId);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);
+
+export const changeSubChannelSettings = createAsyncThunk<
+  void,
+  { accessToken: string; settings: ChannelSettings },
+  { rejectValue: string }
+>(
+  'testServerSlice/changeSubChannelSettings',
+  async ({ accessToken, settings }, { rejectWithValue }) => {
+    try {
+      await ChannelsAPI.changeSubChannelSettings(accessToken, settings);
+    } catch (e) {
+      return rejectWithValue(
+        e instanceof Error ? e.message : 'Неизвестная ошибка',
+      );
+    }
+  },
+);

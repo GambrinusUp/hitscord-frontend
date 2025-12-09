@@ -65,3 +65,13 @@ export interface SettingsForm {
   nonFriendMessage: boolean;
   notificationLifeTime: number;
 }
+
+export interface UserData {
+  userId: string;
+  userName: string;
+  userTag: string;
+  icon: FileResponse | null;
+  notifiable: boolean;
+  friendshipApplication: boolean;
+  nonFriendMessage: boolean;
+}

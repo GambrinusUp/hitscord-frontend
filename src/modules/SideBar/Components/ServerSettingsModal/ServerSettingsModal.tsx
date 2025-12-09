@@ -14,6 +14,7 @@ import {
   ImageUp,
   LockOpen,
   Plus,
+  Trash,
   UserCheck,
   UserMinus,
 } from 'lucide-react';
@@ -24,6 +25,7 @@ import { UserRoleItem } from './UserRoleItem';
 
 import {
   ChangeServerIsClosed,
+  DeleteServer,
   ServerApplications,
   UnbanUser,
 } from '~/features/server';
@@ -51,6 +53,7 @@ export const ServerSettingsModal = ({
     | 'changeIcon'
     | 'changeIsClosed'
     | 'serverApplications'
+    | 'deleteServer'
   >('roles');
   //const [assignRoleUserId, setAssignRoleUserId] = useState<string | null>('');
   //const [assignRoleId, setAssignRoleId] = useState<string | null>('');
@@ -216,6 +219,14 @@ export const ServerSettingsModal = ({
               onClick={() => setActiveSetting('serverApplications')}
             />
           )}
+          {isCreator && (
+            <NavLink
+              label="Удаление сервера"
+              leftSection={<Trash size={16} />}
+              active={activeSetting === 'deleteServer'}
+              onClick={() => setActiveSetting('deleteServer')}
+            />
+          )}
         </Stack>
         <ScrollArea>
           {activeSetting === 'roles' && (
@@ -292,6 +303,7 @@ export const ServerSettingsModal = ({
           {activeSetting === 'changeIcon' && <IconChange />}
           {activeSetting === 'changeIsClosed' && <ChangeServerIsClosed />}
           {activeSetting === 'serverApplications' && <ServerApplications />}
+          {activeSetting === 'deleteServer' && <DeleteServer />}
         </ScrollArea>
       </Group>
     </Modal>

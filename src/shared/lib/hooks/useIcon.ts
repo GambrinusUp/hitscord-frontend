@@ -4,6 +4,7 @@ import { getIcon } from '~/entities/files';
 
 const iconCache = new Map<string, string>();
 const failedToLoad = new Set<string>();
+const iconLoadingMap = new Map<string, Promise<string>>();
 
 export const useIcon = (fileId?: string, options: { skip?: boolean } = {}) => {
   const [iconBase64, setIconBase64] = useState<string | null>(null);
@@ -30,28 +31,40 @@ export const useIcon = (fileId?: string, options: { skip?: boolean } = {}) => {
       return;
     }
 
-    const fetchIcon = async () => {
-      setLoading(true);
-      setError(null);
+    let promise = iconLoadingMap.get(fileId);
 
-      try {
-        const iconData = await getIcon(fileId);
-        const dataUrl = `data:${iconData.fileType};base64,${iconData.base64File}`;
+    if (!promise) {
+      promise = getIcon(fileId)
+        .then((iconData) => {
+          const dataUrl = `data:${iconData.fileType};base64,${iconData.base64File}`;
+          iconCache.set(fileId, dataUrl);
+          failedToLoad.delete(fileId);
 
-        iconCache.set(fileId, dataUrl);
-        failedToLoad.delete(fileId);
+          return dataUrl;
+        })
+        .catch((err) => {
+          console.error('Error fetching icon:', err);
+          failedToLoad.add(fileId);
+          throw err;
+        })
+        .finally(() => {
+          iconLoadingMap.delete(fileId);
+        });
+
+      iconLoadingMap.set(fileId, promise);
+    }
+
+    setLoading(true);
+    promise
+      .then((dataUrl) => {
         setIconBase64(dataUrl);
-      } catch (err) {
-        console.error('Error fetching icon:', err);
-        setError('Failed to load icon');
+        setError(null);
+      })
+      .catch(() => {
         setIconBase64(null);
-        failedToLoad.add(fileId);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchIcon();
+        setError('Failed to load icon');
+      })
+      .finally(() => setLoading(false));
   }, [fileId, options.skip]);
 
   const refetch = async () => {
@@ -59,17 +72,22 @@ export const useIcon = (fileId?: string, options: { skip?: boolean } = {}) => {
 
     iconCache.delete(fileId);
     failedToLoad.delete(fileId);
+    iconLoadingMap.delete(fileId);
 
     setLoading(true);
+
     try {
       const iconData = await getIcon(fileId);
       const dataUrl = `data:${iconData.fileType};base64,${iconData.base64File}`;
+
       iconCache.set(fileId, dataUrl);
       setIconBase64(dataUrl);
+      setError(null);
     } catch (err) {
       console.error('Error refetching icon:', err);
       setError('Failed to reload icon');
       failedToLoad.add(fileId);
+      setIconBase64(null);
     } finally {
       setLoading(false);
     }

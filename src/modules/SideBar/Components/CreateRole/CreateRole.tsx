@@ -14,8 +14,23 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
   const [roleName, setRoleName] = useState('');
   const [color, setColor] = useState('#ffffff');
+  const [colorError, setColorError] = useState('');
+
+  const validateColor = (value: string): boolean => {
+    const colorRegex = /^#([A-Fa-f0-9]{6})$/;
+
+    return colorRegex.test(value);
+  };
 
   const handleCreateRole = async () => {
+    if (!validateColor(color)) {
+      setColorError('Цвет должен быть в формате #000000');
+
+      return;
+    }
+
+    setColorError('');
+
     if (
       roleName.trim().length > 1 &&
       color.trim().length > 1 &&
@@ -33,10 +48,13 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
         showSuccess('Роль успешно создана');
         setRoleName('');
         setColor('#ffffff');
+        setColorError('');
         onClose();
       }
     }
   };
+
+  const isButtonDisabled = roleName.trim().length < 1 || !validateColor(color);
 
   return (
     <Modal
@@ -58,13 +76,21 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
           label="Выберите цвет"
           placeholder="#000000"
           value={color}
-          onChange={setColor}
+          onChange={(value) => {
+            setColor(value);
+
+            if (validateColor(value)) {
+              setColorError('');
+            }
+          }}
+          error={colorError}
         />
         <Button
           leftSection={<Save />}
           variant="light"
           radius="md"
           onClick={handleCreateRole}
+          disabled={isButtonDisabled}
         >
           Создать
         </Button>

@@ -92,13 +92,13 @@ export const createServer = async (
 export const deleteServer = async (accessToken: string, serverId: string) => {
   try {
     const response = await fetch(`${API_URL}/api/server/delete`, {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        serverId: serverId,
+        serverId,
       }),
     });
 

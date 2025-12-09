@@ -1,4 +1,5 @@
 import { FileResponse } from '~/entities/files';
+import { SystemRole } from '~/entities/presets';
 import { LoadingState } from '~/shared/types';
 import { NestedChannel } from '~/store/ServerStore';
 
@@ -25,6 +26,7 @@ export interface UserInChat {
   friendshipApplication: boolean;
   nonFriendMessage: boolean;
   isFriend: boolean;
+  systemRoles: Omit<SystemRole, 'id' | 'childRoles'>[];
 }
 
 export interface ChatInfo {
@@ -79,6 +81,7 @@ export interface ChatMessage {
   authorId: string;
   createdAt: string;
   replyToMessage: ReplyMessage | null;
+  isTagged?: boolean;
 
   text?: string | null;
   modifiedAt?: string | null;
@@ -91,6 +94,7 @@ export interface ChatMessage {
   multiple?: boolean;
   deadline?: string | null;
   variants?: VoteVariant[];
+  totalUsers?: number;
 }
 
 export interface ChatsState {

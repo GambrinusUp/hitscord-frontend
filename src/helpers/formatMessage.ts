@@ -34,67 +34,17 @@ export const formatVoteVariant = (rawVariant: any): VoteVariant => ({
   totalVotes: rawVariant.TotalVotes,
   votedUserIds: rawVariant.VotedUserIds, // Предполагается массив строк/чисел
 });
-
+/*
+ "SubChannelId": "8d7c458e-f063-442b-b129-60c160ccad9b",
+            "CanUse": true,
+            "IsNotifiable": true
+*/
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const formatNestedChannel = (rawNestedChannel: any): NestedChannel => ({
   subChannelId: rawNestedChannel.SubChannelId,
-  rolesCanUse: rawNestedChannel.RolesCanUse,
+  canUse: rawNestedChannel.CanUse,
+  isNotifiable: rawNestedChannel.IsNotifiable,
 });
-
-/*export const formatMessage = (rawMessage: any): ChannelMessage => {
-  let messageType: MessageType = MessageType.Classic;
-  let poll: Poll | null = null;
-
-  if (rawMessage.MessageType === 'Vote') {
-    messageType = MessageType.Vote;
-    poll = formatPoll(rawMessage);
-  }
-
-  if (rawMessage.Payload && rawMessage.Payload.MessageType === 'Vote') {
-    messageType = MessageType.Vote;
-    poll = formatPoll(rawMessage.Payload);
-    const text = rawMessage.Payload.Content;
-    const commonFields = {
-      text: text,
-      modifiedAt: rawMessage.Payload.ModifiedAt || null,
-      nestedChannel: rawMessage.Payload.NestedChannelId || null,
-      files: rawMessage.Payload.Files
-        ? rawMessage.Payload.Files.map(formatMessageFile)
-        : null,
-      messageType: messageType,
-      serverId: rawMessage.Payload.ServerId || null,
-      channelId: rawMessage.Payload.ChannelId,
-      id: rawMessage.Payload.Id,
-      authorId: rawMessage.Payload.AuthorId,
-      createdAt: rawMessage.Payload.CreatedAt,
-      replyToMessage: rawMessage.Payload.ReplyToMessage
-        ? formatReplyMessage(rawMessage.Payload.ReplyToMessage)
-        : null,
-      poll: poll,
-    };
-
-    return commonFields;
-  } else {
-    return {
-      text: rawMessage.Payload.Text,
-      modifiedAt: rawMessage.Payload.ModifiedAt || null,
-      nestedChannel: rawMessage.Payload.NestedChannelId || null,
-      files: rawMessage.Payload.Files
-        ? rawMessage.Payload.Files.map(formatMessageFile)
-        : null,
-      messageType: MessageType.Classic,
-      serverId: rawMessage.Payload.ServerId || null,
-      channelId: rawMessage.Payload.ChannelId,
-      id: rawMessage.Payload.Id,
-      authorId: rawMessage.Payload.AuthorId,
-      createdAt: rawMessage.Payload.CreatedAt,
-      replyToMessage: rawMessage.Payload.ReplyToMessage
-        ? formatReplyMessage(rawMessage.Payload.ReplyToMessage)
-        : null,
-      poll: null,
-    };
-  }
-};*/
 
 export const formatMessage = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -114,6 +64,7 @@ export const formatMessage = (
     replyToMessage: rawMessage.ReplyToMessage
       ? formatReplyMessage(rawMessage.ReplyToMessage)
       : null,
+    isTagged: rawMessage.isTagged || false,
   };
 
   if (messageType === MessageType.Classic) {
@@ -137,6 +88,7 @@ export const formatMessage = (
       variants: rawMessage.Variants
         ? rawMessage.Variants.map(formatVoteVariant)
         : [],
+      totalUsers: rawMessage.TotalUsers,
     };
   }
 
@@ -162,6 +114,7 @@ export const formatChatMessage = (rawMessage: any): ChatMessage => {
     replyToMessage: rawMessage.ReplyToMessage
       ? formatReplyMessage(rawMessage.ReplyToMessage)
       : null,
+    isTagged: rawMessage.isTagged || false,
   };
 
   if (messageType === MessageType.Classic) {
@@ -185,6 +138,7 @@ export const formatChatMessage = (rawMessage: any): ChatMessage => {
       variants: rawMessage.Variants
         ? rawMessage.Variants.map(formatVoteVariant)
         : [],
+      totalUsers: rawMessage.TotalUsers,
     };
   }
 
