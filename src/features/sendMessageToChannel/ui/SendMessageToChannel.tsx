@@ -20,7 +20,7 @@ export const SendMessageToChannel = () => {
   const [message, setMessage] = useState('');
 
   const handleSendMessage = () => {
-    if (message.trim() && chat.chatId) {
+    if (message.trim() && chat.chatId && ((message.trim()).length > 0 || uploadedFiles.length > 0)) {
       sendChatMessage({
         Token: accessToken,
         ChannelId: chat.chatId,
@@ -37,7 +37,7 @@ export const SendMessageToChannel = () => {
   };
 
   const handleCreateSubchat = () => {
-    if (message.trim() && chat.chatId) {
+    if (message.trim() && chat.chatId && ((message.trim()).length > 0 || uploadedFiles.length > 0)) {
       sendChatMessage({
         Token: accessToken,
         ChannelId: chat.chatId,
@@ -70,6 +70,8 @@ export const SendMessageToChannel = () => {
     e.target.value = '';
   };
 
+  const disabled = (message.trim()).length > 0 || uploadedFiles.length > 0;
+
   return (
     <Group mt="auto" align="center" wrap="nowrap" gap={0}>
       <ActionIcon
@@ -81,7 +83,7 @@ export const SendMessageToChannel = () => {
         <Paperclip size={20} />
         <input type="file" hidden multiple onChange={handleFileChange} />
       </ActionIcon>
-      <ActionIcon size="xl" variant="transparent" onClick={handleCreateSubchat}>
+      <ActionIcon size="xl" variant="transparent" disabled={!disabled} onClick={handleCreateSubchat}>
         <MessageSquarePlus size={20} />
       </ActionIcon>
       <Textarea
@@ -94,7 +96,7 @@ export const SendMessageToChannel = () => {
         minRows={1}
         maxRows={3}
       />
-      <ActionIcon size="xl" variant="transparent" onClick={handleSendMessage}>
+      <ActionIcon size="xl" variant="transparent" disabled={!disabled} onClick={handleSendMessage}>
         <Send size={20} />
       </ActionIcon>
     </Group>

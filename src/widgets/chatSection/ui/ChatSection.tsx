@@ -100,7 +100,7 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
   });
 
   const handleSendMessage = () => {
-    if (message.trim() && chat.chatId) {
+    if (message.trim() && chat.chatId && ((message.trim()).length > 0 || uploadedFiles.length > 0)) {
       sendChatMessage({
         Token: accessToken,
         ChannelId: chat.chatId,
@@ -166,6 +166,8 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
   const handleBack = () => {
     dispatch(setActiveChat(null));
   };
+
+  const disabled = (message.trim()).length > 0 || uploadedFiles.length > 0;
 
   return (
     <>
@@ -321,6 +323,7 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
             <ActionIcon
               size="xl"
               variant="transparent"
+              disabled={!disabled}
               onClick={handleSendMessage}
             >
               <Send size={20} />

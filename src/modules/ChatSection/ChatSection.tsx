@@ -106,8 +106,10 @@ export const ChatSection = ({
     setNewMessage,
   });
 
+  const disabled = (newMessage.trim()).length > 0 || uploadedFiles.length > 0;
+
   const handleSendMessage = (nestedChannel: boolean) => {
-    if (currentServerId && activeChannelId) {
+    if (currentServerId && activeChannelId && ((newMessage.trim()).length > 0 || uploadedFiles.length > 0)) {
       sendMessage({
         Token: accessToken,
         ChannelId: activeChannelId,
@@ -331,6 +333,7 @@ export const ChatSection = ({
               <ActionIcon
                 size="xl"
                 variant="transparent"
+                disabled={!disabled}
                 onClick={() => handleSendMessage(true)}
               >
                 <MessageSquarePlus size={20} />
@@ -352,7 +355,8 @@ export const ChatSection = ({
               <ActionIcon
                 size="xl"
                 variant="transparent"
-                onClick={() => handleSendMessage(false)}
+                disabled={!disabled}
+                onClick={() => {handleSendMessage(false)}}
               >
                 <Send size={20} />
               </ActionIcon>
