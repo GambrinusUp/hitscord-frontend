@@ -19,6 +19,7 @@ import {
 import {
   addApplicationTo,
   addApplicationFrom,
+  approveApplicationTo,
   approveApplicationFrom,
   removeApplicationTo,
   removeApplicationFrom,
@@ -718,6 +719,11 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           const formattedApplication = formatApplication(data.Payload);
 
           dispatch(approveApplicationFrom(formattedApplication));
+        }
+
+        if (data.MessageType === 'You approved application') {
+          const formattedApplication = formatApplication(data.Payload);
+          dispatch(approveApplicationTo(formattedApplication));
         }
 
         if (data.MessageType === 'Friendship deleted') {

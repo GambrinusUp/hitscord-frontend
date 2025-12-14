@@ -43,6 +43,10 @@ export const FriendshipSlice = createSlice({
         (application) => application.id !== action.payload,
       );
     },
+    approveApplicationTo: (state, action: PayloadAction<Application>) => {
+      const { user } = action.payload;
+      state.friendshipList.push(user);
+    },
     approveApplicationFrom: (state, action: PayloadAction<Application>) => {
       const { user } = action.payload;
 
@@ -139,6 +143,7 @@ export const {
   addApplicationFrom,
   removeApplicationFrom,
   removeApplicationTo,
+  approveApplicationTo,
   approveApplicationFrom,
   removeFriend,
 } = FriendshipSlice.actions;

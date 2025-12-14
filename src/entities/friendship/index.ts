@@ -4,6 +4,7 @@ export {
   addApplicationFrom,
   removeApplicationTo,
   removeApplicationFrom,
+  approveApplicationTo,
   approveApplicationFrom,
   removeFriend,
 } from './model/slice';
