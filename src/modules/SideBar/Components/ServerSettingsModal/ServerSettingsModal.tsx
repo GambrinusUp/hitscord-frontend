@@ -142,7 +142,7 @@ export const ServerSettingsModal = ({
       rolesLoading === LoadingState.IDLE &&
       currentServerId
     ) {
-      console.log(canCreateRoles);
+      //console.log(canCreateRoles);
       dispatch(getRoles({ accessToken, serverId: currentServerId }));
     }
   }, [rolesLoading, currentServerId]);

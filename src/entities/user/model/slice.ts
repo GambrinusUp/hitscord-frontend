@@ -80,7 +80,7 @@ export const UserSlice = createSlice({
       .addCase(
         loginUser.fulfilled,
         (state, action: PayloadAction<LoginResponse>) => {
-          console.log(action.payload);
+          //console.log(action.payload);
 
           state.error = '';
           state.accessToken = action.payload.accessToken;

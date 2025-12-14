@@ -247,7 +247,7 @@ export const useMessages = (
             if (!targetId) return;
 
             if (messageId > lastReadedMessageId) {
-              console.log('read message', messageId);
+              //console.log('read message', messageId);
 
               readMessage({
                 Token: accessToken,

@@ -96,16 +96,17 @@ export const VoiceChannels = () => {
   };
 
   const handleKickUser = (socketId: string) => {
-    console.log(socketId);
+    //console.log(socketId);
     socket.emit(
       'kickUser',
       { targetSocketId: socketId },
+      // eslint-disable-next-line unused-imports/no-unused-vars
       (response: { success: boolean; message: string }) => {
-        if (response.success) {
+        /*if (response.success) {
           console.log('Пользователь успешно кикнут:', response.message);
         } else {
           console.error('Ошибка кикания пользователя:', response.message);
-        }
+        }*/
       },
     );
   };
@@ -134,7 +135,7 @@ export const VoiceChannels = () => {
 
   const handleMuteUser = (userId: string, isMuted: boolean | undefined) => {
     if (!isMuted || isMuted === undefined) {
-      console.log(userId, isMuted, socket);
+      //console.log(userId, isMuted, socket);
       socket.emit('muteUserById', { userId });
     } else {
       socket.emit('unmuteUserById', { userId });

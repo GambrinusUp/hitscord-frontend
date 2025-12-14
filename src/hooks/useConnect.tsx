@@ -50,7 +50,7 @@ export const useConnect = () => {
       setProducerTransport(producerTransport);
 
       setIsConnected(true);
-      console.log('Connected successfully');
+      //console.log('Connected successfully');
     } catch (error) {
       console.error('Error connecting:', error);
       setIsConnected(false);

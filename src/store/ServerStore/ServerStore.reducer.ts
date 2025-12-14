@@ -214,8 +214,8 @@ const testServerSlice = createSlice({
     },
     // Проверку на добавление на конкретном сервере
     addUserWs: (state, action: PayloadAction<UserOnServer>) => {
-      console.log(state.currentServerId);
-      console.log(state.serverData.users);
+      //console.log(state.currentServerId);
+      //console.log(state.serverData.users);
       state.serverData.users.push(action.payload);
     },
     deleteUserWs: (
@@ -643,7 +643,7 @@ const testServerSlice = createSlice({
       .addCase(
         getUserServers.fulfilled,
         (state, action: PayloadAction<ServerItem[]>) => {
-          console.log(action.payload);
+          //console.log(action.payload);
           state.serversList = action.payload;
           state.isLoading = false;
           state.error = '';
@@ -974,7 +974,7 @@ const testServerSlice = createSlice({
       .addCase(
         getBannedUsers.fulfilled,
         (state, action: PayloadAction<BannedUserResponse>) => {
-          console.log(action.payload);
+          //console.log(action.payload);
           state.bannedUsers = action.payload.bannedList;
           state.pageBannedUsers = action.payload.page;
           state.totalPagesBannedUsers = action.payload.total;

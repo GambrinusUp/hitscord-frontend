@@ -96,7 +96,7 @@ export const ApiProvider = ({ children }: Props) => {
 
             return api(originalRequest);
           } catch (refreshError) {
-            console.log(refreshError)
+            //console.log(refreshError)
             processQueue(refreshError, null);
             dispatch(clearTokens());
             localStorage.setItem(TokenType.ACCESS, '');

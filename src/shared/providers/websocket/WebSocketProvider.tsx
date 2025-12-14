@@ -157,7 +157,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         const currentChatIdValue = currentChatIdRef.current;
         const userIdValue = userIdRef.current;
 
-        console.log(data);
+        //console.log(data);
 
         if (data.MessageType === 'New user on server') {
           const formattedUser = formatUser(data.Payload);
@@ -665,7 +665,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         ) {
           const formattedMessage = formatMessage(data.Payload);
 
-          console.log(formattedMessage);
+          //console.log(formattedMessage);
           dispatch(updateVoteWs(formattedMessage));
         }
 
@@ -737,7 +737,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
       wsRef.current = ws;
 
       return () => {
-        console.log('Closing WebSocket connection');
+        //console.log('Closing WebSocket connection');
         ws.close();
       };
     }
@@ -751,7 +751,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           Content: message,
         };
 
-        console.log(sendData);
+        //console.log(sendData);
         wsRef.current.send(JSON.stringify(sendData));
       } else {
         console.error(
@@ -771,7 +771,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           Content: message,
         };
 
-        console.log(sendData);
+        //console.log(sendData);
 
         wsRef.current.send(JSON.stringify(sendData));
       } else {
@@ -830,7 +830,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           Content: message,
         };
 
-        console.log(sendData);
+        //console.log(sendData);
 
         wsRef.current.send(JSON.stringify(sendData));
       } else {

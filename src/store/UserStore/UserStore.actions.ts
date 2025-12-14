@@ -55,12 +55,12 @@ export const getUserProfile = createAsyncThunk<
   async ({ accessToken }, { rejectWithValue, dispatch, getState }) => {
     try {
       const response = await UserAPI.getProfile(accessToken);
-      console.log(response);
+      //console.log(response);
 
       return response;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
-      console.log(e);
+      //console.log(e);
 
       if (e.status === 401) {
         const state = getState();
