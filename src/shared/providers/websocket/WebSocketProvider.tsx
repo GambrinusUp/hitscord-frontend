@@ -687,7 +687,15 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
         if (data.MessageType === 'New friendship application') {
           const formattedApplication = formatApplication(data.Payload);
-
+          notifications.show({
+            title: 'Уведомление',
+            message: `Вам пришло предложение о дружбе от пользователя ${formattedApplication.user.userName}`,
+            position: 'top-center',
+            color: 'yellow',
+            radius: 'md',
+            autoClose: 2000,
+            icon: <CircleAlert />,
+          });
           dispatch(addApplicationTo(formattedApplication));
         }
 
