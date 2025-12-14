@@ -20,6 +20,7 @@ import {
   addApplicationTo,
   addApplicationFrom,
   approveApplicationFrom,
+  removeApplicationTo,
   removeApplicationFrom,
   removeFriend,
 } from '~/entities/friendship';
@@ -694,7 +695,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
             position: 'top-center',
             color: 'yellow',
             radius: 'md',
-            autoClose: 2000,
+            autoClose: 4000,
             icon: <CircleAlert />,
           });
           dispatch(addApplicationTo(formattedApplication));
@@ -707,6 +708,10 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
         if (data.MessageType === 'Friendship application declined') {
           dispatch(removeApplicationFrom(data.Payload.Id));
+        }
+
+        if (data.MessageType === 'Friendship application deleted') {
+          dispatch(removeApplicationTo(data.Payload.Id));
         }
 
         if (data.MessageType === 'Friendship application approved') {

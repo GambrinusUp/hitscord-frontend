@@ -2,6 +2,7 @@ export {
   friendshipReducer,
   addApplicationTo,
   addApplicationFrom,
+  removeApplicationTo,
   removeApplicationFrom,
   approveApplicationFrom,
   removeFriend,
