@@ -18,6 +18,7 @@ import {
 } from '~/entities/chat';
 import {
   addApplicationTo,
+  addApplicationFrom,
   approveApplicationFrom,
   removeApplicationFrom,
   removeFriend,
@@ -697,6 +698,11 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
             icon: <CircleAlert />,
           });
           dispatch(addApplicationTo(formattedApplication));
+        }
+
+        if (data.MessageType === 'Created friendship application') {
+          const formattedApplication = formatApplication(data.Payload);
+          dispatch(addApplicationFrom(formattedApplication));
         }
 
         if (data.MessageType === 'Friendship application declined') {
