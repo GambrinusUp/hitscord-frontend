@@ -26,7 +26,7 @@ export const formatIcon = (rawIcon: any): FileResponse => {
 export const formatSystemRoles = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rawSystemRoles: any,
-): Omit<SystemRole, 'id' | 'childRoles'> => {
+): Omit<SystemRole, 'id' | 'parentId' | 'parentName'> => {
   return {
     name: rawSystemRoles.Name,
     type: rawSystemRoles.Type,

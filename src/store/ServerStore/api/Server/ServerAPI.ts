@@ -453,19 +453,16 @@ export const changeServerIsClosed = async (
   isApprove?: boolean,
 ): Promise<void> => {
   try {
-    const formData = new FormData();
-    formData.append('ServerId', serverId);
-    formData.append('IsClosed', isClosed.toString());
-
-    if (isApprove !== undefined) {
-      formData.append('IsApprove', isApprove.toString());
-    }
-
     const response = await fetch(`${API_URL}/api/server/isClosed`, {
       method: 'PUT',
-      body: formData,
+      body: JSON.stringify({
+        serverId,
+        isClosed,
+        isApprove,
+      }),
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
       },
     });
 

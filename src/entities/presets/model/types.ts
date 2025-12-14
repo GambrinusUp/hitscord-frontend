@@ -7,9 +7,10 @@ export enum SystemRoleTypeEnum {
 
 export interface SystemRole {
   id: string;
-  name: string;
   type: SystemRoleTypeEnum;
-  childRoles: unknown[];
+  name: string;
+  parentId: string;
+  parentName: string;
 }
 
 export interface GetSystemRoles {

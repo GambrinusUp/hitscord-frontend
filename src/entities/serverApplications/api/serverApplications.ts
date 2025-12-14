@@ -16,35 +16,28 @@ import { api } from '~/shared/api';
 export const approveApplication = async (
   applicationId: string,
 ): Promise<void> => {
-  const formData = new FormData();
-  formData.append('Id', applicationId);
-
-  await api.post(APPROVE_APPLICATION, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+  await api.post(APPROVE_APPLICATION, {
+    id: applicationId,
   });
 };
 
 export const removeApplicationServer = async (
   applicationId: string,
 ): Promise<void> => {
-  const formData = new FormData();
-  formData.append('Id', applicationId);
-
   await api.delete(REMOVE_SERVER_APPLICATION, {
-    data: formData,
+    data: {
+      id: applicationId,
+    },
   });
 };
 
 export const removeApplicationUser = async (
   applicationId: string,
 ): Promise<void> => {
-  const formData = new FormData();
-  formData.append('Id', applicationId);
-
   await api.delete(REMOVE_USER_APPLICATION, {
-    data: formData,
+    data: {
+      id: applicationId,
+    },
   });
 };
 

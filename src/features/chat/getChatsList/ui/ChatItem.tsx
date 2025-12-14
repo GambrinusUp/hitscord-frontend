@@ -33,7 +33,7 @@ export const ChatItem = ({ chat }: ChatItemProps) => {
     <Card bg="#1a1b1e" padding="xs" radius="md" c="#fff" p="md" w="100%">
       <Group justify="space-between">
         <Group>
-          <Avatar  src={iconBase64} alt="no image here" size="xl" />
+          <Avatar src={iconBase64} alt="no image here" size="xl" />
           <Stack>
             <Title order={3}>{chatName}</Title>
             <Group>

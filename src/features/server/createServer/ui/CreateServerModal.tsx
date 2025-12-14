@@ -29,10 +29,10 @@ export const CreateServerModal = ({
   const [activeTab, setActiveTab] = useState<string | null>('create');
   const { user, accessToken } = useAppSelector((state) => state.userStore);
 
-  const isStudent =
+  const isTeacher =
     user.systemRoles.length > 0
       ? !!user.systemRoles.find(
-          (role) => role.type === SystemRoleTypeEnum.Student,
+          (role) => role.type === SystemRoleTypeEnum.Teacher,
         )
       : true;
 
@@ -141,7 +141,7 @@ export const CreateServerModal = ({
             />
             <Select
               label="Тип сервера"
-              disabled={isStudent}
+              disabled={!isTeacher}
               data={[
                 {
                   value: String(ServerTypeEnum.Student),

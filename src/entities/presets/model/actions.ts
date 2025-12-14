@@ -7,7 +7,7 @@ import {
   GET_PRESETS_ACTION_NAME,
   GET_SYSTEM_ROLES_ACTION_NAME,
 } from './const';
-import { GetPresets, GetSystemRoles, PresetDto } from './types';
+import { GetPresets, GetSystemRoles, Preset, PresetDto } from './types';
 
 import { PresetsAPI } from '~/entities/presets/api';
 import { ERROR_MESSAGES } from '~/shared/constants';
@@ -53,14 +53,20 @@ export const getPresets = createAsyncThunk<
 });
 
 export const createPreset = createAsyncThunk<
-  void,
+  Preset,
   PresetDto,
   { rejectValue: string }
 >(
   CREATE_PRESET_ACTION_NAME,
   async ({ serverId, serverRoleId, systemRoleId }, { rejectWithValue }) => {
     try {
-      await PresetsAPI.createPreset(serverId, serverRoleId, systemRoleId);
+      const response = await PresetsAPI.createPreset(
+        serverId,
+        serverRoleId,
+        systemRoleId,
+      );
+
+      return response;
     } catch (e) {
       if (e instanceof AxiosError) {
         return rejectWithValue(

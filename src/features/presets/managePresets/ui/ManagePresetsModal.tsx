@@ -128,6 +128,8 @@ export const ManagePresetsModal = ({
                   <Table.Th>Название</Table.Th>
                   <Table.Th>Тип</Table.Th>
                   <Table.Th>ID</Table.Th>
+                  <Table.Th>Родительская роль</Table.Th>
+                  <Table.Th>ID родительской роли</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -136,6 +138,8 @@ export const ManagePresetsModal = ({
                     <Table.Td>{role.name}</Table.Td>
                     <Table.Td>{role.type}</Table.Td>
                     <Table.Td>{role.id}</Table.Td>
+                    <Table.Td>{role.parentName}</Table.Td>
+                    <Table.Td>{role.parentId}</Table.Td>
                   </Table.Tr>
                 ))}
               </Table.Tbody>

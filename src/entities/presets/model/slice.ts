@@ -62,6 +62,10 @@ export const PresetsSlice = createSlice({
 
         state.error = '';
       })
+      .addCase(createPreset.fulfilled, (state, action) => {
+        state.presets = [...state.presets, action.payload];
+        state.error = '';
+      })
       .addMatcher(
         isAnyOf(
           createPreset.pending,

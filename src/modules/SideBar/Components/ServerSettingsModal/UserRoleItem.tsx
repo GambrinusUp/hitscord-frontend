@@ -12,6 +12,7 @@ import { Plus } from 'lucide-react';
 import { useState } from 'react';
 
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { useIcon } from '~/shared/lib/hooks';
 import { RoleType } from '~/store/RolesStore';
 import { addRole, removeRole, UserOnServer } from '~/store/ServerStore';
 
@@ -26,6 +27,8 @@ export const UserRoleItem = ({ user }: UserRoleItemProps) => {
     (state) => state.testServerStore,
   );
   const { accessToken } = useAppSelector((state) => state.userStore);
+
+  const { iconBase64 } = useIcon(user.icon?.fileId);
 
   const [loading, setLoading] = useState(false);
   const [newRole, setNewRole] = useState<string | null>(null);
@@ -86,7 +89,7 @@ export const UserRoleItem = ({ user }: UserRoleItemProps) => {
     <Card radius="md">
       <Stack gap="md">
         <Group>
-          <Avatar size={40} radius="xl" src={undefined} alt={user.userName} />
+          <Avatar size={40} radius="xl" src={iconBase64} alt={user.userName} />
           <Stack gap="0">
             <Text fw={700}>{user.userName}</Text>
             <Text c="dimmed">{user.userTag}</Text>
