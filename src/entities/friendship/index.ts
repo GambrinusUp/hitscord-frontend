@@ -1,7 +1,10 @@
 export {
   friendshipReducer,
   addApplicationTo,
+  addApplicationFrom,
+  removeApplicationTo,
   removeApplicationFrom,
+  approveApplicationTo,
   approveApplicationFrom,
   removeFriend,
 } from './model/slice';

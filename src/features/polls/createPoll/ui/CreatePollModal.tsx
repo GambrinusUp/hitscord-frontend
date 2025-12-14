@@ -75,21 +75,27 @@ export const CreatePollModal = ({
 
     const isoDate = deadLine ? new Date(deadLine).toISOString() : undefined;
 
+    const renumberedVariants = variants
+      .sort((a, b) => a.number - b.number)
+      .map((variant, index) => ({
+        Number: index + 1,
+        Content: variant.content,
+    }));
+
+    const votePayload = {
+      Title: title,
+      Content: content,
+      IsAnonimous: isAnonimous,
+      Multiple: multiple,
+      Deadline: isoDate,
+      Variants: renumberedVariants,
+    };
+
     if (type === MessageType.CHANNEL && currentChannelId) {
       sendMessage({
         Token: accessToken,
         ChannelId: currentChannelId,
-        Vote: {
-          Title: title,
-          Content: content,
-          IsAnonimous: isAnonimous,
-          Multiple: multiple,
-          Deadline: isoDate,
-          Variants: variants.map((variant) => ({
-            Number: variant.number,
-            Content: variant.content,
-          })),
-        },
+        Vote: votePayload,
         MessageType: ServerMessageType.Vote,
       });
     }
@@ -98,17 +104,7 @@ export const CreatePollModal = ({
       sendMessage({
         Token: accessToken,
         ChannelId: currentSubChatId,
-        Vote: {
-          Title: title,
-          Content: content,
-          IsAnonimous: isAnonimous,
-          Multiple: multiple,
-          Deadline: isoDate,
-          Variants: variants.map((variant) => ({
-            Number: variant.number,
-            Content: variant.content,
-          })),
-        },
+        Vote: votePayload,
         MessageType: ServerMessageType.Vote,
       });
     }
@@ -117,17 +113,7 @@ export const CreatePollModal = ({
       sendChatMessage({
         Token: accessToken,
         ChannelId: activeChat,
-        Vote: {
-          Title: title,
-          Content: content,
-          IsAnonimous: isAnonimous,
-          Multiple: multiple,
-          Deadline: isoDate,
-          Variants: variants.map((variant) => ({
-            Number: variant.number,
-            Content: variant.content,
-          })),
-        },
+        Vote: votePayload,
         MessageType: ServerMessageType.Vote,
       });
     }

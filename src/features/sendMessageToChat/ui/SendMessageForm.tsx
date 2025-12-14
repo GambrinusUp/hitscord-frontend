@@ -37,7 +37,7 @@ export const SendMessageForm = ({
   const [message, setMessage] = useState('');
 
   const handleSendMessage = () => {
-    if (message.trim() && chat.chatId) {
+    if (message.trim() && chat.chatId && ((message.trim()).length > 0 || uploadedFiles.length > 0)) {
       sendChatMessage({
         Token: accessToken,
         ChannelId: chat.chatId,
@@ -72,6 +72,8 @@ export const SendMessageForm = ({
     e.target.value = '';
   };
 
+  const disabled = (message.trim()).length > 0 || uploadedFiles.length > 0;
+
   return (
     <Group mt="auto" align="center" wrap="nowrap" gap={0}>
       <ActionIcon
@@ -94,7 +96,7 @@ export const SendMessageForm = ({
         minRows={1}
         maxRows={3}
       />
-      <ActionIcon size="xl" variant="transparent" onClick={handleSendMessage}>
+      <ActionIcon size="xl" variant="transparent" disabled={!disabled} onClick={handleSendMessage}>
         <Send size={20} />
       </ActionIcon>
     </Group>

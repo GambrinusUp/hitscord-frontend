@@ -18,7 +18,10 @@ import {
 } from '~/entities/chat';
 import {
   addApplicationTo,
+  addApplicationFrom,
+  approveApplicationTo,
   approveApplicationFrom,
+  removeApplicationTo,
   removeApplicationFrom,
   removeFriend,
 } from '~/entities/friendship';
@@ -687,18 +690,40 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
         if (data.MessageType === 'New friendship application') {
           const formattedApplication = formatApplication(data.Payload);
-
+          notifications.show({
+            title: 'Уведомление',
+            message: `Вам пришло предложение о дружбе от пользователя ${formattedApplication.user.userName}`,
+            position: 'top-center',
+            color: 'yellow',
+            radius: 'md',
+            autoClose: 4000,
+            icon: <CircleAlert />,
+          });
           dispatch(addApplicationTo(formattedApplication));
+        }
+
+        if (data.MessageType === 'Created friendship application') {
+          const formattedApplication = formatApplication(data.Payload);
+          dispatch(addApplicationFrom(formattedApplication));
         }
 
         if (data.MessageType === 'Friendship application declined') {
           dispatch(removeApplicationFrom(data.Payload.Id));
         }
 
+        if (data.MessageType === 'Friendship application deleted') {
+          dispatch(removeApplicationTo(data.Payload.Id));
+        }
+
         if (data.MessageType === 'Friendship application approved') {
           const formattedApplication = formatApplication(data.Payload);
 
           dispatch(approveApplicationFrom(formattedApplication));
+        }
+
+        if (data.MessageType === 'You approved application') {
+          const formattedApplication = formatApplication(data.Payload);
+          dispatch(approveApplicationTo(formattedApplication));
         }
 
         if (data.MessageType === 'Friendship deleted') {
