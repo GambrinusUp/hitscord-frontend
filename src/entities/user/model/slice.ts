@@ -48,6 +48,21 @@ export const UserSlice = createSlice({
       state.refreshToken = '';
       state.isLoggedIn = false;
     },
+    clearUserData: (state) => {
+      state.user = {
+        id: '',
+        name: '',
+        tag: '',
+        mail: '',
+        accontCreateDate: '',
+        notifiable: false,
+        friendshipApplication: false,
+        nonFriendMessage: false,
+        icon: null,
+        notificationLifeTime: 0,
+        systemRoles: []
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -83,20 +98,20 @@ export const UserSlice = createSlice({
         },
       )
       .addCase(logoutUser.fulfilled, (state) => {
+        state.isLoggedIn = false;
         state.error = '';
         state.accessToken = '';
         state.refreshToken = '';
         localStorage.setItem(TokenType.ACCESS, '');
         localStorage.setItem(TokenType.REFRESH, '');
-        state.isLoggedIn = false;
       })
       .addCase(logoutUser.rejected, (state, action) => {
+        state.isLoggedIn = false;
         state.error = action.payload as string;
         state.accessToken = '';
         state.refreshToken = '';
         localStorage.setItem(TokenType.ACCESS, '');
         localStorage.setItem(TokenType.REFRESH, '');
-        state.isLoggedIn = false;
       })
       .addCase(refreshTokens.pending, (state) => {
         state.error = '';
@@ -168,6 +183,7 @@ export const UserSlice = createSlice({
           registerUser.pending,
           changeNotificationLifetime.pending,
           changeProfileIcon.pending,
+          loginUser.pending,
         ),
         (state) => {
           state.error = '';
@@ -190,6 +206,6 @@ export const UserSlice = createSlice({
   },
 });
 
-export const { clearTokens } = UserSlice.actions;
+export const { clearTokens, clearUserData } = UserSlice.actions;
 
 export const userReducer = UserSlice.reducer;

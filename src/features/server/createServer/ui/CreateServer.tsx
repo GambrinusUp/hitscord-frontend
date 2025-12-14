@@ -15,7 +15,7 @@ export const CreateServer = () => {
   return (
     <>
       <ActionIcon size="lg" variant="transparent" onClick={open} disabled={!canCreateServer}>
-        <CirclePlus size={24} color="#fff" />
+        <CirclePlus size={28} color="#fff" />
       </ActionIcon>
       <CreateServerModal opened={opened} onClose={close} />
     </>

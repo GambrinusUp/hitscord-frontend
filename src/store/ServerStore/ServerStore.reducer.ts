@@ -229,7 +229,11 @@ const testServerSlice = createSlice({
       }
     },
     clearServerData: (state) => {
+      state.serversList = [];
       state.messages = [];
+      state.currentServerId = null;
+      state.currentNotificationChannelId = null;
+      state.currentVoiceChannelId = null;
       state.currentServerId = null;
       state.currentChannelId = null;
       state.serverData = {
@@ -470,6 +474,10 @@ const testServerSlice = createSlice({
 
       if (indexServer >= 0) {
         state.serversList[indexServer].nonReadedCount -= 1;
+
+        if(isTagged) {
+          state.serversList[indexServer].nonReadedTaggedCount -= 1;
+        }
       }
     },
     changeReadedCount: (state, action: PayloadAction<ChangeReadedCount>) => {
@@ -514,6 +522,10 @@ const testServerSlice = createSlice({
 
       if (indexServer >= 0) {
         state.serversList[indexServer].nonReadedCount += 1;
+
+        if(isTagged) {
+          state.serversList[indexServer].nonReadedTaggedCount += 1;
+        }
       }
     },
     readOwnMessage: (state, action: PayloadAction<ChangeReadedCount>) => {

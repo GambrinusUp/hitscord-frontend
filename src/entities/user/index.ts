@@ -1,4 +1,4 @@
-export { userReducer, clearTokens } from './model/slice';
+export { userReducer, clearTokens, clearUserData } from './model/slice';
 
 export type { SettingsForm, User, UserSystemRole } from './model/types';
 export { SettingType } from './model/types';

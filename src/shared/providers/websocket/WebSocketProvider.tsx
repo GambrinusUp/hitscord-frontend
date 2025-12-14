@@ -65,8 +65,6 @@ import {
   setNewServerName,
   setNewUserName,
   toggleUserMuteStatus,
-  addRoleToUserWs,
-  removeRoleFromUserWs,
   updateVoteWs,
   UserRoleOnServer,
   updateServerIcon,
@@ -157,6 +155,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           currentNotificationChannelIdRef.current;
         const currentChannelIdValue = currentChannelIdRef.current;
         const currentChatIdValue = currentChatIdRef.current;
+        const userIdValue = userIdRef.current;
 
         console.log(data);
 
@@ -321,9 +320,9 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           );
 
           if (containsRole) {
-            if (currentServerIdValue && currentServerIdValue === ServerId) {
+            if (currentServerIdValue === ServerId) {
               dispatch(
-                getServerData({ accessToken, serverId: currentServerIdValue }),
+                getServerData({ accessToken, serverId: ServerId }),
               );
             }
           }
@@ -332,9 +331,9 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         if (data.MessageType === 'New role') {
           const { ServerId } = data.Payload;
 
-          if (currentServerIdValue && currentServerIdValue === ServerId) {
+          if (currentServerIdValue === ServerId) {
             dispatch(
-              getServerData({ accessToken, serverId: currentServerIdValue }),
+              getServerData({ accessToken, serverId: ServerId }),
             );
           }
         }
@@ -347,9 +346,9 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           );
 
           if (containsRole) {
-            if (currentServerIdValue && currentServerIdValue === ServerId) {
+            if (currentServerIdValue === ServerId) {
               dispatch(
-                getServerData({ accessToken, serverId: currentServerIdValue }),
+                getServerData({ accessToken, serverId: ServerId }),
               );
             }
           }
@@ -363,9 +362,9 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           );
 
           if (containsRole) {
-            if (currentServerIdValue && currentServerIdValue === ServerId) {
+            if (currentServerIdValue === ServerId) {
               dispatch(
-                getServerData({ accessToken, serverId: currentServerIdValue }),
+                getServerData({ accessToken, serverId: ServerId }),
               );
             }
           }
@@ -379,9 +378,9 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           );
 
           if (containsRole) {
-            if (currentServerIdValue && currentServerIdValue === ServerId) {
+            if (currentServerIdValue === ServerId) {
               dispatch(
-                getServerData({ accessToken, serverId: currentServerIdValue }),
+                getServerData({ accessToken, serverId: ServerId }),
               );
             }
           }
@@ -432,7 +431,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                   channelId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
                   serverId: formattedMessage.serverId!,
-                  isTagged: formattedMessage.isTagged!,
+                  isTagged: formattedMessage.isTagged ? formattedMessage.isTagged : false,
                 }),
               );
             } else {
@@ -441,7 +440,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                   channelId: formattedMessage.channelId,
                   readedMessageId: formattedMessage.id,
                   serverId: formattedMessage.serverId!,
-                  isTagged: formattedMessage.isTagged!,
+                  isTagged: formattedMessage.isTagged ? formattedMessage.isTagged : false,
                 }),
               );
             }
@@ -587,23 +586,23 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         }
 
         if (data.MessageType === 'Role added to user') {
-          dispatch(
-            addRoleToUserWs({
-              channelId: data.Payload.ServerId,
-              userId: data.Payload.UserId,
-              roleId: data.Payload.RoleId,
-            }),
-          );
+          const { ServerId, UserId } = data.Payload;
+
+          if(UserId === userIdValue){
+            dispatch(
+              getServerData({ accessToken, serverId: ServerId }),
+            );
+          }
         }
 
         if (data.MessageType === 'Role removed from user') {
-          dispatch(
-            removeRoleFromUserWs({
-              channelId: data.Payload.ServerId,
-              userId: data.Payload.UserId,
-              roleId: data.Payload.RoleId,
-            }),
-          );
+          const { ServerId, UserId } = data.Payload;
+
+          if(UserId === userIdValue){
+            dispatch(
+              getServerData({ accessToken, serverId: ServerId }),
+            );
+          }
         }
 
         if (data.MessageType === 'New user in chat') {
@@ -625,7 +624,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           );
         }
 
-        if (data.MessageType === 'You added to chat') {
+        if (data.MessageType === 'You have been added into a chat') {
           dispatch(
             addChat({
               chatId: data.Payload.ChatId,

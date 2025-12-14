@@ -24,7 +24,7 @@ export const ServerList = () => {
     <Flex
       w="100%"
       h="100%"
-      maw={50}
+      maw={80}
       bg="#0E0E10"
       align="center"
       direction="column"

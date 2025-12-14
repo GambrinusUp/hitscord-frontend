@@ -32,7 +32,12 @@ export const ServerItem = ({
   };
 
   return (
-    <Box pos="relative" style={{ cursor: 'pointer' }}>
+    <Box 
+      pos="relative"
+      w={48}
+      h={48}
+      style={{ cursor: 'pointer' }}
+    >
       <ActionIcon
         size="xl"
         radius="xl"
@@ -47,13 +52,13 @@ export const ServerItem = ({
         <Badge
           color="red"
           variant="filled"
-          size="xs"
+          size="sm"
           circle
           pos="absolute"
-          top={25}
+          top={24}
           right={30}
-          w={16}
-          h={16}
+          w={20}
+          h={20}
           p={0}
           style={{
             border: '2px solid #0E0E10',
@@ -66,13 +71,13 @@ export const ServerItem = ({
         <Badge
           color="blue"
           variant="filled"
-          size="xs"
+          size="sm"
           circle
           pos="absolute"
-          top={5}
+          top={0}
           right={30}
-          w={16}
-          h={16}
+          w={20}
+          h={20}
           p={0}
           style={{
             border: '2px solid #0E0E10',

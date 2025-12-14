@@ -64,7 +64,7 @@ export const formatMessage = (
     replyToMessage: rawMessage.ReplyToMessage
       ? formatReplyMessage(rawMessage.ReplyToMessage)
       : null,
-    isTagged: rawMessage.isTagged || false,
+    isTagged: rawMessage.isTagged,
   };
 
   if (messageType === MessageType.Classic) {
@@ -114,7 +114,7 @@ export const formatChatMessage = (rawMessage: any): ChatMessage => {
     replyToMessage: rawMessage.ReplyToMessage
       ? formatReplyMessage(rawMessage.ReplyToMessage)
       : null,
-    isTagged: rawMessage.isTagged || false,
+    isTagged: rawMessage.isTagged,
   };
 
   if (messageType === MessageType.Classic) {

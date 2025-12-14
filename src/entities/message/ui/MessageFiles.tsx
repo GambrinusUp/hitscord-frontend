@@ -1,4 +1,4 @@
-import { Flex, Group, Text } from '@mantine/core';
+import { Flex, Group, Loader, Text } from '@mantine/core';
 import saveAs from 'file-saver';
 import { useState } from 'react';
 
@@ -24,6 +24,8 @@ export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
   useFileUploadNotification(loadingFileId !== null);
 
   const handleFileClick = async (file: MessageFile) => {
+    if (loadingFileId === file.fileId) return;
+
     try {
       setLoadingFileId(file.fileId);
 
@@ -54,22 +56,33 @@ export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
 
   return (
     <Flex direction="column" gap={6} mt={8}>
-      {files.map((file) => (
-        <Group
-          key={file.fileId}
-          gap="xs"
-          style={messageFilesStyles.message()}
-          onClick={() => handleFileClick(file)}
-        >
-          {getFileIcon(file.fileType)}
-          <Text size="sm" style={{ wordBreak: 'break-word' }}>
-            {file.fileName}
-          </Text>
-          <Text size="xs" c="gray.4">
-            {formatFileSize(file.fileSize)}
-          </Text>
-        </Group>
-      ))}
+      {files.map((file) => {
+        const isLoading = loadingFileId === file.fileId;
+
+        return (
+          <Group
+            key={file.fileId}
+            gap="xs"
+            style={{
+              ...messageFilesStyles.message(),
+              opacity: isLoading ? 0.6 : 1,
+              pointerEvents: isLoading ? 'none' : 'auto',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+            }}
+            onClick={() => handleFileClick(file)}
+          >
+            {isLoading ? <Loader size="xs" /> : getFileIcon(file.fileType)}
+
+            <Text size="sm" style={{ wordBreak: 'break-word' }}>
+              {file.fileName}
+            </Text>
+
+            <Text size="xs" c="gray.4">
+              {formatFileSize(file.fileSize)}
+            </Text>
+          </Group>
+        );
+      })}
     </Flex>
   );
 };

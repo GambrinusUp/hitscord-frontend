@@ -35,7 +35,7 @@ export const ServerPanel = () => {
     <Flex
       w="100%"
       h="100%"
-      maw={50}
+      maw={70}
       bg="#0E0E10"
       align="center"
       direction="column"
@@ -48,7 +48,7 @@ export const ServerPanel = () => {
           variant="transparent"
           onClick={() => dispatch(setOpenHome(true))}
         >
-          <Home size={24} color="#fff" />
+          <Home size={28} color="#fff" />
         </ActionIcon>
         <Divider my="sm" />
         <ScrollArea.Autosize mah="100%">
@@ -69,7 +69,7 @@ export const ServerPanel = () => {
         <CreateServer />
       </Flex>
       <ActionIcon size="lg" variant="transparent" onClick={handleLogout}>
-        <LogOut size={24} color="#fff" />
+        <LogOut size={28} color="#fff" />
       </ActionIcon>
     </Flex>
   );

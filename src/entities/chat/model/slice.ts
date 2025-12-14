@@ -59,6 +59,13 @@ export const ChatsSlice = createSlice({
   reducers: {
     setActiveChat: (state, action: PayloadAction<string | null>) => {
       state.activeChat = action.payload;
+      state.messages = [];
+      state.remainingTopMessagesCount = 0;
+      state.lastTopMessageId= 0;
+      state.remainingBottomMessagesCount= MAX_MESSAGE_NUMBER;
+      state.lastBottomMessageId= 0;
+      state.startMessageId= 0;
+      state.allMessagesCount= 0;
       state.error = '';
     },
     addChatMessage: (state, action: PayloadAction<ChatMessage>) => {

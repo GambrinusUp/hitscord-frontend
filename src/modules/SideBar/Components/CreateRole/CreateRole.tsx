@@ -15,6 +15,7 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
   const [roleName, setRoleName] = useState('');
   const [color, setColor] = useState('#ffffff');
   const [colorError, setColorError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const validateColor = (value: string): boolean => {
     const colorRegex = /^#([A-Fa-f0-9]{6})$/;
@@ -37,6 +38,8 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
       accessToken &&
       currentServerId
     ) {
+      setLoading(true);
+
       const result = await dispatch(
         createRole({
           accessToken,
@@ -52,9 +55,11 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
         onClose();
       }
     }
+
+    setLoading(false);
   };
 
-  const isButtonDisabled = roleName.trim().length < 1 || !validateColor(color);
+  const isButtonDisabled = loading || roleName.trim().length < 1 || !validateColor(color);
 
   return (
     <Modal
