@@ -118,6 +118,15 @@ const testServerSlice = createSlice({
   reducers: {
     setCurrentServerId: (state, action: PayloadAction<string>) => {
       state.currentServerId = action.payload;
+      state.serverData.permissions = {
+        canChangeRole: false,
+        canWorkChannels: false,
+        canDeleteUsers: false,
+        canMuteOther: false,
+        canDeleteOthersMessages: false,
+        canIgnoreMaxCount: false,
+        canCreateRoles: false,
+      };
       state.error = '';
     },
     setCurrentChannelId: (state, action: PayloadAction<string | null>) => {
