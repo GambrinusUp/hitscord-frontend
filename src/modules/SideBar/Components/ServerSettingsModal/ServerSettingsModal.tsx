@@ -145,7 +145,7 @@ export const ServerSettingsModal = ({
       //console.log(canCreateRoles);
       dispatch(getRoles({ accessToken, serverId: currentServerId }));
     }
-  }, [rolesLoading, currentServerId]);
+  }, [rolesLoading, canCreateRoles, currentServerId]);
 
   useEffect(() => {
     if (error) {
