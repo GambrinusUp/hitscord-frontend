@@ -29,6 +29,8 @@ export const MediaContext = createContext<{
   toggleMute: () => void;
   selectedUserId: string | null;
   setSelectedUserId: React.Dispatch<React.SetStateAction<string | null>>;
+  previewUserIds: Set<string>;
+  togglePreview: (socketId: string) => void;
   videoAudioProducer: Producer | null;
   setVideoAudioProducer: React.Dispatch<React.SetStateAction<Producer | null>>;
 } | null>(null);

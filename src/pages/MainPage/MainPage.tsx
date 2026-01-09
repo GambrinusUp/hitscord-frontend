@@ -7,12 +7,12 @@ import { MAX_MESSAGE_NUMBER } from '~/constants';
 import { getUserProfile } from '~/entities/user';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { ChatSection } from '~/modules/ChatSection/ChatSection';
-import { ChatSectionWithUsers } from '~/modules/ChatSectionWithUsers';
 import { DetailsPanel, DetailsPanelMobile } from '~/modules/DetailsPanel';
 import { ProfilePage } from '~/modules/Profile';
 import { ServerPanel } from '~/modules/ServerPanel';
 import { SideBar, SideBarMobile } from '~/modules/SideBar';
 import { getChannelMessages, getServerData } from '~/store/ServerStore';
+import { VoiceChannelFacade } from '~/widgets/voiceChannelFacade';
 
 export const MainPage = () => {
   const navigate = useNavigate();
@@ -81,7 +81,7 @@ export const MainPage = () => {
               openDetailsPanel={openDetailsPanel}
             />
           ) : (
-            <ChatSectionWithUsers />
+            <VoiceChannelFacade />
           )}
           <DetailsPanel />
           <SideBarMobile onClose={close} opened={sidebarOpened} />

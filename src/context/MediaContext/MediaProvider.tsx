@@ -31,6 +31,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
     null,
   );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [previewUserIds, setPreviewUserIds] = useState<Set<string>>(new Set());
   const dispatch = useAppDispatch();
   const { currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
@@ -39,6 +40,20 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
 
   const addConsumer = (consumer: Consumer) => {
     setConsumers((prev) => [...prev, consumer]);
+  };
+
+  const togglePreview = (socketId: string) => {
+    setPreviewUserIds((prev) => {
+      const newSet = new Set(prev);
+
+      if (newSet.has(socketId)) {
+        newSet.delete(socketId);
+      } else {
+        newSet.add(socketId);
+      }
+
+      return newSet;
+    });
   };
 
   const toggleMute = () => {
@@ -77,7 +92,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
     });
 
     socket.on('updateUsersList', ({ rooms }) => {
-      //console.log(rooms);
+      console.log(rooms);
       setUsers(rooms);
     });
 
@@ -123,6 +138,8 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
         toggleMute,
         selectedUserId,
         setSelectedUserId,
+        previewUserIds,
+        togglePreview,
         videoAudioProducer,
         setVideoAudioProducer,
       }}
