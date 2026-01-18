@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { ServerItem } from './components/ServerItem';
 
+import { useMediaContext } from '~/context';
 import { CreateServer } from '~/features/server';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { setOpenHome } from '~/store/AppStore';
@@ -14,6 +15,7 @@ import { logoutUser } from '~/store/UserStore';
 export const ServerPanel = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { isConnected } = useMediaContext();
   const { serversList } = useAppSelector((state) => state.testServerStore);
   const { accessToken } = useAppSelector((state) => state.userStore);
 
@@ -40,7 +42,7 @@ export const ServerPanel = () => {
       align="center"
       direction="column"
       justify="space-between"
-      p="10px 0"
+      p={`10px 0 ${isConnected ? 130 : 85}px 0`}
     >
       <Flex direction="column" align="center" h="calc(100% - 40px)">
         <ActionIcon

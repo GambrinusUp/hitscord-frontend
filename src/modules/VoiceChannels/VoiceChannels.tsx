@@ -100,13 +100,12 @@ export const VoiceChannels = () => {
     socket.emit(
       'kickUser',
       { targetSocketId: socketId },
-      // eslint-disable-next-line unused-imports/no-unused-vars
       (response: { success: boolean; message: string }) => {
-        /*if (response.success) {
+        if (response.success) {
           console.log('Пользователь успешно кикнут:', response.message);
         } else {
           console.error('Ошибка кикания пользователя:', response.message);
-        }*/
+        }
       },
     );
   };
@@ -134,11 +133,40 @@ export const VoiceChannels = () => {
   };
 
   const handleMuteUser = (userId: string, isMuted: boolean | undefined) => {
-    if (!isMuted || isMuted === undefined) {
-      //console.log(userId, isMuted, socket);
-      socket.emit('muteUserById', { userId });
+    console.log(isMuted);
+
+    if (isMuted) {
+      socket.emit(
+        'unmuteUserById',
+        {
+          userId,
+          accessToken: accessToken,
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (response: any) => {
+          if (response.success) {
+            console.log(response.message);
+          } else {
+            console.error('Ошибка при анмуте:', response.message);
+          }
+        },
+      );
     } else {
-      socket.emit('unmuteUserById', { userId });
+      socket.emit(
+        'muteUserById',
+        {
+          userId,
+          accessToken: accessToken,
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (response: any) => {
+          if (response.success) {
+            console.log(response.message);
+          } else {
+            console.error('Ошибка при муте:', response.message);
+          }
+        },
+      );
     }
   };
 

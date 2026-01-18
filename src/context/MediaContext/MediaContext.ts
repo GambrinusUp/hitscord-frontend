@@ -11,9 +11,11 @@ export const MediaContext = createContext<{
   isConnected: boolean;
   isMuted: boolean;
   isStreaming: boolean;
+  isCameraOn: boolean;
   setIsConnected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsMuted: React.Dispatch<React.SetStateAction<boolean>>;
   setIsStreaming: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsCameraOn: React.Dispatch<React.SetStateAction<boolean>>;
   audioProducer: Producer | null;
   setAudioProducer: React.Dispatch<React.SetStateAction<Producer | null>>;
   videoProducer: Producer | null;

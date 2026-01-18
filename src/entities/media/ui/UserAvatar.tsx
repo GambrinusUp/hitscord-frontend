@@ -1,5 +1,5 @@
 import { Avatar } from '@mantine/core';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 
 import { MessageType, useMessageAuthor } from '~/entities/message';
 import { useIcon } from '~/shared/lib/hooks';
@@ -9,7 +9,7 @@ interface UserAvatarProps {
   userId: string;
 }
 
-export const UserAvatar = ({ userName, userId }: UserAvatarProps) => {
+export const UserAvatar = memo(({ userName, userId }: UserAvatarProps) => {
   const { getUserIcon } = useMessageAuthor(MessageType.CHANNEL);
   const userIcon = useMemo(() => getUserIcon(userId!), [getUserIcon, userId]);
   const { iconBase64 } = useIcon(userIcon);
@@ -28,4 +28,4 @@ export const UserAvatar = ({ userName, userId }: UserAvatarProps) => {
       {userName[0]}
     </Avatar>
   );
-};
+});

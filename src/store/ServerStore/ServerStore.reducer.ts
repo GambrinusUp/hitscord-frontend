@@ -484,7 +484,7 @@ const testServerSlice = createSlice({
       if (indexServer >= 0) {
         state.serversList[indexServer].nonReadedCount -= 1;
 
-        if(isTagged) {
+        if (isTagged) {
           state.serversList[indexServer].nonReadedTaggedCount -= 1;
         }
       }
@@ -532,7 +532,7 @@ const testServerSlice = createSlice({
       if (indexServer >= 0) {
         state.serversList[indexServer].nonReadedCount += 1;
 
-        if(isTagged) {
+        if (isTagged) {
           state.serversList[indexServer].nonReadedTaggedCount += 1;
         }
       }
@@ -641,6 +641,35 @@ const testServerSlice = createSlice({
       state.serversList = state.serversList.map((server) =>
         server.serverId === serverId ? { ...server, icon } : server,
       );
+    },
+    changeUserMuteStatusWs: (
+      state,
+      action: PayloadAction<{
+        channelId: string;
+        userId: string;
+        muteStatus: MuteStatus;
+      }>,
+    ) => {
+      const voiceChannel = state.serverData.channels.voiceChannels.find(
+        (channel) => channel.channelId === action.payload.channelId,
+      );
+
+      if (voiceChannel) {
+        const userIndex = voiceChannel.users.findIndex(
+          (user) => user.userId === action.payload.userId,
+        );
+
+        if (userIndex >= 0) {
+          console.log(action.payload);
+          voiceChannel.users[userIndex].muteStatus = action.payload.muteStatus;
+
+          if (action.payload.muteStatus === MuteStatus.NotMuted) {
+            voiceChannel.users[userIndex].isMuted = false;
+          } else {
+            voiceChannel.users[userIndex].isMuted = true;
+          }
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -1161,6 +1190,7 @@ export const {
   updateVoteWs,
   setCurrentNotificationChannelId,
   updateServerIcon,
+  changeUserMuteStatusWs,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

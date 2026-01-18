@@ -59,13 +59,37 @@ export const StreamView = () => {
   useEffect(() => {
     if (!socket || !currentRoom) return;
 
-    const onProducerClosed = ({ producerId }: { producerId: string }) => {
-      const isStreamSelected = consumers.some(
-        (consumer) =>
-          consumer.kind === 'video' &&
-          consumer.producerId === producerId &&
-          currentRoom.users[selectedUserId!]?.producerIds.includes(producerId),
-      );
+    const onProducerClosed = ({
+      producerId,
+    }: {
+      producerId: string | undefined;
+    }) => {
+      let isStreamSelected = false;
+
+      if (producerId) {
+        isStreamSelected = consumers.some(
+          (consumer) =>
+            consumer.kind === 'video' &&
+            consumer.producerId === producerId &&
+            currentRoom.users[selectedUserId!]?.producerIds.includes(
+              producerId,
+            ),
+        );
+      } else {
+        const room = users.find(
+          (room) => room.roomName === currentVoiceChannelId,
+        );
+
+        if (room) {
+          const userStream = room.users.find(
+            (user) => user.socketId === selectedUserId,
+          );
+
+          if (!userStream) {
+            isStreamSelected = true;
+          }
+        }
+      }
 
       if (isStreamSelected) {
         handleCloseStream();

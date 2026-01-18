@@ -19,6 +19,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isCameraOn, setIsCameraOn] = useState(false);
   const [consumers, setConsumers] = useState<Consumer[]>([]);
   const [users, setUsers] = useState<Room[]>([]);
   const [device, setDevice] = useState<Device | null>(null);
@@ -120,9 +121,11 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
         isConnected,
         isMuted,
         isStreaming,
+        isCameraOn,
         setIsConnected,
         setIsMuted,
         setIsStreaming,
+        setIsCameraOn,
         audioProducer,
         setAudioProducer,
         videoProducer,

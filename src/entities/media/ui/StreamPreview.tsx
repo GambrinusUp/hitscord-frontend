@@ -1,4 +1,5 @@
 import { Badge, Box, CSSProperties, MantineStyleProp } from '@mantine/core';
+import { memo } from 'react';
 
 const stylesStreamPreview = {
   container: (): MantineStyleProp => ({
@@ -23,7 +24,7 @@ interface StreamPreviewProps {
   videoRef: React.MutableRefObject<HTMLVideoElement | null>;
 }
 
-export const StreamPreview = ({ videoRef }: StreamPreviewProps) => {
+export const StreamPreview = memo(({ videoRef }: StreamPreviewProps) => {
   return (
     <Box style={stylesStreamPreview.container()}>
       <video
@@ -42,4 +43,4 @@ export const StreamPreview = ({ videoRef }: StreamPreviewProps) => {
       </Badge>
     </Box>
   );
-};
+});

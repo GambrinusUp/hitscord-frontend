@@ -53,6 +53,7 @@ export {
   updateVoteWs,
   setCurrentNotificationChannelId,
   updateServerIcon,
+  changeUserMuteStatusWs,
 } from './ServerStore.reducer';
 
 export {

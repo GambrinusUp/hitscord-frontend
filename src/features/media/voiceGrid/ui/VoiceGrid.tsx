@@ -1,5 +1,6 @@
 import { ActionIcon, Group, ScrollArea, SimpleGrid } from '@mantine/core';
 import { ArrowLeftFromLine } from 'lucide-react';
+import { useMemo, useCallback } from 'react';
 
 import { useMediaContext } from '~/context';
 import { VoiceUserCard } from '~/entities/media';
@@ -22,17 +23,25 @@ export const VoiceGrid = () => {
     (room) => room.roomName === currentVoiceChannelId,
   );
 
-  const handleOpenStream = (socketId: string) => {
-    setSelectedUserId(socketId);
-  };
+  const handleOpenStream = useCallback(
+    (socketId: string) => {
+      setSelectedUserId(socketId);
+    },
+    [setSelectedUserId],
+  );
 
-  const handlePreviewStream = (socketId: string) => {
-    togglePreview(socketId);
-  };
+  const handlePreviewStream = useCallback(
+    (socketId: string) => {
+      togglePreview(socketId);
+    },
+    [togglePreview],
+  );
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     dispatch(toggleUserStreamView());
-  };
+  }, [dispatch]);
+
+  const memoizedConsumers = useMemo(() => consumers, [consumers]);
 
   return (
     <ScrollArea style={{ flex: 1, maxHeight: '100%' }}>
@@ -65,7 +74,7 @@ export const VoiceGrid = () => {
                   isMuted={isMuted}
                   isSpeaking={isSpeaking}
                   isPreviewActive={isPreviewActive}
-                  consumers={consumers}
+                  consumers={memoizedConsumers}
                   userProducerIds={producerIds}
                 />
               );

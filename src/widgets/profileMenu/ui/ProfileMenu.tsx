@@ -49,7 +49,8 @@ export const ProfileMenu = ({
     <Stack
       gap="xs"
       bg="#1A1B1E"
-      w={{ base: 150, lg: 250 }}
+      w="100%"
+      maw={250}
       h="100%"
       visibleFrom="sm"
       p={10}

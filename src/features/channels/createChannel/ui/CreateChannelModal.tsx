@@ -1,4 +1,4 @@
-import { Button, Group, Modal, TextInput } from '@mantine/core';
+import { Button, Group, Modal, NumberInput, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 
 import { getModalTitle } from '~/features/channels/createChannel/lib/getModalTitle';
@@ -18,6 +18,7 @@ interface CreateChannelModalProps {
 
 interface CreateChannelForm {
   name: string;
+  count: number;
 }
 
 export const CreateChannelModal = ({
@@ -32,6 +33,7 @@ export const CreateChannelModal = ({
   const form = useForm<CreateChannelForm>({
     initialValues: {
       name: '',
+      count: 3,
     },
     validate: {
       name: combineValidators(
@@ -52,6 +54,8 @@ export const CreateChannelModal = ({
         serverId: currentServerId,
         name: values.name,
         channelType,
+        maxCount:
+          channelType === ChannelType.VOICE_CHANNEL ? values.count : undefined,
       }),
     );
 
@@ -84,6 +88,15 @@ export const CreateChannelModal = ({
           placeholder="Введите название канала"
           {...form.getInputProps('name')}
         />
+        {channelType === ChannelType.VOICE_CHANNEL && (
+          <NumberInput
+            label="Введите число"
+            placeholder="Число от 3 до 999"
+            {...form.getInputProps('count')}
+            min={3}
+            max={999}
+          />
+        )}
         <Group justify="flex-end" mt="md">
           <Button variant="outline" onClick={onClose}>
             Отмена

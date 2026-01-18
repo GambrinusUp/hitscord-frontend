@@ -11,6 +11,7 @@ import { DetailsPanel, DetailsPanelMobile } from '~/modules/DetailsPanel';
 import { ProfilePage } from '~/modules/Profile';
 import { ServerPanel } from '~/modules/ServerPanel';
 import { SideBar, SideBarMobile } from '~/modules/SideBar';
+import { Panel } from '~/modules/SideBar/components/Panel';
 import { getChannelMessages, getServerData } from '~/store/ServerStore';
 import { VoiceChannelFacade } from '~/widgets/voiceChannelFacade';
 
@@ -68,7 +69,7 @@ export const MainPage = () => {
   }, [accessToken, activeChannelId, dispatch]);
 
   return (
-    <Box style={{ display: 'flex', height: '100dvh' }}>
+    <Box style={{ display: 'flex', height: '100dvh', position: 'relative' }}>
       <ServerPanel />
       {isOpenHome ? (
         <ProfilePage />
@@ -91,6 +92,19 @@ export const MainPage = () => {
           />
         </>
       )}
+      <Box
+        style={{
+          position: 'fixed',
+          bottom: 5,
+          left: 5,
+          right: 0,
+          zIndex: 100,
+          maxWidth: 310,
+          boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.3)',
+        }}
+      >
+        <Panel />
+      </Box>
     </Box>
   );
 };

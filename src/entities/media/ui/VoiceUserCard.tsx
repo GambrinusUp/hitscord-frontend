@@ -1,7 +1,7 @@
 import { Card, Stack, Text, Group, Box, Badge } from '@mantine/core';
 import { IconCameraPlus } from '@tabler/icons-react';
 import { AppData, Consumer } from 'mediasoup-client/lib/types';
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 
 import { Buttons } from './Buttons';
 import { CompatButtons } from './CompatButtons';
@@ -19,17 +19,17 @@ interface VoiceUserCardProps {
   userId?: string;
   isStreaming: boolean;
   onOpenStream: (socketId: string) => void;
-  isCameraEnabled?: boolean; // Для будущей поддержки камеры
+  isCameraEnabled?: boolean;
   onPreviewStream?: (socketId: string) => void;
-  isSpeaking?: boolean; // Говорит ли пользователь
-  isMuted?: boolean; // Выключен ли микрофон
-  isPreviewActive?: boolean; // Активен ли предпросмотр
+  isSpeaking?: boolean;
+  isMuted?: boolean;
+  isPreviewActive?: boolean;
   consumers?: Consumer<AppData>[];
   userProducerIds?: string[];
   isCompact?: boolean;
 }
 
-export const VoiceUserCard = ({
+const VoiceUserCardComponent = ({
   socketId,
   userName,
   userId,
@@ -58,6 +58,45 @@ export const VoiceUserCard = ({
       onPreviewStream(socketId);
     }
   };
+
+  const mediaContent = useMemo(() => {
+    if (isCameraEnabled) {
+      return (
+        <Box style={stylesVoiceUserCard.video()}>
+          <Stack align="center" gap="xs">
+            <IconCameraPlus
+              size={32}
+              style={{ color: 'rgba(88, 166, 255, 0.6)' }}
+            />
+            <Text size="sm" c="dimmed">
+              Камера включена
+            </Text>
+          </Stack>
+          <Badge
+            size="sm"
+            variant="light"
+            color="green"
+            style={stylesVoiceUserCard.badge()}
+          >
+            LIVE
+          </Badge>
+        </Box>
+      );
+    }
+
+    if (isStreaming && isPreviewActive) {
+      return <StreamPreview videoRef={videoRef} />;
+    }
+
+    return <UserAvatar userName={userName} userId={userId!} />;
+  }, [
+    isCameraEnabled,
+    isStreaming,
+    isPreviewActive,
+    videoRef,
+    userName,
+    userId,
+  ]);
 
   return (
     <Card
@@ -90,42 +129,7 @@ export const VoiceUserCard = ({
     >
       <Box style={stylesVoiceUserCard.previewContainer(isCompact)}>
         {isMuted && <MicrophoneIndicator />}
-        {isCameraEnabled ? (
-          <Box
-            style={{
-              width: '100%',
-              height: '100%',
-              background:
-                'linear-gradient(45deg, rgba(88, 166, 255, 0.1) 0%, rgba(140, 100, 255, 0.1) 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative',
-            }}
-          >
-            <Stack align="center" gap="xs">
-              <IconCameraPlus
-                size={32}
-                style={{ color: 'rgba(88, 166, 255, 0.6)' }}
-              />
-              <Text size="sm" c="dimmed">
-                Камера включена
-              </Text>
-            </Stack>
-            <Badge
-              size="sm"
-              variant="light"
-              color="green"
-              style={stylesVoiceUserCard.badge()}
-            >
-              LIVE
-            </Badge>
-          </Box>
-        ) : isStreaming && isPreviewActive ? (
-          <StreamPreview videoRef={videoRef} />
-        ) : (
-          <UserAvatar userName={userName} userId={userId!} />
-        )}
+        {mediaContent}
         {isCompact && isStreaming && (
           <CompatButtons
             hovered={hovered}
@@ -168,3 +172,47 @@ export const VoiceUserCard = ({
     </Card>
   );
 };
+
+const areEqual = (
+  prevProps: VoiceUserCardProps,
+  nextProps: VoiceUserCardProps,
+) => {
+  const mediaPropsEqual =
+    prevProps.isCameraEnabled === nextProps.isCameraEnabled &&
+    prevProps.isStreaming === nextProps.isStreaming &&
+    prevProps.isPreviewActive === nextProps.isPreviewActive &&
+    prevProps.userName === nextProps.userName &&
+    prevProps.userId === nextProps.userId &&
+    prevProps.socketId === nextProps.socketId &&
+    prevProps.isCompact === nextProps.isCompact;
+
+  const prevConsumers = prevProps.consumers ?? [];
+  const nextConsumers = nextProps.consumers ?? [];
+  const consumersEqual =
+    prevConsumers.length === nextConsumers.length &&
+    prevConsumers.every(
+      (consumer, index) =>
+        consumer.id === nextConsumers[index]?.id &&
+        consumer.producerId === nextConsumers[index]?.producerId,
+    );
+
+  const prevProducerIds = prevProps.userProducerIds ?? [];
+  const nextProducerIds = nextProps.userProducerIds ?? [];
+  const producerIdsEqual =
+    prevProducerIds.length === nextProducerIds.length &&
+    prevProducerIds.every((id, index) => id === nextProducerIds[index]);
+
+  if (!mediaPropsEqual || !consumersEqual || !producerIdsEqual) {
+    return false;
+  }
+
+  return (
+    prevProps.isMuted === nextProps.isMuted &&
+    prevProps.isSpeaking === nextProps.isSpeaking &&
+    prevProps.onOpenStream === nextProps.onOpenStream &&
+    prevProps.onPreviewStream === nextProps.onPreviewStream
+  );
+};
+
+export const VoiceUserCard = memo(VoiceUserCardComponent, areEqual);
+VoiceUserCard.displayName = 'VoiceUserCard';

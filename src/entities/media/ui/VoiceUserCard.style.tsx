@@ -27,6 +27,16 @@ export const stylesVoiceUserCard = {
     overflow: 'hidden',
     borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
   }),
+  video: (): MantineStyleProp => ({
+    width: '100%',
+    height: '100%',
+    background:
+      'linear-gradient(45deg, rgba(88, 166, 255, 0.1) 0%, rgba(140, 100, 255, 0.1) 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  }),
   badge: (): MantineStyleProp => ({
     position: 'absolute',
     top: 8,

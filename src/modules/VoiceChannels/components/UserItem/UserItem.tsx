@@ -16,11 +16,14 @@ export const UserItem = ({
   handleKickUser,
   channelId,
   userId,
-  //handleMuteUser,
+  handleMuteUser,
 }: UserItemProps) => {
   /*const roleType = useAppSelector(
     (state) => state.testServerStore.serverData.userRoleType,
   );*/
+  const { isCreator } = useAppSelector(
+    (state) => state.testServerStore.serverData,
+  );
   const canWorkChannels = useAppSelector(
     (state) => state.testServerStore.serverData.permissions.canWorkChannels,
   );
@@ -36,16 +39,10 @@ export const UserItem = ({
       (user) => user.userId === userId,
     ),
   )?.roleType;*/
+  const currentUser = users?.find((user) => user.userId === userId);
 
-  /* const isMuted =
-    users?.find((user) => user.userId === userId)?.muteStatus ===
-      MuteStatus.Muted || MuteStatus.SelfMuted;*/
-
-  const isMuted = users?.find((user) => user.userId === userId)?.isMuted;
-
-  /*useEffect(() => {
-    console.log(isMuted, userId);
-  }, [isMuted, userId]);*/
+  const isMuted = currentUser?.isMuted && currentUser?.muteStatus === 1;
+  const isSelfMuted = currentUser?.isMuted && currentUser?.muteStatus === 2;
 
   return (
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>
@@ -58,7 +55,13 @@ export const UserItem = ({
             color={isSpeaking ? '#43b581' : undefined}
             style={{ flexShrink: 0 }}
           />
-          {isMuted && <MicOff size={20} style={{ flexShrink: 0 }} />}
+          {(isSelfMuted || isMuted) && (
+            <MicOff
+              color={isSelfMuted ? '#ff0000' : '#43b581'}
+              size={20}
+              style={{ flexShrink: 0 }}
+            />
+          )}
           <Text
             style={{
               flex: 1,
@@ -106,7 +109,7 @@ export const UserItem = ({
             Открыть стрим
           </Menu.Item>
         )}
-        {canWorkChannels &&
+        {(isCreator || canWorkChannels) &&
           //Number(roleType) <= Number(userRoleType) &&
           userId !== user.id && (
             <Menu.Item
@@ -116,16 +119,27 @@ export const UserItem = ({
               Отключить пользователя
             </Menu.Item>
           )}
-        {/*canWorkChannels &&
-          Number(roleType) <= Number(userRoleType) &&
+        {(isCreator || canWorkChannels) &&
+          //Number(roleType) <= Number(userRoleType) &&
           userId !== user.id && (
-            <Menu.Item
-              leftSection={<MicOff />}
-              onClick={() => handleMuteUser(userId!, isMuted)}
-            >
-              Оключить звук пользователя
-            </Menu.Item>
-          )*/}
+            <>
+              {!isSelfMuted ? (
+                <Menu.Item
+                  leftSection={<MicOff />}
+                  onClick={() => handleMuteUser(userId!, isSelfMuted)}
+                >
+                  Оключить звук пользователя
+                </Menu.Item>
+              ) : (
+                <Menu.Item
+                  leftSection={<MicOff />}
+                  onClick={() => handleMuteUser(userId!, isSelfMuted)}
+                >
+                  Включить звук пользователя
+                </Menu.Item>
+              )}
+            </>
+          )}
       </Menu.Dropdown>
     </Menu>
   );

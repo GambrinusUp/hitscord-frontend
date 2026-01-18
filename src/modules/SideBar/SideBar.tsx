@@ -23,13 +23,13 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { ChangeNameModal } from './components/ChangeNameModal';
-import { Panel } from './components/Panel';
 import { RolesModal } from './components/RolesModal';
 import { RolesPermissionsModal } from './components/RolesPermissionsModal';
 import { ServerSettingsModal } from './components/ServerSettingsModal';
 import { UnsubscribeModal } from './components/UnsubscribeModal';
 import { SideBarProps } from './SideBarProps.types';
 
+import { useMediaContext } from '~/context';
 import { ServerTypeEnum } from '~/entities/servers';
 import { ManagePresetsModal } from '~/features/presets';
 import { ChangeNotificationSetting } from '~/features/server';
@@ -54,6 +54,7 @@ export const SideBar = ({ onClose }: SideBarProps) => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const disconnect = useDisconnect();
+  const { isConnected } = useMediaContext();
   const [opened, { open, close }] = useDisclosure(false);
   const [
     changeNameModalOpened,
@@ -116,9 +117,9 @@ export const SideBar = ({ onClose }: SideBarProps) => {
       <Stack
         gap="xs"
         bg="#1A1B1E"
-        p={10}
+        p={`10px 10px ${isConnected ? 130 : 85}px 10px`}
         //w={{ base: 150, lg: 250 }}
-        w={250}
+        miw={250}
         h="100%"
         visibleFrom="sm"
       >
@@ -215,7 +216,6 @@ export const SideBar = ({ onClose }: SideBarProps) => {
           <NotificationChannels />
           <VoiceChannels />
         </ScrollArea.Autosize>
-        <Panel />
       </Stack>
       <ServerSettingsModal opened={opened} onClose={close} />
       <ChangeNameModal
