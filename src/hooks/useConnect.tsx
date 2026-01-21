@@ -1,3 +1,5 @@
+import { useSound } from 'use-sound';
+
 import { socket } from '~/api/socket';
 import {
   useMediaContext,
@@ -6,6 +8,7 @@ import {
   getLocalAudioStream,
   joinRoom,
 } from '~/context';
+import sound from '~/shared/static/zapsplat_multimedia_alert_prompt_mallet_marimba_success_104792.mp3';
 
 export const useConnect = () => {
   const {
@@ -15,6 +18,7 @@ export const useConnect = () => {
     setProducerTransport,
     addConsumer,
   } = useMediaContext();
+  const [play] = useSound(sound, { volume: 0.35 });
 
   const connect = async (
     roomName: string,
@@ -47,10 +51,11 @@ export const useConnect = () => {
         setAudioProducer,
         addConsumer,
       );
+
       setProducerTransport(producerTransport);
 
       setIsConnected(true);
-      //console.log('Connected successfully');
+      play();
     } catch (error) {
       console.error('Error connecting:', error);
       setIsConnected(false);

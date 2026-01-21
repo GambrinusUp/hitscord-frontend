@@ -275,7 +275,7 @@ export const PollItem = ({
                         onClick={(e) => {
                           e.stopPropagation();
 
-                          if (!isAnonimous && variant.votedUserIds.length > 0) {
+                          if (!isAnonimous) {
                             setSelectedVariantIndex(index);
                           }
                         }}
