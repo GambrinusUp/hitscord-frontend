@@ -18,7 +18,6 @@ export const useCamera = () => {
   const startCamera = async () => {
     if (!producerTransport) return;
 
-    // Если идет стрим экрана, не позволяем включить камеру
     if (isStreaming) {
       console.warn('Нельзя включить камеру во время стрима экрана');
 
@@ -34,9 +33,7 @@ export const useCamera = () => {
       cameraStreamRef.current = cameraStream;
       const videoTrack = cameraStream.getVideoTracks()[0];
 
-      // Проверяем, не используется ли videoProducer для стрима экрана
       if (!videoProducer || videoProducer.appData?.source !== 'screen-video') {
-        // Если есть старый producer камеры, закрываем его
         if (videoProducer && videoProducer.appData?.source === 'camera') {
           const accessToken = localStorage.getItem('accessToken');
           videoProducer.close();
@@ -64,13 +61,11 @@ export const useCamera = () => {
   const stopCamera = async () => {
     const accessToken = localStorage.getItem('accessToken');
 
-    // Останавливаем трек камеры
     if (cameraStreamRef.current) {
       cameraStreamRef.current.getTracks().forEach((track) => track.stop());
       cameraStreamRef.current = null;
     }
 
-    // Закрываем producer только если это камера (не стрим экрана)
     if (videoProducer && videoProducer.appData?.source === 'camera') {
       videoProducer.close();
       socket.emit('stopProducer', {

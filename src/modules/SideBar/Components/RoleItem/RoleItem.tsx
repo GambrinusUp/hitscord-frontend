@@ -19,17 +19,15 @@ import { deleteRole, RoleType } from '~/store/RolesStore';
 export const RoleItem = ({ role, editRole, editSettings }: RoleItemProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId, serverData } = useAppSelector(
     (state) => state.testServerStore,
   );
   const canChangeRole = serverData.permissions.canChangeRole;
 
   const handleDelete = async () => {
-    if (accessToken && currentServerId) {
+    if (currentServerId) {
       const result = await dispatch(
         deleteRole({
-          accessToken,
           serverId: currentServerId,
           roleId: role.role.id,
         }),

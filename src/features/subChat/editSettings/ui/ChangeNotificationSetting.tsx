@@ -7,7 +7,6 @@ import { changeChannelNotifiable } from '~/store/ServerStore';
 export const ChangeNotificationSetting = () => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentSubChatId, subChatInfo } = useAppSelector(
     (state) => state.subChatStore,
   );
@@ -17,7 +16,6 @@ export const ChangeNotificationSetting = () => {
   const changeSetting = async () => {
     const result = await dispatch(
       changeChannelNotifiable({
-        accessToken,
         channelId: currentSubChatId!,
       }),
     );

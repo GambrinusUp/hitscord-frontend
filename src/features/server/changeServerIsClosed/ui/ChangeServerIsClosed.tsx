@@ -9,7 +9,6 @@ import { changeServerIsClosed } from '~/store/ServerStore';
 export const ChangeServerIsClosed = () => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { serverData, currentServerId } = useAppSelector(
     (state) => state.testServerStore,
   );
@@ -20,7 +19,6 @@ export const ChangeServerIsClosed = () => {
   const handleClose = async () => {
     const result = await dispatch(
       changeServerIsClosed({
-        accessToken,
         serverId: currentServerId!,
         isClosed: !isClosed,
       }),
@@ -34,7 +32,6 @@ export const ChangeServerIsClosed = () => {
   const handleOpen = async () => {
     const result = await dispatch(
       changeServerIsClosed({
-        accessToken,
         serverId: currentServerId!,
         isClosed: !isClosed,
         isApprove,

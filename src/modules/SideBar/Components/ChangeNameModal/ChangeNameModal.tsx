@@ -8,7 +8,6 @@ import { changeNameOnServer } from '~/store/ServerStore';
 
 export const ChangeNameModal = ({ opened, onClose }: ChangeNameModalProps) => {
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
   //const [newName, setNewName] = useState('');
   const { showSuccess } = useNotification();
@@ -39,7 +38,6 @@ export const ChangeNameModal = ({ opened, onClose }: ChangeNameModalProps) => {
     if (currentServerId) {
       const result = await dispatch(
         changeNameOnServer({
-          accessToken,
           serverId: currentServerId,
           name: values.newName,
         }),

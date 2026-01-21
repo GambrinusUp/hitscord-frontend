@@ -1,4 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import { AxiosError } from 'axios';
 
 import { RolesAPI } from './api';
 import {
@@ -11,91 +12,92 @@ import {
 
 export const getRoles = createAsyncThunk<
   GetRoles,
-  { accessToken: string; serverId: string },
+  { serverId: string },
   { rejectValue: string }
->(
-  'rolesSlice/getRoles',
-  async ({ accessToken, serverId }, { rejectWithValue }) => {
-    try {
-      const response = await RolesAPI.getRoles(accessToken, serverId);
+>('rolesSlice/getRoles', async ({ serverId }, { rejectWithValue }) => {
+  try {
+    const response = await RolesAPI.getRoles(serverId);
 
-      return response;
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+    return response;
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
     }
-  },
-);
+
+    return rejectWithValue('Произошла ошибка');
+  }
+});
 
 export const createRole = createAsyncThunk<
   CreateRoleResponse,
-  { accessToken: string; role: CreateRoleRequest },
+  { role: CreateRoleRequest },
   { rejectValue: string }
->(
-  'rolesSlice/createRole',
-  async ({ accessToken, role }, { rejectWithValue, dispatch }) => {
-    try {
-      const response = await RolesAPI.createRole(accessToken, role);
+>('rolesSlice/createRole', async ({ role }, { rejectWithValue, dispatch }) => {
+  try {
+    const response = await RolesAPI.createRole(role);
 
-      dispatch(getRoles({ accessToken, serverId: role.serverId }));
+    dispatch(getRoles({ serverId: role.serverId }));
 
-      return response;
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+    return response;
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
     }
-  },
-);
+
+    return rejectWithValue('Произошла ошибка');
+  }
+});
 
 export const deleteRole = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; roleId: string },
+  { serverId: string; roleId: string },
   { rejectValue: string }
 >(
   'rolesSlice/deleteRole',
-  async ({ accessToken, serverId, roleId }, { rejectWithValue }) => {
+  async ({ serverId, roleId }, { rejectWithValue }) => {
     try {
-      await RolesAPI.deleteRole(accessToken, serverId, roleId);
+      await RolesAPI.deleteRole(serverId, roleId);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const updateRole = createAsyncThunk<
   void,
-  { accessToken: string; updatedRole: UpdateRole },
+  { updatedRole: UpdateRole },
   { rejectValue: string }
->(
-  'rolesSlice/updateRole',
-  async ({ accessToken, updatedRole }, { rejectWithValue }) => {
-    try {
-      await RolesAPI.updateRole(accessToken, updatedRole);
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+>('rolesSlice/updateRole', async ({ updatedRole }, { rejectWithValue }) => {
+  try {
+    await RolesAPI.updateRole(updatedRole);
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
     }
-  },
-);
+
+    return rejectWithValue('Произошла ошибка');
+  }
+});
 
 export const updateRoleSettings = createAsyncThunk<
   void,
-  { accessToken: string; updatedRoleSettings: ChangeSettings },
+  { updatedRoleSettings: ChangeSettings },
   { rejectValue: string }
 >(
   'rolesSlice/updateRoleSettings',
-  async ({ accessToken, updatedRoleSettings }, { rejectWithValue }) => {
+  async ({ updatedRoleSettings }, { rejectWithValue }) => {
     try {
-      await RolesAPI.updateRoleSettings(accessToken, updatedRoleSettings);
+      await RolesAPI.updateRoleSettings(updatedRoleSettings);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );

@@ -13,7 +13,6 @@ export const ChangeNotificationSetting = ({
 }: ChangeNotificationSettingProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { serverData } = useAppSelector((state) => state.testServerStore);
   const textChannel = serverData.channels.textChannels.find(
     (channel) => channel.channelId === channelId,
@@ -39,7 +38,6 @@ export const ChangeNotificationSetting = ({
   const changeSetting = async () => {
     const result = await dispatch(
       changeChannelNotifiable({
-        accessToken,
         channelId,
       }),
     );

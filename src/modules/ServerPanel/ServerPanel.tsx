@@ -29,7 +29,7 @@ export const ServerPanel = () => {
 
   useEffect(() => {
     if (accessToken) {
-      dispatch(getUserServers({ accessToken }));
+      dispatch(getUserServers());
     }
   }, [accessToken, dispatch]);
 

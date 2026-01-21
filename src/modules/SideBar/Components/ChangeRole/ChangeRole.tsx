@@ -11,7 +11,6 @@ import { updatedRole } from '~/store/ServerStore';
 export const ChangeRole = ({ opened, onClose }: ChangeRoleProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
   const { role } = useAppSelector((state) => state.rolesStore);
   const [roleName, setRoleName] = useState('');
@@ -21,13 +20,11 @@ export const ChangeRole = ({ opened, onClose }: ChangeRoleProps) => {
     if (
       roleName.trim().length > 1 &&
       color.trim().length > 1 &&
-      accessToken &&
       currentServerId &&
       role
     ) {
       const result = await dispatch(
         updateRole({
-          accessToken,
           updatedRole: {
             serverId: currentServerId,
             roleId: role.role.id,

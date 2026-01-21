@@ -35,7 +35,7 @@ export const RolesModal = ({ opened, onClose }: RolesModalProps) => {
 
   useEffect(() => {
     if (accessToken && currentServerId && canCreateRoles) {
-      dispatch(getRoles({ accessToken, serverId: currentServerId }));
+      dispatch(getRoles({ serverId: currentServerId }));
     }
   }, [accessToken, currentServerId, canCreateRoles]);
 

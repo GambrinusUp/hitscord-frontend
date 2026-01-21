@@ -64,7 +64,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
       } else {
         audioProducer.pause();
       }
-      dispatch(selfMute({ accessToken }));
+      dispatch(selfMute());
       setIsMuted(!isMuted);
     }
   };

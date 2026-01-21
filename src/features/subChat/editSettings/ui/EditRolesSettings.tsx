@@ -12,7 +12,6 @@ interface EditRolesSettingsProps {
 
 export const EditRolesSettings = ({ onClose }: EditRolesSettingsProps) => {
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentChannelId, serverData } = useAppSelector(
     (state) => state.testServerStore,
   );
@@ -34,7 +33,6 @@ export const EditRolesSettings = ({ onClose }: EditRolesSettingsProps) => {
 
     const result = await dispatch(
       changeSubChannelSettings({
-        accessToken,
         settings: {
           channelId: currentSubChatId!,
           add: toBoolean(add!),

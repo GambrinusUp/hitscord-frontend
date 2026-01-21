@@ -1,6 +1,6 @@
 import { Button, Stack, Text } from '@mantine/core';
 
-import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { useAppDispatch, useNotification } from '~/hooks';
 import { deleteChannel } from '~/store/ServerStore';
 
 interface DeleteChannelProps {
@@ -17,14 +17,12 @@ export const DeleteChannel = ({
   onClose,
 }: DeleteChannelProps) => {
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { showSuccess } = useNotification();
 
   const handleDeleteChannel = async () => {
     setLoading(true);
     const result = await dispatch(
       deleteChannel({
-        accessToken,
         channelId,
       }),
     );

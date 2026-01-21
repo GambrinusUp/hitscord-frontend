@@ -35,7 +35,6 @@ export const SettingsChannelModal = ({
   channelType,
 }: SettingsChannelModalProps) => {
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { serverData, error } = useAppSelector(
     (state) => state.testServerStore,
   );
@@ -47,10 +46,10 @@ export const SettingsChannelModal = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (accessToken && canWorkChannels && opened) {
-      dispatch(getChannelSettings({ accessToken, channelId }));
+    if (canWorkChannels && opened) {
+      dispatch(getChannelSettings({ channelId }));
     }
-  }, [accessToken, canWorkChannels, opened]);
+  }, [canWorkChannels, opened]);
 
   useEffect(() => {
     if (error !== '') {

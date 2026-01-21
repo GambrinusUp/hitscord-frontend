@@ -44,7 +44,7 @@ export const ServerSettingsModal = ({
     (state) => state.testServerStore,
   );
   const { rolesLoading } = useAppSelector((state) => state.rolesStore);
-  const { accessToken, user } = useAppSelector((state) => state.userStore);
+  const { user } = useAppSelector((state) => state.userStore);
   const [activeSetting, setActiveSetting] = useState<
     | 'name'
     | 'roles'
@@ -84,7 +84,7 @@ export const ServerSettingsModal = ({
     if (result.meta.requestStatus === 'fulfilled') {
       setLoading(false);
       showSuccess('Роль успешно присвоена');
-      dispatch(getServerData({ accessToken, serverId: serverData.serverId }));
+      dispatch(getServerData({ serverId: serverData.serverId }));
       onClose();
     }
   };
@@ -99,7 +99,6 @@ export const ServerSettingsModal = ({
 
       const result = await dispatch(
         changeServerName({
-          accessToken,
           serverId: currentServerId,
           name: newServerName,
         }),
@@ -119,7 +118,6 @@ export const ServerSettingsModal = ({
 
       const result = await dispatch(
         deleteUserFromServer({
-          accessToken,
           serverId: currentServerId,
           userId: deletedUserId,
           banReason: banReason.trim() !== '' ? banReason : undefined,
@@ -143,7 +141,7 @@ export const ServerSettingsModal = ({
       currentServerId
     ) {
       //console.log(canCreateRoles);
-      dispatch(getRoles({ accessToken, serverId: currentServerId }));
+      dispatch(getRoles({ serverId: currentServerId }));
     }
   }, [rolesLoading, canCreateRoles, currentServerId]);
 

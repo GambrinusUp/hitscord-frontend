@@ -1,4 +1,3 @@
-import { API_URL } from '~/constants';
 import { FileResponse } from '~/entities/files';
 import { api } from '~/shared/api';
 import {
@@ -7,426 +6,158 @@ import {
   ServerData,
 } from '~/store/ServerStore';
 
-export const getServers = async (
-  accessToken: string,
-): Promise<GetServersResponse> => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/get/List`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
+export const getServers = async (): Promise<GetServersResponse> => {
+  const { data } = await api.get('/server/get/List');
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error get servers:', error);
-    throw error;
-  }
+  return data;
 };
 
-export const getServerData = async (
-  accessToken: string,
-  serverId: string,
-): Promise<ServerData> => {
-  try {
-    const response = await fetch(
-      `${API_URL}/api/server/getserverdata?serverId=${serverId}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
+export const getServerData = async (serverId: string): Promise<ServerData> => {
+  const { data } = await api.get('/server/getserverdata', {
+    params: { serverId },
+  });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error get server data:', error);
-    throw error;
-  }
+  return data;
 };
 
 export const createServer = async (
-  accessToken: string,
   name: string,
   serverType: number,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/create`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name,
-        serverType,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error create server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.post('/server/create', {
+    name,
+    serverType,
+  });
 };
 
-export const deleteServer = async (accessToken: string, serverId: string) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/delete`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serverId,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error delete server:', error);
-    throw error;
-  }
+export const deleteServer = async (serverId: string): Promise<void> => {
+  await api.delete('/server/delete', {
+    data: { serverId },
+  });
 };
 
 export const changeRole = async (
-  accessToken: string,
   serverId: string,
   userId: string,
   role: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/changerole`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serverId: serverId,
-        userId: userId,
-        role: role,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error create server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.put('/server/changerole', {
+    serverId,
+    userId,
+    role,
+  });
 };
 
 export const addRole = async (
-  accessToken: string,
   serverId: string,
   userId: string,
   role: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/addrole`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serverId: serverId,
-        userId: userId,
-        role: role,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error create server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.put('/server/addrole', {
+    serverId,
+    userId,
+    role,
+  });
 };
 
 export const removeRole = async (
-  accessToken: string,
   serverId: string,
   userId: string,
   role: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/removerole`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serverId: serverId,
-        userId: userId,
-        role: role,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error create server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.put('/server/removerole', {
+    serverId,
+    userId,
+    role,
+  });
 };
 
 export const subscribeToServer = async (
-  accessToken: string,
   serverId: string,
   userName: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/subscribe`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serverId: serverId,
-        userName: userName,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error subscribe to server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.post('/server/subscribe', {
+    serverId,
+    userName,
+  });
 };
 
 export const unsubscribeFromServer = async (
-  accessToken: string,
   serverId: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/unsubscribe`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serverId: serverId,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error unsubscribe from server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.delete('/server/unsubscribe', {
+    data: { serverId },
+  });
 };
 
 export const changeServerName = async (
-  accessToken: string,
   serverId: string,
   name: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/name/server/change`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: serverId,
-        name,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error change server name:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.put('/server/name/server/change', {
+    id: serverId,
+    name,
+  });
 };
 
 export const changeNameOnServer = async (
-  accessToken: string,
   serverId: string,
   name: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/name/user/change`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: serverId,
-        name,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error change user name on server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.put('/server/name/user/change', {
+    id: serverId,
+    name,
+  });
 };
 
 export const deleteUserFromServer = async (
-  accessToken: string,
   serverId: string,
   userId: string,
   banReason?: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/deleteuser`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serverId,
-        userId,
-        banReason,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error delete user from server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.delete('/server/deleteuser', {
+    data: {
+      serverId,
+      userId,
+      banReason,
+    },
+  });
 };
 
 export const creatorUnsubscribeFromServer = async (
-  accessToken: string,
   serverId: string,
   newCreatorId: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/unsubscribe/creator`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        serverId,
-        newCreatorId,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error unsubscribe creator from server:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.delete('/server/unsubscribe/creator', {
+    data: {
+      serverId,
+      newCreatorId,
+    },
+  });
 };
 
 export const getBannedUsers = async (
-  accessToken: string,
   serverId: string,
   page: number,
   size: number,
 ): Promise<BannedUserResponse> => {
-  try {
-    const response = await fetch(
-      `${API_URL}/api/server/banned/list?serverId=${serverId}&Page=${page}&Size=${size}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
+  const { data } = await api.get('/server/banned/list', {
+    params: { serverId, Page: page, Size: size },
+  });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error get banned users:', error);
-    throw error;
-  }
+  return data;
 };
 
 export const unbanUser = async (
-  accessToken: string,
   userId: string,
   serverId: string,
-) => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/banned/unban`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId,
-        serverId,
-      }),
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error unban user:', error);
-    throw error;
-  }
+): Promise<void> => {
+  await api.delete('/server/banned/unban', {
+    data: {
+      userId,
+      serverId,
+    },
+  });
 };
 
 export const changeServerIcon = async (
@@ -447,60 +178,19 @@ export const changeServerIcon = async (
 };
 
 export const changeServerIsClosed = async (
-  accessToken: string,
   serverId: string,
   isClosed: boolean,
   isApprove?: boolean,
 ): Promise<void> => {
-  try {
-    const response = await fetch(`${API_URL}/api/server/isClosed`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        serverId,
-        isClosed,
-        isApprove,
-      }),
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error change server is closed:', error);
-    throw error;
-  }
+  await api.put('/server/isClosed', {
+    serverId,
+    isClosed,
+    isApprove,
+  });
 };
 
-export const changeNotifiable = async (
-  accessToken: string,
-  serverId: string,
-) => {
-  try {
-    const response = await fetch(
-      `${API_URL}/api/server/settings/nonnotifiable`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: serverId,
-        }),
-      },
-    );
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-  } catch (error) {
-    console.error('Error change notifiable:', error);
-    throw error;
-  }
+export const changeNotifiable = async (serverId: string): Promise<void> => {
+  await api.put('/server/settings/nonnotifiable', {
+    id: serverId,
+  });
 };

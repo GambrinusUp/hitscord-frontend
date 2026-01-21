@@ -27,7 +27,6 @@ export const CreateChannelModal = ({
   channelType,
 }: CreateChannelModalProps) => {
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
 
   const form = useForm<CreateChannelForm>({
@@ -50,7 +49,6 @@ export const CreateChannelModal = ({
 
     const result = await dispatch(
       createChannel({
-        accessToken,
         serverId: currentServerId,
         name: values.name,
         channelType,
@@ -60,7 +58,7 @@ export const CreateChannelModal = ({
     );
 
     if (result.meta.requestStatus === 'fulfilled') {
-      dispatch(getServerData({ accessToken, serverId: currentServerId }));
+      dispatch(getServerData({ serverId: currentServerId }));
     }
 
     onClose();

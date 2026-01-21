@@ -1,7 +1,7 @@
 import { Button, Stack, Text, TextInput } from '@mantine/core';
 import { useState } from 'react';
 
-import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
+import { useAppDispatch, useNotification } from '~/hooks';
 import { changeChannelName } from '~/store/ServerStore';
 
 interface EditChannelNameProps {
@@ -20,7 +20,6 @@ export const EditChannelName = ({
   onClose,
 }: EditChannelNameProps) => {
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { showSuccess } = useNotification();
   const [newChannelName, setNewChannelName] = useState(channelName);
 
@@ -28,7 +27,6 @@ export const EditChannelName = ({
     setLoading(true);
     const result = await dispatch(
       changeChannelName({
-        accessToken,
         id: channelId,
         name: newChannelName,
       }),

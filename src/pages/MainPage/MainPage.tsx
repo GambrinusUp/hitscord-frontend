@@ -21,9 +21,7 @@ export const MainPage = () => {
   const { isUserStreamView, isOpenHome } = useAppSelector(
     (state) => state.appStore,
   );
-  const { accessToken, isLoggedIn } = useAppSelector(
-    (state) => state.userStore,
-  );
+  const { isLoggedIn } = useAppSelector((state) => state.userStore);
   const {
     currentServerId,
     currentChannelId,
@@ -43,22 +41,21 @@ export const MainPage = () => {
   }, [isLoggedIn, navigate]);
 
   useEffect(() => {
-    if (accessToken) dispatch(getUserProfile());
-  }, [accessToken, dispatch]);
+    dispatch(getUserProfile());
+  }, [dispatch]);
 
   useEffect(() => {
-    if (currentServerId && accessToken) {
-      dispatch(getServerData({ accessToken, serverId: currentServerId }));
+    if (currentServerId) {
+      dispatch(getServerData({ serverId: currentServerId }));
     }
-  }, [accessToken, currentServerId, dispatch]);
+  }, [currentServerId, dispatch]);
 
   useEffect(() => {
-    if (activeChannelId && accessToken) {
+    if (activeChannelId) {
       const isFirstLoad = startMessageId === 0;
 
       dispatch(
         getChannelMessages({
-          accessToken,
           channelId: activeChannelId,
           number: MAX_MESSAGE_NUMBER,
           fromMessageId: startMessageId,
@@ -66,7 +63,7 @@ export const MainPage = () => {
         }),
       );
     }
-  }, [accessToken, activeChannelId, dispatch]);
+  }, [activeChannelId, dispatch]);
 
   return (
     <Box style={{ display: 'flex', height: '100dvh', position: 'relative' }}>

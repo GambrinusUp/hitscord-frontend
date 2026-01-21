@@ -28,7 +28,6 @@ interface UnbanUserProps {
 export const UnbanUser = ({ opened, loading, setLoading }: UnbanUserProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const {
     currentServerId,
     serverData,
@@ -45,7 +44,6 @@ export const UnbanUser = ({ opened, loading, setLoading }: UnbanUserProps) => {
 
       const result = await dispatch(
         unbanUser({
-          accessToken,
           serverId: currentServerId,
           userId: userId,
         }),
@@ -62,7 +60,6 @@ export const UnbanUser = ({ opened, loading, setLoading }: UnbanUserProps) => {
     if (pageBannedUsers < totalPagesBannedUsers && currentServerId) {
       dispatch(
         getBannedUsers({
-          accessToken,
           serverId: currentServerId,
           page: value,
           size: 5,
@@ -72,10 +69,9 @@ export const UnbanUser = ({ opened, loading, setLoading }: UnbanUserProps) => {
   };
 
   useEffect(() => {
-    if (canDeleteUsers && accessToken && currentServerId && opened) {
+    if (canDeleteUsers && currentServerId && opened) {
       dispatch(
         getBannedUsers({
-          accessToken,
           serverId: currentServerId,
           page: 1,
           size: 5,

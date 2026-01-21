@@ -132,7 +132,6 @@ export const useMessages = (
         if (type === MessageType.CHANNEL && entityId) {
           await dispatch(
             getMoreMessages({
-              accessToken,
               channelId: entityId,
               number: numberToLoad + 1,
               fromMessageId: lastTopMessageId,
@@ -204,7 +203,6 @@ export const useMessages = (
         if (type === MessageType.CHANNEL && entityId) {
           dispatch(
             getMoreMessages({
-              accessToken,
               channelId: entityId,
               number: numberToLoad + 1,
               fromMessageId: lastBottomMessageId,

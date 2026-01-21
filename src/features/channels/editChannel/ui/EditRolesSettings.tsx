@@ -30,7 +30,6 @@ export const EditRolesSettings = ({
   onClose,
 }: EditRolesSettingsProps) => {
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { serverData } = useAppSelector((state) => state.testServerStore);
   const { showSuccess } = useNotification();
   const [add, setAdd] = useState<string | null>(null);
@@ -49,7 +48,6 @@ export const EditRolesSettings = ({
     ) {
       const result = await dispatch(
         changeTextChannelSettings({
-          accessToken,
           settings: {
             channelId,
             add: toBoolean(add),
@@ -74,7 +72,6 @@ export const EditRolesSettings = ({
     ) {
       const result = await dispatch(
         changeVoiceChannelSettings({
-          accessToken,
           settings: {
             channelId,
             add: toBoolean(add),
@@ -99,7 +96,6 @@ export const EditRolesSettings = ({
     ) {
       const result = await dispatch(
         changeNotificationChannelSettings({
-          accessToken,
           settings: {
             channelId,
             add: toBoolean(add),

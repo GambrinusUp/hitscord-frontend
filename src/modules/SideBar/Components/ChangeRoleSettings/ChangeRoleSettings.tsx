@@ -29,7 +29,6 @@ export const ChangeRoleSettings = ({
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { role } = useAppSelector((state) => state.rolesStore);
   const [loading, setLoading] = useState(false);
   const form = useForm({
@@ -37,7 +36,7 @@ export const ChangeRoleSettings = ({
   });
 
   const handleSave = async () => {
-    if (accessToken && currentServerId && role) {
+    if (currentServerId && role) {
       const values = form.getValues();
       //const updates = [];
       let isSettingsChange = false;
@@ -63,7 +62,6 @@ export const ChangeRoleSettings = ({
         if (newValue !== oldValue) {
           const result = await dispatch(
             updateRoleSettings({
-              accessToken,
               updatedRoleSettings: {
                 serverId: currentServerId,
                 roleId: role.role.id,

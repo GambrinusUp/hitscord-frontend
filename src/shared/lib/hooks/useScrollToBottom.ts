@@ -4,7 +4,7 @@ import { useChannelData } from './useChannelMessagesData';
 import { useChatData } from './useChatData';
 
 import { getMoreChatMessages } from '~/entities/chat';
-import { useAppDispatch, useAppSelector } from '~/hooks';
+import { useAppDispatch } from '~/hooks';
 import { LoadingState } from '~/shared/types';
 import { clearHasNewMessage, getMoreMessages } from '~/store/ServerStore';
 
@@ -24,7 +24,6 @@ export const useScrollToBottom = ({
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [showButton, setShowButton] = useState(false);
 
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const chatData = useChatData();
   const channelData = useChannelData();
 
@@ -54,7 +53,6 @@ export const useScrollToBottom = ({
         if (type === 'channel') {
           await dispatch(
             getMoreMessages({
-              accessToken,
               channelId: entityId,
               number: numberToLoad,
               fromMessageId: lastBottomMessageId,

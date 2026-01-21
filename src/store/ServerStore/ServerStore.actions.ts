@@ -19,157 +19,169 @@ import { RootState } from '~/store/store';
 
 export const getUserServers = createAsyncThunk<
   ServerItem[],
-  { accessToken: string },
+  undefined,
   { rejectValue: string }
->(
-  'testServerSlice/getUserServers',
-  async ({ accessToken }, { rejectWithValue }) => {
-    try {
-      const response = await ServerAPI.getServers(accessToken);
+>('testServerSlice/getUserServers', async (_, { rejectWithValue }) => {
+  try {
+    const response = await ServerAPI.getServers();
 
-      return response.serversList;
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+    return response.serversList;
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
     }
-  },
-);
+
+    return rejectWithValue('Произошла ошибка');
+  }
+});
 
 export const getServerData = createAsyncThunk<
   ServerData,
-  { accessToken: string; serverId: string },
+  { serverId: string },
   { rejectValue: string }
 >(
   'testServerSlice/getServerData',
-  async ({ accessToken, serverId }, { rejectWithValue }) => {
+  async ({ serverId }, { rejectWithValue }) => {
     try {
-      const response = await ServerAPI.getServerData(accessToken, serverId);
+      const response = await ServerAPI.getServerData(serverId);
 
       return response;
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const createServer = createAsyncThunk<
   void,
-  { accessToken: string; name: string; serverType: number },
+  { name: string; serverType: number },
   { rejectValue: string }
 >(
   'testServerSlice/createServer',
-  async ({ accessToken, name, serverType }, { rejectWithValue }) => {
+  async ({ name, serverType }, { rejectWithValue }) => {
     try {
-      await ServerAPI.createServer(accessToken, name, serverType);
+      await ServerAPI.createServer(name, serverType);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const deleteServer = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string },
+  { serverId: string },
   { rejectValue: string }
->(
-  'testServerSlice/deleteServer',
-  async ({ accessToken, serverId }, { rejectWithValue }) => {
-    try {
-      await ServerAPI.deleteServer(accessToken, serverId);
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+>('testServerSlice/deleteServer', async ({ serverId }, { rejectWithValue }) => {
+  try {
+    await ServerAPI.deleteServer(serverId);
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
     }
-  },
-);
+
+    return rejectWithValue('Произошла ошибка');
+  }
+});
 
 export const changeRole = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; userId: string; role: string },
+  { serverId: string; userId: string; role: string },
   { rejectValue: string }
 >(
   'testServerSlice/changeRole',
-  async ({ accessToken, serverId, userId, role }, { rejectWithValue }) => {
+  async ({ serverId, userId, role }, { rejectWithValue }) => {
     try {
-      await ServerAPI.changeRole(accessToken, serverId, userId, role);
+      await ServerAPI.changeRole(serverId, userId, role);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const addRole = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; userId: string; role: string },
+  { serverId: string; userId: string; role: string },
   { rejectValue: string }
 >(
   'testServerSlice/addRole',
-  async ({ accessToken, serverId, userId, role }, { rejectWithValue }) => {
+  async ({ serverId, userId, role }, { rejectWithValue }) => {
     try {
-      await ServerAPI.addRole(accessToken, serverId, userId, role);
+      await ServerAPI.addRole(serverId, userId, role);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const removeRole = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; userId: string; role: string },
+  { serverId: string; userId: string; role: string },
   { rejectValue: string }
 >(
   'testServerSlice/removeRole',
-  async ({ accessToken, serverId, userId, role }, { rejectWithValue }) => {
+  async ({ serverId, userId, role }, { rejectWithValue }) => {
     try {
-      await ServerAPI.removeRole(accessToken, serverId, userId, role);
+      await ServerAPI.removeRole(serverId, userId, role);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const subscribeToServer = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; userName: string },
+  { serverId: string; userName: string },
   { rejectValue: string }
 >(
   'testServerSlice/subscribeToServer',
-  async ({ accessToken, serverId, userName }, { rejectWithValue }) => {
+  async ({ serverId, userName }, { rejectWithValue }) => {
     try {
-      await ServerAPI.subscribeToServer(accessToken, serverId, userName);
+      await ServerAPI.subscribeToServer(serverId, userName);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const unsubscribeFromServer = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string },
+  { serverId: string },
   { rejectValue: string }
 >(
   'testServerSlice/unsubscribeFromServer',
-  async ({ accessToken, serverId }, { rejectWithValue }) => {
+  async ({ serverId }, { rejectWithValue }) => {
     try {
-      await ServerAPI.unsubscribeFromServer(accessToken, serverId);
+      await ServerAPI.unsubscribeFromServer(serverId);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
@@ -177,7 +189,6 @@ export const unsubscribeFromServer = createAsyncThunk<
 export const getChannelMessages = createAsyncThunk<
   GetMessage,
   {
-    accessToken: string;
     channelId: string;
     number: number;
     fromMessageId: number;
@@ -187,12 +198,11 @@ export const getChannelMessages = createAsyncThunk<
 >(
   'testServerSlice/getChannelMessages',
   async (
-    { accessToken, channelId, number, fromMessageId, down },
+    { channelId, number, fromMessageId, down },
     { rejectWithValue, getState },
   ) => {
     try {
       const response = await ChannelsAPI.getChannelsMessages(
-        accessToken,
         channelId,
         number,
         fromMessageId,
@@ -222,7 +232,6 @@ export const getChannelMessages = createAsyncThunk<
 
       if (shouldLoadDown) {
         const fallbackResponse = await ChannelsAPI.getChannelsMessages(
-          accessToken,
           channelId,
           number,
           fromMessageId,
@@ -234,9 +243,11 @@ export const getChannelMessages = createAsyncThunk<
 
       return response;
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
@@ -244,7 +255,6 @@ export const getChannelMessages = createAsyncThunk<
 export const getMoreMessages = createAsyncThunk<
   GetMessage,
   {
-    accessToken: string;
     channelId: string;
     number: number;
     fromMessageId: number;
@@ -253,13 +263,9 @@ export const getMoreMessages = createAsyncThunk<
   { rejectValue: string }
 >(
   'testServerSlice/getMoreMessages',
-  async (
-    { accessToken, channelId, number, fromMessageId, down },
-    { rejectWithValue },
-  ) => {
+  async ({ channelId, number, fromMessageId, down }, { rejectWithValue }) => {
     try {
       const response = await ChannelsAPI.getChannelsMessages(
-        accessToken,
         channelId,
         number,
         fromMessageId,
@@ -268,9 +274,11 @@ export const getMoreMessages = createAsyncThunk<
 
       return response;
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
@@ -278,7 +286,6 @@ export const getMoreMessages = createAsyncThunk<
 export const createChannel = createAsyncThunk<
   void,
   {
-    accessToken: string;
     serverId: string;
     name: string;
     channelType: ChannelType;
@@ -287,22 +294,15 @@ export const createChannel = createAsyncThunk<
   { rejectValue: string }
 >(
   'testServerSlice/createChannel',
-  async (
-    { accessToken, serverId, name, channelType, maxCount },
-    { rejectWithValue },
-  ) => {
+  async ({ serverId, name, channelType, maxCount }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.createChannel(
-        accessToken,
-        serverId,
-        name,
-        channelType,
-        maxCount,
-      );
+      await ChannelsAPI.createChannel(serverId, name, channelType, maxCount);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
@@ -310,265 +310,268 @@ export const createChannel = createAsyncThunk<
 export const deleteChannel = createAsyncThunk<
   void,
   {
-    accessToken: string;
     channelId: string;
   },
   { rejectValue: string }
 >(
   'testServerSlice/deleteChannel',
-  async ({ accessToken, channelId }, { rejectWithValue }) => {
+  async ({ channelId }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.deleteChannel(accessToken, channelId);
+      await ChannelsAPI.deleteChannel(channelId);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeServerName = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; name: string },
+  { serverId: string; name: string },
   { rejectValue: string }
 >(
   'testServerSlice/changeServerName',
-  async ({ accessToken, serverId, name }, { rejectWithValue }) => {
+  async ({ serverId, name }, { rejectWithValue }) => {
     try {
-      await ServerAPI.changeServerName(accessToken, serverId, name);
+      await ServerAPI.changeServerName(serverId, name);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeNameOnServer = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; name: string },
+  { serverId: string; name: string },
   { rejectValue: string }
 >(
   'testServerSlice/changeNameOnServer',
-  async ({ accessToken, serverId, name }, { rejectWithValue }) => {
+  async ({ serverId, name }, { rejectWithValue }) => {
     try {
-      await ServerAPI.changeNameOnServer(accessToken, serverId, name);
+      await ServerAPI.changeNameOnServer(serverId, name);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const deleteUserFromServer = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; userId: string; banReason?: string },
+  { serverId: string; userId: string; banReason?: string },
   { rejectValue: string }
 >(
   'testServerSlice/deleteUserFromServer',
-  async ({ accessToken, serverId, userId, banReason }, { rejectWithValue }) => {
+  async ({ serverId, userId, banReason }, { rejectWithValue }) => {
     try {
-      await ServerAPI.deleteUserFromServer(
-        accessToken,
-        serverId,
-        userId,
-        banReason,
-      );
+      await ServerAPI.deleteUserFromServer(serverId, userId, banReason);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeNotificationChannelSettings = createAsyncThunk<
   void,
-  { accessToken: string; settings: ChannelSettings },
+  { settings: ChannelSettings },
   { rejectValue: string }
 >(
   'testServerSlice/changeNotificationChannelSettings',
-  async ({ accessToken, settings }, { rejectWithValue }) => {
+  async ({ settings }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.changeNotificationChannelSettings(
-        accessToken,
-        settings,
-      );
+      await ChannelsAPI.changeNotificationChannelSettings(settings);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeChannelName = createAsyncThunk<
   void,
-  { accessToken: string; id: string; name: string },
+  { id: string; name: string },
   { rejectValue: string }
 >(
   'testServerSlice/changeChannelName',
-  async ({ accessToken, id, name }, { rejectWithValue }) => {
+  async ({ id, name }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.changeChannelName(accessToken, id, name);
+      await ChannelsAPI.changeChannelName(id, name);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const creatorUnsubscribeFromServer = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string; newCreatorId: string },
+  { serverId: string; newCreatorId: string },
   { rejectValue: string }
 >(
   'testServerSlice/creatorUnsubscribeFromServer',
-  async ({ accessToken, serverId, newCreatorId }, { rejectWithValue }) => {
+  async ({ serverId, newCreatorId }, { rejectWithValue }) => {
     try {
-      await ServerAPI.creatorUnsubscribeFromServer(
-        accessToken,
-        serverId,
-        newCreatorId,
-      );
+      await ServerAPI.creatorUnsubscribeFromServer(serverId, newCreatorId);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const selfMute = createAsyncThunk<
   void,
-  { accessToken: string },
+  undefined,
   { rejectValue: string }
->('testServerSlice/selfMute', async ({ accessToken }, { rejectWithValue }) => {
+>('testServerSlice/selfMute', async (_, { rejectWithValue }) => {
   try {
-    await ChannelsAPI.selfMute(accessToken);
+    await ChannelsAPI.selfMute();
   } catch (e) {
-    return rejectWithValue(
-      e instanceof Error ? e.message : 'Неизвестная ошибка',
-    );
+    if (e instanceof AxiosError) {
+      return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+    }
+
+    return rejectWithValue('Произошла ошибка');
   }
 });
 
 export const changeTextChannelSettings = createAsyncThunk<
   void,
-  { accessToken: string; settings: ChannelSettings },
+  { settings: ChannelSettings },
   { rejectValue: string }
 >(
   'testServerSlice/changeTextChannelSettings',
-  async ({ accessToken, settings }, { rejectWithValue }) => {
+  async ({ settings }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.changeTextChannelSettings(accessToken, settings);
+      await ChannelsAPI.changeTextChannelSettings(settings);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const getChannelSettings = createAsyncThunk<
   GetChannelSettings,
-  { accessToken: string; channelId: string },
+  { channelId: string },
   { rejectValue: string }
 >(
   'testServerSlice/getChannelSettings',
-  async ({ accessToken, channelId }, { rejectWithValue }) => {
+  async ({ channelId }, { rejectWithValue }) => {
     try {
-      const response = await ChannelsAPI.getChannelSettings(
-        accessToken,
-        channelId,
-      );
+      const response = await ChannelsAPI.getChannelSettings(channelId);
 
       return response;
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeVoiceChannelSettings = createAsyncThunk<
   void,
-  { accessToken: string; settings: ChannelSettings },
+  { settings: ChannelSettings },
   { rejectValue: string }
 >(
   'testServerSlice/changeVoiceChannelSettings',
-  async ({ accessToken, settings }, { rejectWithValue }) => {
+  async ({ settings }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.changeVoiceChannelSettings(accessToken, settings);
+      await ChannelsAPI.changeVoiceChannelSettings(settings);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const getBannedUsers = createAsyncThunk<
   BannedUserResponse,
-  { accessToken: string; serverId: string; page: number; size: number },
+  { serverId: string; page: number; size: number },
   { rejectValue: string }
 >(
   'testServerSlice/getBannedUsers',
-  async ({ accessToken, serverId, page, size }, { rejectWithValue }) => {
+  async ({ serverId, page, size }, { rejectWithValue }) => {
     try {
-      const response = await ServerAPI.getBannedUsers(
-        accessToken,
-        serverId,
-        page,
-        size,
-      );
+      const response = await ServerAPI.getBannedUsers(serverId, page, size);
 
       return response;
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const unbanUser = createAsyncThunk<
   void,
-  { accessToken: string; userId: string; serverId: string },
+  { userId: string; serverId: string },
   { rejectValue: string }
 >(
   'testServerSlice/unbanUser',
-  async ({ accessToken, userId, serverId }, { rejectWithValue }) => {
+  async ({ userId, serverId }, { rejectWithValue }) => {
     try {
-      await ServerAPI.unbanUser(accessToken, userId, serverId);
+      await ServerAPI.unbanUser(userId, serverId);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeVoiceChannelMaxCount = createAsyncThunk<
   void,
-  { accessToken: string; voiceChannelId: string; maxCount: number },
+  { voiceChannelId: string; maxCount: number },
   { rejectValue: string }
 >(
   'testServerSlice/changeVoiceChannelMaxCount',
-  async ({ accessToken, voiceChannelId, maxCount }, { rejectWithValue }) => {
+  async ({ voiceChannelId, maxCount }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.changeVoiceChannelMaxCount(
-        accessToken,
-        voiceChannelId,
-        maxCount,
-      );
+      await ChannelsAPI.changeVoiceChannelMaxCount(voiceChannelId, maxCount);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
@@ -599,7 +602,6 @@ export const changeServerIcon = createAsyncThunk<
 export const changeServerIsClosed = createAsyncThunk<
   void,
   {
-    accessToken: string;
     serverId: string;
     isClosed: boolean;
     isApprove?: boolean;
@@ -607,72 +609,72 @@ export const changeServerIsClosed = createAsyncThunk<
   { rejectValue: string }
 >(
   'testServerSlice/changeServerIsClosed',
-  async (
-    { accessToken, serverId, isClosed, isApprove },
-    { rejectWithValue },
-  ) => {
+  async ({ serverId, isClosed, isApprove }, { rejectWithValue }) => {
     try {
-      await ServerAPI.changeServerIsClosed(
-        accessToken,
-        serverId,
-        isClosed,
-        isApprove,
-      );
+      await ServerAPI.changeServerIsClosed(serverId, isClosed, isApprove);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeNotifiable = createAsyncThunk<
   void,
-  { accessToken: string; serverId: string },
+  { serverId: string },
   { rejectValue: string }
 >(
   'testServerSlice/changeNotifiable',
-  async ({ accessToken, serverId }, { rejectWithValue }) => {
+  async ({ serverId }, { rejectWithValue }) => {
     try {
-      await ServerAPI.changeNotifiable(accessToken, serverId);
+      await ServerAPI.changeNotifiable(serverId);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeChannelNotifiable = createAsyncThunk<
   void,
-  { accessToken: string; channelId: string },
+  { channelId: string },
   { rejectValue: string }
 >(
   'testServerSlice/changeChannelNotifiable',
-  async ({ accessToken, channelId }, { rejectWithValue }) => {
+  async ({ channelId }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.changeChannelNotifiable(accessToken, channelId);
+      await ChannelsAPI.changeChannelNotifiable(channelId);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );
 
 export const changeSubChannelSettings = createAsyncThunk<
   void,
-  { accessToken: string; settings: ChannelSettings },
+  { settings: ChannelSettings },
   { rejectValue: string }
 >(
   'testServerSlice/changeSubChannelSettings',
-  async ({ accessToken, settings }, { rejectWithValue }) => {
+  async ({ settings }, { rejectWithValue }) => {
     try {
-      await ChannelsAPI.changeSubChannelSettings(accessToken, settings);
+      await ChannelsAPI.changeSubChannelSettings(settings);
     } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
     }
   },
 );

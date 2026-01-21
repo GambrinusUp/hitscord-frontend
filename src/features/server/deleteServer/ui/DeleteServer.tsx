@@ -2,6 +2,7 @@ import { Button, Group, Modal, Stack, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Trash } from 'lucide-react';
 import { useState } from 'react';
+
 import { useAppDispatch, useAppSelector, useNotification } from '~/hooks';
 import { deleteServer } from '~/store/ServerStore';
 
@@ -9,7 +10,6 @@ export const DeleteServer = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const { showSuccess } = useNotification();
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +19,6 @@ export const DeleteServer = () => {
 
     const result = await dispatch(
       deleteServer({
-        accessToken,
         serverId: currentServerId!,
       }),
     );

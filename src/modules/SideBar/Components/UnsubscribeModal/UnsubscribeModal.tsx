@@ -42,7 +42,6 @@ export const UnsubscribeModal = ({ opened, onClose }: UnsubscribeModalProp) => {
 
     const result = await dispatch(
       creatorUnsubscribeFromServer({
-        accessToken,
         serverId: serverData.serverId,
         newCreatorId: userId,
       }),
@@ -50,7 +49,7 @@ export const UnsubscribeModal = ({ opened, onClose }: UnsubscribeModalProp) => {
 
     if (result.meta.requestStatus === 'fulfilled') {
       showSuccess('Вы успешно отписались');
-      dispatch(getUserServers({ accessToken }));
+      dispatch(getUserServers());
       dispatch(setOpenHome(true));
       dispatch(clearServerData());
       setUserId('');

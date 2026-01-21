@@ -10,7 +10,6 @@ import { createRole } from '~/store/RolesStore';
 export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId } = useAppSelector((state) => state.testServerStore);
   const [roleName, setRoleName] = useState('');
   const [color, setColor] = useState('#ffffff');
@@ -35,14 +34,12 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
     if (
       roleName.trim().length > 1 &&
       color.trim().length > 1 &&
-      accessToken &&
       currentServerId
     ) {
       setLoading(true);
 
       const result = await dispatch(
         createRole({
-          accessToken,
           role: { serverId: currentServerId, name: roleName.trim(), color },
         }),
       );
@@ -59,7 +56,8 @@ export const CreateRole = ({ opened, onClose }: CreateRoleProps) => {
     setLoading(false);
   };
 
-  const isButtonDisabled = loading || roleName.trim().length < 1 || !validateColor(color);
+  const isButtonDisabled =
+    loading || roleName.trim().length < 1 || !validateColor(color);
 
   return (
     <Modal

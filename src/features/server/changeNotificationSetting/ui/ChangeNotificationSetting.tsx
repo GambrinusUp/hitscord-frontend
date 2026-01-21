@@ -15,7 +15,6 @@ export const ChangeNotificationSetting = ({
 }: ChangeNotificationSettingProps) => {
   const dispatch = useAppDispatch();
   const { showSuccess } = useNotification();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentServerId, serverData } = useAppSelector(
     (state) => state.testServerStore,
   );
@@ -25,7 +24,6 @@ export const ChangeNotificationSetting = ({
   const changeSetting = async () => {
     const result = await dispatch(
       changeNotifiable({
-        accessToken,
         serverId: currentServerId!,
       }),
     );

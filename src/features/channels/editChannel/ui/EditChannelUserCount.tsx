@@ -18,7 +18,6 @@ export const EditChannelUserCount = ({
   onClose,
 }: EditChannelUserCountProps) => {
   const dispatch = useAppDispatch();
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const { serverData } = useAppSelector((state) => state.testServerStore);
   const { showSuccess } = useNotification();
   const [count, setCount] = useState<string | number>(1);
@@ -27,7 +26,6 @@ export const EditChannelUserCount = ({
     setLoading(true);
     const result = await dispatch(
       changeVoiceChannelMaxCount({
-        accessToken,
         voiceChannelId: channelId,
         maxCount: Number(count),
       }),

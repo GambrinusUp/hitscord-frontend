@@ -184,9 +184,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
             currentServerIdValue &&
             currentServerIdValue === ServerId
           ) {
-            dispatch(
-              getServerData({ accessToken, serverId: currentServerIdValue }),
-            );
+            dispatch(getServerData({ serverId: currentServerIdValue }));
           }
         }
 
@@ -203,9 +201,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
             }
 
             if (currentServerIdValue === data.Payload.ServerId) {
-              dispatch(
-                getServerData({ accessToken, serverId: currentServerIdValue }),
-              );
+              dispatch(getServerData({ serverId: currentServerIdValue }));
             }
           }
         }
@@ -323,7 +319,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
           if (containsRole) {
             if (currentServerIdValue === ServerId) {
-              dispatch(getServerData({ accessToken, serverId: ServerId }));
+              dispatch(getServerData({ serverId: ServerId }));
             }
           }
         }
@@ -332,7 +328,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           const { ServerId } = data.Payload;
 
           if (currentServerIdValue === ServerId) {
-            dispatch(getServerData({ accessToken, serverId: ServerId }));
+            dispatch(getServerData({ serverId: ServerId }));
           }
         }
 
@@ -345,7 +341,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
           if (containsRole) {
             if (currentServerIdValue === ServerId) {
-              dispatch(getServerData({ accessToken, serverId: ServerId }));
+              dispatch(getServerData({ serverId: ServerId }));
             }
           }
         }
@@ -359,7 +355,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
           if (containsRole) {
             if (currentServerIdValue === ServerId) {
-              dispatch(getServerData({ accessToken, serverId: ServerId }));
+              dispatch(getServerData({ serverId: ServerId }));
             }
           }
         }
@@ -373,7 +369,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
           if (containsRole) {
             if (currentServerIdValue === ServerId) {
-              dispatch(getServerData({ accessToken, serverId: ServerId }));
+              dispatch(getServerData({ serverId: ServerId }));
             }
           }
         }
@@ -388,9 +384,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
           if (containsRole) {
             if (currentServerIdValue && currentServerIdValue === ServerId) {
-              dispatch(
-                getServerData({ accessToken, serverId: currentServerIdValue }),
-              );
+              dispatch(getServerData({ serverId: currentServerIdValue }));
             }
           }
         }
@@ -404,9 +398,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
 
           if (containsRole) {
             if (currentServerIdValue && currentServerIdValue === ServerId) {
-              dispatch(
-                getServerData({ accessToken, serverId: currentServerIdValue }),
-              );
+              dispatch(getServerData({ serverId: currentServerIdValue }));
             }
           }
         }
@@ -585,7 +577,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           const { ServerId, UserId } = data.Payload;
 
           if (UserId === userIdValue) {
-            dispatch(getServerData({ accessToken, serverId: ServerId }));
+            dispatch(getServerData({ serverId: ServerId }));
           }
         }
 
@@ -593,7 +585,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           const { ServerId, UserId } = data.Payload;
 
           if (UserId === userIdValue) {
-            dispatch(getServerData({ accessToken, serverId: ServerId }));
+            dispatch(getServerData({ serverId: ServerId }));
           }
         }
 

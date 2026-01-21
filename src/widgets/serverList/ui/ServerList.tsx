@@ -12,13 +12,10 @@ import { getUserServers } from '~/store/ServerStore';
 export const ServerList = () => {
   const dispatch = useAppDispatch();
   const { serversList } = useAppSelector((state) => state.testServerStore);
-  const { accessToken } = useAppSelector((state) => state.userStore);
 
   useEffect(() => {
-    if (accessToken) {
-      dispatch(getUserServers({ accessToken }));
-    }
-  }, [accessToken, dispatch]);
+    dispatch(getUserServers());
+  }, [dispatch]);
 
   return (
     <Flex

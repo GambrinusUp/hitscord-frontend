@@ -27,7 +27,7 @@ export const CreateServerModal = ({
 }: CreateServerModalProps) => {
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState<string | null>('create');
-  const { user, accessToken } = useAppSelector((state) => state.userStore);
+  const { user } = useAppSelector((state) => state.userStore);
 
   const isTeacher =
     user.systemRoles.length > 0
@@ -64,14 +64,13 @@ export const CreateServerModal = ({
   const handleCreateSubmit = async (values: typeof form.values) => {
     const result = await dispatch(
       createServer({
-        accessToken,
         name: values.name,
         serverType: Number(values.serverType),
       }),
     );
 
     if (result.meta.requestStatus === 'fulfilled') {
-      dispatch(getUserServers({ accessToken }));
+      dispatch(getUserServers());
       form.reset();
       onClose();
     }
@@ -80,14 +79,13 @@ export const CreateServerModal = ({
   const handleConnectSubmit = async (values: typeof connectForm.values) => {
     const result = await dispatch(
       subscribeToServer({
-        accessToken,
         serverId: values.serverId.trim(),
         userName: values.userName,
       }),
     );
 
     if (result.meta.requestStatus === 'fulfilled') {
-      dispatch(getUserServers({ accessToken }));
+      dispatch(getUserServers());
       form.reset();
       onClose();
     }

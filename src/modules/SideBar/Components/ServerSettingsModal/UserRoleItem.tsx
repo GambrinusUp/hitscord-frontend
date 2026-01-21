@@ -26,7 +26,6 @@ export const UserRoleItem = ({ user }: UserRoleItemProps) => {
   const { serverData, currentServerId } = useAppSelector(
     (state) => state.testServerStore,
   );
-  const { accessToken } = useAppSelector((state) => state.userStore);
 
   const { iconBase64 } = useIcon(user.icon?.fileId);
 
@@ -49,7 +48,6 @@ export const UserRoleItem = ({ user }: UserRoleItemProps) => {
     if (newRole && currentServerId) {
       const result = await dispatch(
         addRole({
-          accessToken,
           serverId: currentServerId,
           userId: user.userId,
           role: newRole,
@@ -70,7 +68,6 @@ export const UserRoleItem = ({ user }: UserRoleItemProps) => {
     if (currentServerId) {
       const result = await dispatch(
         removeRole({
-          accessToken,
           serverId: currentServerId,
           userId: user.userId,
           role: removedRoleId,

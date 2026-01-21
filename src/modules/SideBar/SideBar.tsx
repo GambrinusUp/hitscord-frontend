@@ -101,11 +101,11 @@ export const SideBar = ({ onClose }: SideBarProps) => {
     dispatch(setCurrentVoiceChannelId(null));
 
     const result = await dispatch(
-      unsubscribeFromServer({ accessToken, serverId: serverData.serverId }),
+      unsubscribeFromServer({ serverId: serverData.serverId }),
     );
 
     if (result.meta.requestStatus === 'fulfilled') {
-      dispatch(getUserServers({ accessToken }));
+      dispatch(getUserServers());
       dispatch(setOpenHome(true));
       dispatch(clearServerData());
       navigate('/main');

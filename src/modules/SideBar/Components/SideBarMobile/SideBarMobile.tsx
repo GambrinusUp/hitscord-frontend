@@ -24,7 +24,6 @@ export const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
   const { serverData, isLoading } = useAppSelector(
     (state) => state.testServerStore,
   );
-  const { accessToken } = useAppSelector((state) => state.userStore);
   const isAdmin = serverData.isCreator;
 
   const copyToClipboard = (text: string) => {
@@ -33,11 +32,11 @@ export const SideBarMobile = ({ onClose, opened }: SideBarMobileProps) => {
 
   const handleUnsubscribe = async () => {
     const result = await dispatch(
-      unsubscribeFromServer({ accessToken, serverId: serverData.serverId }),
+      unsubscribeFromServer({ serverId: serverData.serverId }),
     );
 
     if (result.meta.requestStatus === 'fulfilled') {
-      dispatch(getUserServers({ accessToken }));
+      dispatch(getUserServers());
       dispatch(setOpenHome(true));
       dispatch(clearServerData());
       navigate('/main');
