@@ -11,8 +11,8 @@ import { DetailsPanel, DetailsPanelMobile } from '~/modules/DetailsPanel';
 import { ProfilePage } from '~/modules/Profile';
 import { ServerPanel } from '~/modules/ServerPanel';
 import { SideBar, SideBarMobile } from '~/modules/SideBar';
-import { Panel } from '~/modules/SideBar/components/Panel';
 import { getChannelMessages, getServerData } from '~/store/ServerStore';
+import { ControlPanel } from '~/widgets/controlPanel';
 import { VoiceChannelFacade } from '~/widgets/voiceChannelFacade';
 
 export const MainPage = () => {
@@ -103,7 +103,7 @@ export const MainPage = () => {
           boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.3)',
         }}
       >
-        <Panel />
+        <ControlPanel />
       </Box>
     </Box>
   );

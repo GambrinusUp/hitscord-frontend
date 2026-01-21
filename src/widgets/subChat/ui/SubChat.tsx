@@ -64,7 +64,11 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSendMessage = (nestedChannel: boolean) => {
-    if (newMessage.trim() && currentSubChatId && ((newMessage.trim()).length > 0 || uploadedFiles.length > 0)) {
+    if (
+      newMessage.trim() &&
+      currentSubChatId &&
+      (newMessage.trim().length > 0 || uploadedFiles.length > 0)
+    ) {
       sendMessage({
         Token: accessToken,
         ChannelId: currentSubChatId,
@@ -106,7 +110,7 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
     dispatch(setSubChatInfo(null));
   };
 
-  const disabled = (newMessage.trim()).length > 0 || uploadedFiles.length > 0;
+  const disabled = newMessage.trim().length > 0 || uploadedFiles.length > 0;
 
   return (
     <Modal.Root

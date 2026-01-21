@@ -19,7 +19,12 @@ import {
   useDisconnect,
 } from '~/hooks';
 import { setUserStreamView, toggleUserStreamView } from '~/store/AppStore';
-import { ChannelType, setCurrentVoiceChannelId } from '~/store/ServerStore';
+import {
+  ChannelType,
+  setCurrentVoiceChannelId,
+  setCurrentVoiceChannelServerId,
+  setCurrentVoiceChannelName,
+} from '~/store/ServerStore';
 
 export const VoiceChannels = () => {
   const connect = useConnect();
@@ -50,6 +55,8 @@ export const VoiceChannels = () => {
 
     if (!isConnected) {
       dispatch(setCurrentVoiceChannelId(channelId));
+      dispatch(setCurrentVoiceChannelName(channelId));
+      dispatch(setCurrentVoiceChannelServerId(serverData.serverId));
       connect(channelId, user.name, user.id, serverData.serverId, accessToken);
     } else {
       if (channelId === currentVoiceChannelId) {
@@ -60,6 +67,8 @@ export const VoiceChannels = () => {
         }
         dispatch(setUserStreamView(false));
         dispatch(setCurrentVoiceChannelId(channelId));
+        dispatch(setCurrentVoiceChannelName(channelId));
+        dispatch(setCurrentVoiceChannelServerId(serverData.serverId));
         connect(
           channelId,
           user.name,

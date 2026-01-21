@@ -33,6 +33,7 @@ export interface PollItemProps {
   variants: VoteVariant[];
   multiple: boolean;
   deadLine?: string | null;
+  isAnonimous: boolean;
   onReplyMessage: () => void;
 }
 

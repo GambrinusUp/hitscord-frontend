@@ -2,7 +2,6 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 
 import { ChannelsAPI } from './api/Channels';
-import { MessagesAPI } from './api/Messages';
 import { ServerAPI } from './api/Server';
 import {
   ServerItem,
@@ -276,77 +275,6 @@ export const getMoreMessages = createAsyncThunk<
   },
 );
 
-export const createMessage = createAsyncThunk<
-  void,
-  {
-    accessToken: string;
-    channelId: string;
-    text: string;
-    nestedChannel: boolean;
-  },
-  { rejectValue: string }
->(
-  'testServerSlice/createMessage',
-  async (
-    { accessToken, channelId, text, nestedChannel },
-    { rejectWithValue },
-  ) => {
-    try {
-      await MessagesAPI.createMessage(
-        accessToken,
-        channelId,
-        text,
-        nestedChannel,
-      );
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
-    }
-  },
-);
-
-export const deleteMessage = createAsyncThunk<
-  void,
-  {
-    accessToken: string;
-    messageId: string;
-  },
-  { rejectValue: string }
->(
-  'testServerSlice/deleteMessage',
-  async ({ accessToken, messageId }, { rejectWithValue }) => {
-    try {
-      await MessagesAPI.deleteMessage(accessToken, messageId);
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
-    }
-  },
-);
-
-export const editMessage = createAsyncThunk<
-  void,
-  {
-    accessToken: string;
-    messageId: string;
-    text: string;
-  },
-  { rejectValue: string }
->(
-  'testServerSlice/editMessage',
-  async ({ accessToken, messageId, text }, { rejectWithValue }) => {
-    try {
-      await MessagesAPI.editMessage(accessToken, messageId, text);
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
-    }
-  },
-);
-
 export const createChannel = createAsyncThunk<
   void,
   {
@@ -565,28 +493,6 @@ export const getChannelSettings = createAsyncThunk<
     }
   },
 );
-
-/*export const getVoiceChannelSettings = createAsyncThunk<
-  GetChannelSettings,
-  { accessToken: string; channelId: string },
-  { rejectValue: string }
->(
-  'testServerSlice/getVoiceChannelSettings',
-  async ({ accessToken, channelId }, { rejectWithValue }) => {
-    try {
-      const response = await ChannelsAPI.getVoiceChannelSettings(
-        accessToken,
-        channelId,
-      );
-
-      return response;
-    } catch (e) {
-      return rejectWithValue(
-        e instanceof Error ? e.message : 'Неизвестная ошибка',
-      );
-    }
-  },
-);*/
 
 export const changeVoiceChannelSettings = createAsyncThunk<
   void,

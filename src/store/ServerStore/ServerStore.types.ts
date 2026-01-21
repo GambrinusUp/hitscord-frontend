@@ -12,6 +12,8 @@ export interface ServerState {
   currentChannelId: string | null;
   currentNotificationChannelId: string | null;
   currentVoiceChannelId: string | null;
+  currentVoiceChannelName: string | null;
+  currentVoiceChannelServerId: string | null;
   messages: ChannelMessage[];
   hasNewMessage: boolean;
   messagesStatus: LoadingState;

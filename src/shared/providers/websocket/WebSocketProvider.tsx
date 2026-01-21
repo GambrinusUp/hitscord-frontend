@@ -64,7 +64,6 @@ import {
   removeUserFromVoiceChannel,
   setNewServerName,
   setNewUserName,
-  toggleUserMuteStatus,
   updateVoteWs,
   UserRoleOnServer,
   updateServerIcon,

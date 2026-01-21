@@ -91,6 +91,7 @@ export const MessagesList = ({
                 variants={message.variants!}
                 multiple={message.multiple!}
                 deadLine={message.deadline}
+                isAnonimous={message.isAnonimous!}
                 onReplyMessage={() => replyToMessage(message)}
                 totalUsers={message.totalUsers!}
               />

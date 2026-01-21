@@ -16,13 +16,10 @@ import {
   changeVoiceChannelMaxCount,
   changeVoiceChannelSettings,
   createChannel,
-  createMessage,
   createServer,
   deleteChannel,
-  deleteMessage,
   deleteServer,
   deleteUserFromServer,
-  editMessage,
   getBannedUsers,
   getChannelMessages,
   getChannelSettings,
@@ -86,6 +83,8 @@ const initialState: ServerState = {
   currentChannelId: null,
   currentNotificationChannelId: null,
   currentVoiceChannelId: null,
+  currentVoiceChannelName: null,
+  currentVoiceChannelServerId: null,
   messages: [],
   hasNewMessage: false,
   messagesStatus: LoadingState.IDLE,
@@ -191,6 +190,24 @@ const testServerSlice = createSlice({
     },
     setCurrentVoiceChannelId: (state, action: PayloadAction<string | null>) => {
       state.currentVoiceChannelId = action.payload;
+    },
+    setCurrentVoiceChannelName: (
+      state,
+      action: PayloadAction<string | null>,
+    ) => {
+      const voiceChannel = state.serverData.channels.voiceChannels.find(
+        (channel) => channel.channelId === action.payload,
+      );
+
+      if (voiceChannel) {
+        state.currentVoiceChannelName = voiceChannel.channelName;
+      }
+    },
+    setCurrentVoiceChannelServerId: (
+      state,
+      action: PayloadAction<string | null>,
+    ) => {
+      state.currentVoiceChannelServerId = action.payload;
     },
     addMessage: (state, action: PayloadAction<ChannelMessage>) => {
       const { channelId } = action.payload;
@@ -899,33 +916,6 @@ const testServerSlice = createSlice({
         state.messageIsLoading = LoadingState.REJECTED;
         state.error = action.payload as string;
       })
-      .addCase(createMessage.pending, (state) => {
-        state.error = '';
-      })
-      .addCase(createMessage.fulfilled, (state) => {
-        state.error = '';
-      })
-      .addCase(createMessage.rejected, (state, action) => {
-        state.error = action.payload as string;
-      })
-      .addCase(deleteMessage.pending, (state) => {
-        state.error = '';
-      })
-      .addCase(deleteMessage.fulfilled, (state) => {
-        state.error = '';
-      })
-      .addCase(deleteMessage.rejected, (state, action) => {
-        state.error = action.payload as string;
-      })
-      .addCase(editMessage.pending, (state) => {
-        state.error = '';
-      })
-      .addCase(editMessage.fulfilled, (state) => {
-        state.error = '';
-      })
-      .addCase(editMessage.rejected, (state, action) => {
-        state.error = action.payload as string;
-      })
       .addCase(createChannel.pending, (state) => {
         state.error = '';
       })
@@ -1191,6 +1181,8 @@ export const {
   setCurrentNotificationChannelId,
   updateServerIcon,
   changeUserMuteStatusWs,
+  setCurrentVoiceChannelName,
+  setCurrentVoiceChannelServerId,
 } = testServerSlice.actions;
 
 export const ServerReducer = testServerSlice.reducer;

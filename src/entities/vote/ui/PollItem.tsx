@@ -11,9 +11,10 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { EllipsisVertical, Reply, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { pollItemStyles } from './PollItem.style';
+import { VotersListModal } from './VotersListModal';
 
 import { MessageType } from '~/entities/message';
 import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
@@ -39,6 +40,7 @@ export const PollItem = ({
   variants,
   multiple,
   deadLine,
+  isAnonimous,
   onReplyMessage,
   totalUsers,
 }: PollItemProps) => {
@@ -50,6 +52,9 @@ export const PollItem = ({
   const { getUsername, getUserIcon } = useMessageAuthor(type);
   const { vote, unVote, deleteMessage, deleteChatMessage } = useWebSocket();
   const [isHovered, setIsHovered] = useState(false);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<
+    number | null
+  >(null);
 
   const activeChannelId = currentChannelId ?? currentNotificationChannelId;
   const userId = user.id;
@@ -72,6 +77,17 @@ export const PollItem = ({
     !!deadLine && new Date(deadLine).getTime() < Date.now();
 
   const { iconBase64 } = useIcon(userIcon);
+
+  const getVoterNames = useCallback(
+    (voterIds: string[]): string[] => {
+      return voterIds.map((voterId) => {
+        const userName = getUsername(voterId);
+
+        return userName || '?';
+      });
+    },
+    [getUsername],
+  );
 
   const handleVote = (index: number, variantId: string) => {
     const fieldName = `votes.${index}.checked`;
@@ -249,7 +265,29 @@ export const PollItem = ({
                         </Text>
                       </Group>
 
-                      <Text size="xs" c="gray.4">
+                      <Text
+                        size="xs"
+                        c="gray.4"
+                        style={{
+                          cursor: !isAnonimous ? 'pointer' : 'default',
+                          transition: 'color 0.2s',
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+
+                          if (!isAnonimous && variant.votedUserIds.length > 0) {
+                            setSelectedVariantIndex(index);
+                          }
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isAnonimous && variant.votedUserIds.length > 0) {
+                            e.currentTarget.style.color = '#fff';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '';
+                        }}
+                      >
                         {usersVotedPercent}%
                       </Text>
                     </Group>
@@ -264,6 +302,27 @@ export const PollItem = ({
           </Text>
         </Stack>
       </Group>
+
+      <VotersListModal
+        opened={selectedVariantIndex !== null}
+        onClose={() => setSelectedVariantIndex(null)}
+        variantName={
+          selectedVariantIndex !== null
+            ? variants[selectedVariantIndex]?.content
+            : ''
+        }
+        isAnonimous={isAnonimous}
+        variantsCount={
+          selectedVariantIndex !== null
+            ? variants[selectedVariantIndex].votedUserIds.length
+            : 0
+        }
+        voterNames={
+          selectedVariantIndex !== null
+            ? getVoterNames(variants[selectedVariantIndex].votedUserIds)
+            : []
+        }
+      />
     </Group>
   );
 };

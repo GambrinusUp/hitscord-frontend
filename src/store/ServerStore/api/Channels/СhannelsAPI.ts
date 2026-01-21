@@ -195,64 +195,6 @@ export const changeNotificationChannelSettings = async (
   }
 };
 
-/*export const getTextChannelSettings = async (
-  accessToken: string,
-  channelId: string,
-): Promise<GetChannelSettings> => {
-  try {
-    const response = await fetch(
-      `${API_URL}/api/channel/settings/text?channelId=${channelId}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error get text channel settings:', error);
-    throw error;
-  }
-};
-
-export const getVoiceChannelSettings = async (
-  accessToken: string,
-  channelId: string,
-): Promise<GetChannelSettings> => {
-  try {
-    const response = await fetch(
-      `${API_URL}/api/channel/settings/voice?channelId=${channelId}`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || `Error: ${response.status}`);
-    }
-
-    return data;
-  } catch (error) {
-    console.error('Error get voice channel settings:', error);
-    throw error;
-  }
-};*/
-
 export const changeVoiceChannelSettings = async (
   accessToken: string,
   settings: ChannelSettings,

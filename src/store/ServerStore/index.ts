@@ -54,6 +54,8 @@ export {
   setCurrentNotificationChannelId,
   updateServerIcon,
   changeUserMuteStatusWs,
+  setCurrentVoiceChannelName,
+  setCurrentVoiceChannelServerId,
 } from './ServerStore.reducer';
 
 export {

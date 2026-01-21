@@ -6,11 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import { ServerItem } from './components/ServerItem';
 
 import { useMediaContext } from '~/context';
+import { logoutUser } from '~/entities/user';
 import { CreateServer } from '~/features/server';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { setOpenHome } from '~/store/AppStore';
 import { getUserServers } from '~/store/ServerStore';
-import { logoutUser } from '~/store/UserStore';
 
 export const ServerPanel = () => {
   const dispatch = useAppDispatch();
@@ -20,7 +20,7 @@ export const ServerPanel = () => {
   const { accessToken } = useAppSelector((state) => state.userStore);
 
   const handleLogout = async () => {
-    const result = await dispatch(logoutUser({ accessToken }));
+    const result = await dispatch(logoutUser());
 
     if (result.meta.requestStatus === 'fulfilled') {
       navigate('/');
