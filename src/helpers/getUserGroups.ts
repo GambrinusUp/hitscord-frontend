@@ -10,10 +10,13 @@ export const getUserGroups = (rooms: Room[]): RoomGroup[] => {
           acc[user.socketId] = {
             userName: user.userName,
             userId: user.userId,
-            producerIds: [],
+            producers: [],
           };
         }
-        acc[user.socketId].producerIds.push(user.producerId);
+        acc[user.socketId].producers.push({
+          producerId: user.producerId,
+          source: user.source,
+        });
 
         return acc;
       },

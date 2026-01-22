@@ -1,9 +1,9 @@
-import { Card, Stack, Text, Group, Box, Badge } from '@mantine/core';
-import { IconCameraPlus } from '@tabler/icons-react';
+import { Card, Stack, Text, Group, Box } from '@mantine/core';
 import { AppData, Consumer } from 'mediasoup-client/lib/types';
 import { useState, useMemo, memo } from 'react';
 
 import { Buttons } from './Buttons';
+import { CameraPreview } from './CameraPreview';
 import { CompatButtons } from './CompatButtons';
 import { MicrophoneIndicator } from './MicrophoneIndicator';
 import { StreamPreview } from './StreamPreview';
@@ -11,7 +11,7 @@ import { UserAvatar } from './UserAvatar';
 import { UserInfo } from './UserInfo';
 import { stylesVoiceUserCard } from './VoiceUserCard.style';
 
-import { useStream } from '~/shared/lib/hooks';
+import { useStream, useCamera } from '~/shared/lib/hooks';
 
 interface VoiceUserCardProps {
   socketId: string;
@@ -47,8 +47,13 @@ const VoiceUserCardComponent = ({
   const [hovered, setHovered] = useState(false);
 
   const { videoRef } = useStream({
-    isStreaming: isStreaming && isPreviewActive,
+    isStreaming,
     isPreviewActive,
+    consumers,
+    userProducerIds,
+  });
+
+  const { videoRef: cameraVideoRef, cameraStreamRef } = useCamera({
     consumers,
     userProducerIds,
   });
@@ -60,43 +65,23 @@ const VoiceUserCardComponent = ({
   };
 
   const mediaContent = useMemo(() => {
-    if (isCameraEnabled) {
+    if (isStreaming && isPreviewActive) {
+      return <StreamPreview key="stream" videoRef={videoRef} />;
+    }
+
+    if (isCameraEnabled && !isPreviewActive) {
       return (
-        <Box style={stylesVoiceUserCard.video()}>
-          <Stack align="center" gap="xs">
-            <IconCameraPlus
-              size={32}
-              style={{ color: 'rgba(88, 166, 255, 0.6)' }}
-            />
-            <Text size="sm" c="dimmed">
-              Камера включена
-            </Text>
-          </Stack>
-          <Badge
-            size="sm"
-            variant="light"
-            color="green"
-            style={stylesVoiceUserCard.badge()}
-          >
-            LIVE
-          </Badge>
+        <Box key="camera" style={stylesVoiceUserCard.video()}>
+          <CameraPreview
+            videoRef={cameraVideoRef}
+            cameraStreamRef={cameraStreamRef}
+          />
         </Box>
       );
     }
 
-    if (isStreaming && isPreviewActive) {
-      return <StreamPreview videoRef={videoRef} />;
-    }
-
-    return <UserAvatar userName={userName} userId={userId!} />;
-  }, [
-    isCameraEnabled,
-    isStreaming,
-    isPreviewActive,
-    videoRef,
-    userName,
-    userId,
-  ]);
+    return <UserAvatar key="avatar" userName={userName} userId={userId!} />;
+  }, [isCameraEnabled, isStreaming, isPreviewActive, userName, userId]);
 
   return (
     <Card
@@ -130,7 +115,7 @@ const VoiceUserCardComponent = ({
       <Box style={stylesVoiceUserCard.previewContainer(isCompact)}>
         {isMuted && <MicrophoneIndicator />}
         {mediaContent}
-        {isCompact && isStreaming && (
+        {isCompact && isStreaming && !isCameraEnabled && (
           <CompatButtons
             hovered={hovered}
             isPreviewActive={isPreviewActive}

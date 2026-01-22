@@ -1,6 +1,6 @@
 import { ActionIcon, Group, ScrollArea, SimpleGrid } from '@mantine/core';
 import { ArrowLeftFromLine } from 'lucide-react';
-import { useMemo, useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { useMediaContext } from '~/context';
 import { VoiceUserCard } from '~/entities/media';
@@ -41,8 +41,6 @@ export const VoiceGrid = () => {
     dispatch(toggleUserStreamView());
   }, [dispatch]);
 
-  const memoizedConsumers = useMemo(() => consumers, [consumers]);
-
   return (
     <ScrollArea style={{ flex: 1, maxHeight: '100%' }}>
       <Group justify="flex-end">
@@ -53,14 +51,22 @@ export const VoiceGrid = () => {
       <SimpleGrid cols={{ base: 2, lg: 3 }} spacing="sm">
         {currentRoom &&
           Object.entries(currentRoom.users).map(
-            ([socketId, { userName, userId, producerIds }]) => {
-              const isStreaming = producerIds.length > 1;
+            ([socketId, { userName, userId, producers }]) => {
+              const isStreaming = !!producers.find(
+                (producer) => producer.source === 'screen-video',
+              );
+              const producerIds = producers.map(
+                (producer) => producer.producerId,
+              );
               const isSpeaking = calculateIsSpeaking(
                 producerIds,
                 currentVoiceChannelId!,
               );
               const isMuted = getIsMuted(userId);
               const isPreviewActive = previewUserIds.has(socketId);
+              const isCameraEnabled = !!producers.find(
+                (producer) => producer.source === 'camera',
+              );
 
               return (
                 <VoiceUserCard
@@ -74,8 +80,9 @@ export const VoiceGrid = () => {
                   isMuted={isMuted}
                   isSpeaking={isSpeaking}
                   isPreviewActive={isPreviewActive}
-                  consumers={memoizedConsumers}
+                  consumers={consumers}
                   userProducerIds={producerIds}
+                  isCameraEnabled={isCameraEnabled}
                 />
               );
             },

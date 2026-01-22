@@ -1,5 +1,5 @@
 import { Box } from '@mantine/core';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Panel } from './Panel';
 import { Stream } from './Stream';
@@ -8,11 +8,14 @@ import { stylesStreamView } from './StreamView.style';
 import { socket } from '~/api/socket';
 import { useMediaContext } from '~/context';
 import { VoiceUserCard } from '~/entities/media';
+import { getStoredVolume } from '~/features/media/streamView/lib/getStoredVolume';
+import { saveVolumeToStorage } from '~/features/media/streamView/lib/saveVolumeToStorage';
 import { getUserGroups } from '~/helpers';
 import { useAppSelector } from '~/hooks';
 import { useStream, useSpeaking } from '~/shared/lib/hooks';
 
 export const StreamView = () => {
+  const [volume, setVolume] = useState<number>(1);
   const {
     consumers,
     users,
@@ -33,12 +36,22 @@ export const StreamView = () => {
   const selectedUserData = selectedUserId
     ? currentRoom?.users[selectedUserId]
     : null;
+  const producerIds = selectedUserData?.producers.map(
+    (producer) => producer.producerId,
+  );
 
   const { videoRef } = useStream({
     isStreaming: !!selectedUserData,
     consumers,
-    userProducerIds: selectedUserData?.producerIds ?? [],
+    userProducerIds: producerIds ?? [],
+    volume,
   });
+
+  useEffect(() => {
+    if (selectedUserId) {
+      setVolume(getStoredVolume(selectedUserId));
+    }
+  }, [selectedUserId]);
 
   const handleUserClick = (socketId: string) => {
     setSelectedUserId(socketId);
@@ -56,6 +69,14 @@ export const StreamView = () => {
     togglePreview(socketId);
   };
 
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume);
+
+    if (selectedUserId) {
+      saveVolumeToStorage(selectedUserId, newVolume);
+    }
+  };
+
   useEffect(() => {
     if (!socket || !currentRoom) return;
 
@@ -71,9 +92,9 @@ export const StreamView = () => {
           (consumer) =>
             consumer.kind === 'video' &&
             consumer.producerId === producerId &&
-            currentRoom.users[selectedUserId!]?.producerIds.includes(
-              producerId,
-            ),
+            currentRoom.users[selectedUserId!]?.producers
+              .map((producer) => producer.producerId)
+              .includes(producerId),
         );
       } else {
         const room = users.find(
@@ -110,18 +131,30 @@ export const StreamView = () => {
       <Box style={stylesStreamView.box()}>
         {selectedUserId && selectedUserData && (
           <>
-            <Stream videoRef={videoRef} />
+            <Stream
+              videoRef={videoRef}
+              volume={volume}
+              onVolumeChange={handleVolumeChange}
+            />
             <Panel>
               {currentRoom &&
                 Object.entries(currentRoom.users).map(
-                  ([socketId, { userName, userId, producerIds }]) => {
-                    const isStreaming = producerIds.length > 1;
+                  ([socketId, { userName, userId, producers }]) => {
+                    const isStreaming = !!producers.find(
+                      (producer) => producer.source === 'screen-video',
+                    );
+                    const producerIds = producers.map(
+                      (producer) => producer.producerId,
+                    );
                     const isSpeaking = calculateIsSpeaking(
                       producerIds,
                       currentVoiceChannelId!,
                     );
                     const isMuted = getIsMuted(userId);
                     const isPreviewActive = previewUserIds.has(socketId);
+                    const isCameraEnabled = !!producers.find(
+                      (producer) => producer.source === 'camera',
+                    );
 
                     return (
                       <Box
@@ -144,6 +177,7 @@ export const StreamView = () => {
                           consumers={consumers}
                           userProducerIds={producerIds}
                           isCompact={true}
+                          isCameraEnabled={isCameraEnabled}
                         />
                       </Box>
                     );

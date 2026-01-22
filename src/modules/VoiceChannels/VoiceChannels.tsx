@@ -91,13 +91,15 @@ export const VoiceChannels = () => {
 
     if (!user) return;
 
-    const audioProducerId = user.producerIds.find((producerId) => {
-      const consumer = consumers.find(
-        (c) => c.producerId === producerId && c.kind === 'audio',
-      );
+    const audioProducerId = user.producers
+      .map((producer) => producer.producerId)
+      .find((producerId) => {
+        const consumer = consumers.find(
+          (c) => c.producerId === producerId && c.kind === 'audio',
+        );
 
-      return !!consumer;
-    });
+        return !!consumer;
+      });
 
     if (audioProducerId) {
       setVolume(audioProducerId, value);
@@ -230,7 +232,10 @@ export const VoiceChannels = () => {
                     .filter((room) => room.roomName === channelId)
                     .flatMap((room) =>
                       Object.entries(room.users).map(
-                        ([socketId, { producerIds, userName, userId }]) => {
+                        ([socketId, { producers, userName, userId }]) => {
+                          const producerIds = producers.map(
+                            (producer) => producer.producerId,
+                          );
                           const isSpeaking = calculateIsSpeaking(
                             producerIds,
                             channelId,

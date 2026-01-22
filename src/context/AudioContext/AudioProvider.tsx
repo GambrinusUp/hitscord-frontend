@@ -13,13 +13,6 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
     consumers.forEach(({ producerId, track, kind, appData }) => {
       const source = appData?.source;
 
-      /*console.log(
-        kind,
-        source,
-        appData.source,
-        audioRefs.current.has(producerId),
-      );*/
-
       if (
         kind === 'audio' &&
         source !== 'screen-audio' &&
