@@ -8,11 +8,11 @@ import { stylesStreamView } from './StreamView.style';
 import { socket } from '~/api/socket';
 import { useMediaContext } from '~/context';
 import { VoiceUserCard } from '~/entities/media';
-import { getStoredVolume } from '~/features/media/streamView/lib/getStoredVolume';
-import { saveVolumeToStorage } from '~/features/media/streamView/lib/saveVolumeToStorage';
 import { getUserGroups } from '~/helpers';
 import { useAppSelector } from '~/hooks';
 import { useStream, useSpeaking } from '~/shared/lib/hooks';
+import { getStoredVolume } from '~/shared/lib/utils/getStoredVolume';
+import { saveVolumeToStorage } from '~/shared/lib/utils/saveVolumeToStorage';
 
 export const StreamView = () => {
   const [volume, setVolume] = useState<number>(1);
@@ -85,17 +85,19 @@ export const StreamView = () => {
     }: {
       producerId: string | undefined;
     }) => {
-      let isStreamSelected = false;
+      let shouldCloseStream = false;
 
+      // Проверить
       if (producerId) {
-        isStreamSelected = consumers.some(
-          (consumer) =>
-            consumer.kind === 'video' &&
-            consumer.producerId === producerId &&
-            currentRoom.users[selectedUserId!]?.producers
-              .map((producer) => producer.producerId)
-              .includes(producerId),
+        const isUserScreenProducer = !!currentRoom?.users[
+          selectedUserId!
+        ]?.producers?.some(
+          (producer) =>
+            producer.producerId === producerId &&
+            producer.source === 'screen-video',
         );
+
+        shouldCloseStream = isUserScreenProducer;
       } else {
         const room = users.find(
           (room) => room.roomName === currentVoiceChannelId,
@@ -107,12 +109,12 @@ export const StreamView = () => {
           );
 
           if (!userStream) {
-            isStreamSelected = true;
+            shouldCloseStream = true;
           }
         }
       }
 
-      if (isStreamSelected) {
+      if (shouldCloseStream) {
         handleCloseStream();
       }
     };

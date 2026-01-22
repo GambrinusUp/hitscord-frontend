@@ -8,67 +8,35 @@ interface UseCameraParams {
 
 export const useCamera = ({ consumers, userProducerIds }: UseCameraParams) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const cameraStreamRef = useRef<MediaStream | null>(null);
-  const previousTracksRef = useRef<string>('');
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    if (consumers.length === 0 || userProducerIds.length === 0) {
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
-      previousTracksRef.current = '';
-
-      return;
-    }
-
-    const cameraVideoConsumer = consumers.find(
-      (consumer) =>
-        consumer.kind === 'video' &&
-        consumer.appData?.source === 'camera' &&
-        userProducerIds.includes(consumer.producerId),
+    const consumer = consumers.find(
+      (c) =>
+        c.kind === 'video' &&
+        c.appData?.source === 'camera' &&
+        userProducerIds.includes(c.producerId),
     );
 
-    if (
-      !cameraVideoConsumer?.track ||
-      cameraVideoConsumer.track.readyState === 'ended'
-    ) {
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
-      previousTracksRef.current = '';
+    if (!consumer?.track || consumer.track.readyState === 'ended') {
+      streamRef.current = null;
+
+      if (videoRef.current) videoRef.current.srcObject = null;
 
       return;
     }
 
-    const tracks: MediaStreamTrack[] = [];
+    if (!streamRef.current) {
+      streamRef.current = new MediaStream([consumer.track]);
+    }
 
-    if (cameraVideoConsumer?.track) tracks.push(cameraVideoConsumer.track);
+    const videoEl = videoRef.current;
 
-    if (tracks.length > 0) {
-      const tracksKey = tracks.map((t) => t.id).join(',');
-
-      if (previousTracksRef.current !== tracksKey) {
-        previousTracksRef.current = tracksKey;
-
-        const newStream = new MediaStream(tracks);
-        cameraStreamRef.current = newStream;
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = newStream;
-          videoRef.current
-            .play()
-            .catch((err) =>
-              console.error('Ошибка воспроизведения потока с камеры:', err),
-            );
-        }
-      }
-    } else {
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
-      previousTracksRef.current = '';
+    if (videoEl && videoEl.srcObject !== streamRef.current) {
+      videoEl.srcObject = streamRef.current;
+      videoEl.play().catch(() => {});
     }
   }, [consumers, userProducerIds]);
 
-  return { videoRef, cameraStreamRef };
+  return { videoRef, streamRef };
 };
