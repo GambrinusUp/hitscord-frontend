@@ -53,6 +53,7 @@ export const ChangeRoleSettings = ({
         [Setting.CanCreateRole]: 'canCreateRoles',
         [Setting.CanCreateLessons]: 'canCreateLessons',
         [Setting.CanCheckAttendance]: 'canCheckAttendance',
+        [Setting.CanUseInvitations]: 'canUseInvitations',
       };
 
       for (const [setting, key] of Object.entries(settingsMap)) {

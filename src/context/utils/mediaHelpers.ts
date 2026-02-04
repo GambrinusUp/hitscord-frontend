@@ -6,6 +6,7 @@ import { Transport, TransportOptions } from 'mediasoup-client/lib/Transport';
 import { Socket } from 'socket.io-client';
 
 import { socket } from '~/api/socket';
+import { MuteStatus } from '~/store/ServerStore';
 
 export const getLocalAudioStream = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -26,15 +27,23 @@ export const joinRoom = async (
   serverId: string,
   accessToken: string,
 ) => {
-  return new Promise<RtpCapabilities>((resolve, reject) => {
+  return new Promise<{
+    rtpCapabilities: RtpCapabilities;
+    muteStatus?: MuteStatus;
+  }>((resolve, reject) => {
     socket.emit(
       'joinRoom',
       { roomName, userName, userId, serverId, accessToken },
-      (response: { rtpCapabilities: RtpCapabilities; error?: string }) => {
+      (
+        response: {
+          rtpCapabilities: RtpCapabilities;
+          muteStatus?: MuteStatus;
+        } & { error?: string },
+      ) => {
         if (response.error) {
           reject(response.error);
         } else {
-          resolve(response.rtpCapabilities);
+          resolve(response);
         }
       },
     );

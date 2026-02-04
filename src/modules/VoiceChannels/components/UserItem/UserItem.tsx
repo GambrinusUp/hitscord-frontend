@@ -41,8 +41,8 @@ export const UserItem = ({
   )?.roleType;*/
   const currentUser = users?.find((user) => user.userId === userId);
 
-  const isMuted = currentUser?.isMuted && currentUser?.muteStatus === 1;
-  const isSelfMuted = currentUser?.isMuted && currentUser?.muteStatus === 2;
+  const isMuted = currentUser?.muteStatus === 1;
+  const isSelfMuted = currentUser?.muteStatus === 2;
 
   return (
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>

@@ -9,6 +9,7 @@ import {
   joinRoom,
 } from '~/context';
 import sound from '~/shared/static/zapsplat_multimedia_alert_prompt_mallet_marimba_success_104792.mp3';
+import { MuteStatus } from '~/store/ServerStore';
 
 export const useConnect = () => {
   const {
@@ -17,6 +18,8 @@ export const useConnect = () => {
     setDevice,
     setProducerTransport,
     addConsumer,
+    setIsMuted,
+    setIsUserMute,
   } = useMediaContext();
   const [play] = useSound(sound, { volume: 0.35 });
 
@@ -34,7 +37,7 @@ export const useConnect = () => {
 
       const audioTrack = await getLocalAudioStream();
 
-      const roomData = await joinRoom(
+      const { rtpCapabilities, muteStatus } = await joinRoom(
         roomName,
         userName,
         userId,
@@ -42,7 +45,20 @@ export const useConnect = () => {
         accessToken,
       );
 
-      const device = await createDevice(roomData);
+      const isMuted =
+        muteStatus === MuteStatus.SelfMuted || muteStatus === MuteStatus.Muted;
+
+      if (isMuted) {
+        if (audioTrack instanceof MediaStream) {
+          audioTrack.getTracks().forEach((track) => {
+            track.enabled = false;
+          });
+        } else {
+          (audioTrack as MediaStreamTrack).enabled = false;
+        }
+      }
+
+      const device = await createDevice(rtpCapabilities);
       setDevice(device);
 
       const producerTransport = await createSendTransport(
@@ -53,6 +69,8 @@ export const useConnect = () => {
       );
 
       setProducerTransport(producerTransport);
+      setIsMuted(isMuted);
+      setIsUserMute(muteStatus === MuteStatus.Muted);
 
       setIsConnected(true);
       play();

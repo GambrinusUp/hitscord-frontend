@@ -150,13 +150,13 @@ export const removeRole = createAsyncThunk<
 
 export const subscribeToServer = createAsyncThunk<
   void,
-  { serverId: string; userName: string },
+  { invitationToken: string; userName: string },
   { rejectValue: string }
 >(
   'testServerSlice/subscribeToServer',
-  async ({ serverId, userName }, { rejectWithValue }) => {
+  async ({ invitationToken, userName }, { rejectWithValue }) => {
     try {
-      await ServerAPI.subscribeToServer(serverId, userName);
+      await ServerAPI.subscribeToServer(invitationToken, userName);
     } catch (e) {
       if (e instanceof AxiosError) {
         return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
@@ -669,6 +669,27 @@ export const changeSubChannelSettings = createAsyncThunk<
   async ({ settings }, { rejectWithValue }) => {
     try {
       await ChannelsAPI.changeSubChannelSettings(settings);
+    } catch (e) {
+      if (e instanceof AxiosError) {
+        return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');
+      }
+
+      return rejectWithValue('Произошла ошибка');
+    }
+  },
+);
+
+export const createInvitation = createAsyncThunk<
+  { invitationString: string },
+  { serverId: string; expiredAt: string },
+  { rejectValue: string }
+>(
+  'testServerSlice/createInvitation',
+  async ({ serverId, expiredAt }, { rejectWithValue }) => {
+    try {
+      const response = await ServerAPI.createInvitation(serverId, expiredAt);
+
+      return response;
     } catch (e) {
       if (e instanceof AxiosError) {
         return rejectWithValue(e.response?.data?.message || 'Произошла ошибка');

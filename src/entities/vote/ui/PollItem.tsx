@@ -89,6 +89,27 @@ export const PollItem = ({
     [getUsername],
   );
 
+  const allVoterIds = useMemo(() => {
+    const ids = variants.flatMap((v) => v.votedUserIds || []);
+
+    return Array.from(new Set(ids));
+  }, [variants]);
+
+  const allVoterNames = useMemo(
+    () => getVoterNames(allVoterIds),
+    [getVoterNames, allVoterIds],
+  );
+
+  const groupedVariants = useMemo(
+    () =>
+      variants.map((v) => ({
+        name: v.content,
+        voterNames: getVoterNames(v.votedUserIds || []),
+        count: v.votedUserIds.length,
+      })),
+    [variants, getVoterNames],
+  );
+
   const handleVote = (index: number, variantId: string) => {
     const fieldName = `votes.${index}.checked`;
     const currentValue = form.getInputProps(fieldName).value;
@@ -297,7 +318,21 @@ export const PollItem = ({
             </Stack>
           </Card>
 
-          <Text size="xs" c="gray.5" ta="center">
+          <Text
+            size="xs"
+            c="gray.5"
+            ta="center"
+            style={{
+              cursor: !isAnonimous && totalUsers > 0 ? 'pointer' : 'default',
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+
+              if (!isAnonimous && totalUsers > 0) {
+                setSelectedVariantIndex(-1);
+              }
+            }}
+          >
             Всего проголосовавших: {totalUsers}
           </Text>
         </Stack>
@@ -307,20 +342,29 @@ export const PollItem = ({
         opened={selectedVariantIndex !== null}
         onClose={() => setSelectedVariantIndex(null)}
         variantName={
-          selectedVariantIndex !== null
-            ? variants[selectedVariantIndex]?.content
-            : ''
+          selectedVariantIndex === -1
+            ? 'Все варианты'
+            : selectedVariantIndex !== null
+              ? variants[selectedVariantIndex]?.content
+              : ''
         }
         isAnonimous={isAnonimous}
         variantsCount={
-          selectedVariantIndex !== null
-            ? variants[selectedVariantIndex].votedUserIds.length
-            : 0
+          selectedVariantIndex === -1
+            ? totalUsers
+            : selectedVariantIndex !== null
+              ? variants[selectedVariantIndex].votedUserIds.length
+              : 0
         }
         voterNames={
-          selectedVariantIndex !== null
-            ? getVoterNames(variants[selectedVariantIndex].votedUserIds)
-            : []
+          selectedVariantIndex === -1
+            ? allVoterNames
+            : selectedVariantIndex !== null
+              ? getVoterNames(variants[selectedVariantIndex].votedUserIds)
+              : []
+        }
+        groupedVariants={
+          selectedVariantIndex === -1 ? groupedVariants : undefined
         }
       />
     </Group>

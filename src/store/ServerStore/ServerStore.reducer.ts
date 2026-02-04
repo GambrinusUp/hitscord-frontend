@@ -16,6 +16,7 @@ import {
   changeVoiceChannelMaxCount,
   changeVoiceChannelSettings,
   createChannel,
+  createInvitation,
   createServer,
   deleteChannel,
   deleteServer,
@@ -76,8 +77,10 @@ const initialState: ServerState = {
       canDeleteOthersMessages: false,
       canIgnoreMaxCount: false,
       canCreateRoles: false,
+      canUseInvitations: false,
     },
     isNotifiable: false,
+    invitationString: null,
   },
   currentServerId: null,
   currentChannelId: null,
@@ -125,6 +128,7 @@ const testServerSlice = createSlice({
         canDeleteOthersMessages: false,
         canIgnoreMaxCount: false,
         canCreateRoles: false,
+        canUseInvitations: false,
       };
       state.error = '';
     },
@@ -285,8 +289,10 @@ const testServerSlice = createSlice({
           canDeleteOthersMessages: false,
           canIgnoreMaxCount: false,
           canCreateRoles: false,
+          canUseInvitations: false,
         },
         isNotifiable: false,
+        invitationString: null,
       };
       state.roleSettings = {
         canSee: null,
@@ -368,20 +374,25 @@ const testServerSlice = createSlice({
     },
     addUserOnVoiceChannel: (
       state,
-      action: PayloadAction<{ channelId: string; userId: string }>,
+      action: PayloadAction<{
+        channelId: string;
+        userId: string;
+        muteStatus: MuteStatus;
+      }>,
     ) => {
-      const { channelId, userId } = action.payload;
+      const { channelId, userId, muteStatus } = action.payload;
 
       const voiceChannel = state.serverData.channels.voiceChannels.find(
         (channel) => channel.channelId === channelId,
       );
 
+      console.log(userId, muteStatus);
+
       if (voiceChannel) {
         if (!voiceChannel.users.some((user) => user.userId === userId)) {
           voiceChannel.users.push({
             userId,
-            muteStatus: MuteStatus.NotMuted,
-            isMuted: false,
+            muteStatus: muteStatus,
           });
         }
       }
@@ -581,12 +592,17 @@ const testServerSlice = createSlice({
     addRoleToUserWs: (
       state,
       action: PayloadAction<{
-        channelId: string;
+        serverId: string;
         userId: string;
         roleId: string;
       }>,
     ) => {
-      const { userId, roleId } = action.payload;
+      const { userId, roleId, serverId } = action.payload;
+
+      if (state.currentServerId !== serverId) {
+        return;
+      }
+
       const findedRole = state.serverData.roles.find(
         (role) => role.id === roleId,
       );
@@ -611,12 +627,17 @@ const testServerSlice = createSlice({
     removeRoleFromUserWs: (
       state,
       action: PayloadAction<{
-        channelId: string;
+        serverId: string;
         userId: string;
         roleId: string;
       }>,
     ) => {
-      const { userId, roleId } = action.payload;
+      const { userId, roleId, serverId } = action.payload;
+
+      if (state.currentServerId !== serverId) {
+        return;
+      }
+
       const findedRole = state.serverData.roles.find(
         (role) => role.id === roleId,
       );
@@ -680,11 +701,11 @@ const testServerSlice = createSlice({
           console.log(action.payload);
           voiceChannel.users[userIndex].muteStatus = action.payload.muteStatus;
 
-          if (action.payload.muteStatus === MuteStatus.NotMuted) {
+          /*if (action.payload.muteStatus === MuteStatus.NotMuted) {
             voiceChannel.users[userIndex].isMuted = false;
           } else {
             voiceChannel.users[userIndex].isMuted = true;
-          }
+          }*/
         }
       }
     },
@@ -733,8 +754,10 @@ const testServerSlice = createSlice({
             canDeleteOthersMessages: false,
             canIgnoreMaxCount: false,
             canCreateRoles: false,
+            canUseInvitations: false,
           },
           isNotifiable: false,
+          invitationString: null,
         };
         state.currentChannelId = null;
         state.numberOfMessages = 0;
@@ -1095,6 +1118,15 @@ const testServerSlice = createSlice({
         }
       })
 
+      .addCase(createInvitation.fulfilled, (state, { meta, payload }) => {
+        const { serverId } = meta.arg;
+
+        if (state.currentServerId === serverId) {
+          state.serverData.invitationString = payload.invitationString;
+        }
+        state.error = '';
+      })
+
       .addMatcher(
         isAnyOf(getChannelSettings.fulfilled),
         (state, action: PayloadAction<GetChannelSettings>) => {
@@ -1115,6 +1147,7 @@ const testServerSlice = createSlice({
           changeServerIsClosed.pending,
           changeNotifiable.pending,
           changeChannelNotifiable.pending,
+          createInvitation.pending,
         ),
         (state) => {
           state.error = '';
@@ -1144,6 +1177,7 @@ const testServerSlice = createSlice({
           changeServerIsClosed.rejected,
           changeNotifiable.rejected,
           changeChannelNotifiable.rejected,
+          createInvitation.rejected,
         ),
         (state, action) => {
           state.error = action.payload as string;

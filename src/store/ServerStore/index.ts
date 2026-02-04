@@ -89,4 +89,5 @@ export {
   deleteServer,
   changeChannelNotifiable,
   changeSubChannelSettings,
+  createInvitation,
 } from './ServerStore.actions';

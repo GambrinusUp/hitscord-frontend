@@ -18,6 +18,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
   //проверить стрим экрана при включении и отключении микрофона, при подключении новых пользователей
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isUserMute, setIsUserMute] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [consumers, setConsumers] = useState<Consumer[]>([]);
@@ -145,6 +146,8 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
         togglePreview,
         videoAudioProducer,
         setVideoAudioProducer,
+        isUserMute,
+        setIsUserMute,
       }}
     >
       {props.children}

@@ -19,6 +19,7 @@ import {
 
 import { stylesControlPanel } from './ControlPanel.style';
 
+import { socket } from '~/api/socket';
 import { useMediaContext } from '~/context';
 import {
   useDisconnect,
@@ -37,8 +38,14 @@ import {
 
 export const ControlPanel = () => {
   const dispatch = useAppDispatch();
-  const { isConnected, toggleMute, isMuted, isStreaming, isCameraOn } =
-    useMediaContext();
+  const {
+    isConnected,
+    toggleMute,
+    isMuted,
+    isUserMute,
+    isStreaming,
+    isCameraOn,
+  } = useMediaContext();
   const disconnect = useDisconnect();
   const { startScreenSharing, stopScreenSharing } = useScreenSharing();
   const { toggleCamera } = useCamera();
@@ -62,7 +69,16 @@ export const ControlPanel = () => {
   const handleOpenChannel = () => {
     if (currentVoiceChannelServerId === currentServerId && !isOpenHome) return;
 
-    dispatch(setCurrentServerId(currentVoiceChannelServerId!));
+    if (currentServerId !== currentVoiceChannelServerId) {
+      dispatch(setCurrentServerId(currentVoiceChannelServerId!));
+
+      socket.emit('setServer', {
+        serverId: currentVoiceChannelServerId!,
+        userName: user.name,
+        userId: user.id,
+      });
+    }
+
     dispatch(setUserStreamView(true));
 
     if (isOpenHome) {
@@ -108,18 +124,21 @@ export const ControlPanel = () => {
       {isConnected && (
         <Group gap="xs" justify="center">
           <Tooltip
-            label={isMuted ? 'Включить микрофон' : 'Выключить микрофон'}
+            label={
+              isMuted || isUserMute ? 'Включить микрофон' : 'Выключить микрофон'
+            }
             openDelay={500}
           >
             <ActionIcon
-              variant={isMuted ? 'filled' : 'light'}
-              color={isMuted ? 'red' : 'gray'}
+              variant={isMuted || isUserMute ? 'filled' : 'light'}
+              color={isMuted || isUserMute ? 'red' : 'gray'}
               size="lg"
               radius="md"
               onClick={toggleMute}
-              style={stylesControlPanel.microphoneIcon(isMuted)}
+              style={stylesControlPanel.microphoneIcon(isMuted || isUserMute)}
+              disabled={isUserMute}
             >
-              {isMuted ? <MicOff size={18} /> : <Mic size={18} />}
+              {isMuted || isUserMute ? <MicOff size={18} /> : <Mic size={18} />}
             </ActionIcon>
           </Tooltip>
 
