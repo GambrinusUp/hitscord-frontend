@@ -6,4 +6,5 @@ export {
   createSendTransport,
   getLocalAudioStream,
   joinRoom,
+  resetConsumerTransportState,
 } from './utils';

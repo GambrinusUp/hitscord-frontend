@@ -48,7 +48,12 @@ export const UserItem = ({
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>
       <Menu.Target>
         <Group
-          style={{ cursor: 'pointer', overflow: 'hidden', width: '100%' }}
+          style={{ cursor: 'pointer', overflow: 'hidden', width: '100%',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    wordBreak: 'break-all',
+    maxWidth: '100%',
+           }}
           wrap="nowrap"
         >
           <User
@@ -70,10 +75,10 @@ export const UserItem = ({
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
-              whiteSpace: 'normal',
+              whiteSpace: 'nowrap',
               lineHeight: '1.2em',
               maxHeight: '2.4em',
-              wordBreak: 'break-word',
+              wordBreak: 'break-all',
             }}
           >
             {userName}

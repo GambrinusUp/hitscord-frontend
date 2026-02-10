@@ -5,4 +5,5 @@ export {
   createSendTransport,
   getProducers,
   signalNewConsumerTransport,
+  resetConsumerTransportState,
 } from './mediaHelpers';

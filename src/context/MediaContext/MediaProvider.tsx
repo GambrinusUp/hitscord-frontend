@@ -32,6 +32,9 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
   const [producerTransport, setProducerTransport] = useState<Transport | null>(
     null,
   );
+  const [consumerTransport, setConsumerTransport] = useState<Transport | null>(
+    null,
+  );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [previewUserIds, setPreviewUserIds] = useState<Set<string>>(new Set());
   const dispatch = useAppDispatch();
@@ -89,12 +92,17 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
 
     socket.on('new-producer', ({ producerId }: { producerId: string }) => {
       if (device) {
-        signalNewConsumerTransport(producerId, device, addConsumer);
+        signalNewConsumerTransport(
+          producerId,
+          device,
+          addConsumer,
+          consumerTransport,
+          setConsumerTransport,
+        );
       }
     });
 
     socket.on('updateUsersList', ({ rooms }) => {
-      console.log(rooms);
       setUsers(rooms);
     });
 
@@ -114,7 +122,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
       socket.off('new-producer');
       socket.off('updateUsersList');
     };
-  }, [device]);
+  }, [device, consumerTransport]);
 
   return (
     <MediaContext.Provider
@@ -135,6 +143,8 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
         setDevice,
         producerTransport,
         setProducerTransport,
+        consumerTransport,
+        setConsumerTransport,
         consumers,
         users,
         addConsumer,

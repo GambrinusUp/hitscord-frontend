@@ -1,7 +1,7 @@
 import { useSound } from 'use-sound';
 
 import { socket } from '~/api/socket';
-import { useMediaContext } from '~/context';
+import { resetConsumerTransportState, useMediaContext } from '~/context';
 import sound from '~/shared/static/zapsplat_multimedia_alert_prompt_mallet_marimba_warning_or_error_104796.mp3';
 
 export const useDisconnect = () => {
@@ -14,6 +14,8 @@ export const useDisconnect = () => {
     setIsStreaming,
     setAudioProducer,
     setVideoAudioProducer,
+    consumerTransport,
+    setConsumerTransport,
   } = useMediaContext();
   const [play] = useSound(sound, { volume: 0.35 });
 
@@ -32,6 +34,9 @@ export const useDisconnect = () => {
     setAudioProducer(null);
     setVideoProducer(null);
     setVideoAudioProducer(null);
+    consumerTransport?.close();
+    setConsumerTransport(null);
+    resetConsumerTransportState();
 
     play();
   };

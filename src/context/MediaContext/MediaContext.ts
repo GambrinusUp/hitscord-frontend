@@ -24,6 +24,8 @@ export const MediaContext = createContext<{
   setDevice: React.Dispatch<React.SetStateAction<Device | null>>;
   producerTransport: Transport | null;
   setProducerTransport: React.Dispatch<React.SetStateAction<Transport | null>>;
+  consumerTransport: Transport | null;
+  setConsumerTransport: React.Dispatch<React.SetStateAction<Transport | null>>;
   consumers: Consumer[];
   users: Room[];
   addConsumer: (consumer: Consumer) => void;

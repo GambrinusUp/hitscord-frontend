@@ -17,6 +17,8 @@ export const useConnect = () => {
     setAudioProducer,
     setDevice,
     setProducerTransport,
+    consumerTransport,
+    setConsumerTransport,
     addConsumer,
     setIsMuted,
     setIsUserMute,
@@ -66,6 +68,8 @@ export const useConnect = () => {
         audioTrack,
         setAudioProducer,
         addConsumer,
+        consumerTransport,
+        setConsumerTransport,
       );
 
       setProducerTransport(producerTransport);

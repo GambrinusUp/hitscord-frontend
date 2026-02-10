@@ -8,6 +8,12 @@ import { Socket } from 'socket.io-client';
 import { socket } from '~/api/socket';
 import { MuteStatus } from '~/store/ServerStore';
 
+let consumerTransportPromise: Promise<Transport> | null = null;
+
+export const resetConsumerTransportState = () => {
+  consumerTransportPromise = null;
+};
+
 export const getLocalAudioStream = async () => {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
@@ -62,6 +68,8 @@ export const createSendTransport = async (
   audioTrack: MediaStreamTrack,
   setAudioProducer: React.Dispatch<React.SetStateAction<Producer | null>>,
   addConsumer: (consumer: Consumer) => void,
+  consumerTransport: Transport | null,
+  setConsumerTransport: React.Dispatch<React.SetStateAction<Transport | null>>,
 ): Promise<Transport> =>
   new Promise((resolve, reject) => {
     socket.emit(
@@ -94,7 +102,13 @@ export const createSendTransport = async (
             },
             ({ id }: { id: string }) => {
               callback({ id });
-              getProducers(socket, device, addConsumer);
+              getProducers(
+                socket,
+                device,
+                addConsumer,
+                consumerTransport,
+                setConsumerTransport,
+              );
             },
           );
         });
@@ -118,10 +132,18 @@ export const getProducers = (
   socket: Socket,
   device: Device,
   addConsumer: (consumer: Consumer) => void,
+  consumerTransport: Transport | null,
+  setConsumerTransport: React.Dispatch<React.SetStateAction<Transport | null>>,
 ) => {
   socket.emit('getProducers', (producerIds: string[]) => {
     producerIds.forEach((remoteProducerId) =>
-      signalNewConsumerTransport(remoteProducerId, device, addConsumer),
+      signalNewConsumerTransport(
+        remoteProducerId,
+        device,
+        addConsumer,
+        consumerTransport,
+        setConsumerTransport,
+      ),
     );
   });
 };
@@ -130,31 +152,66 @@ export const signalNewConsumerTransport = async (
   remoteProducerId: string,
   device: Device | null,
   addConsumer: (consumer: Consumer) => void,
+  consumerTransport: Transport | null,
+  setConsumerTransport: React.Dispatch<React.SetStateAction<Transport | null>>,
 ) => {
-  socket.emit(
-    'createWebRtcTransport',
-    { consumer: true },
-    async ({ params }: { params: TransportOptions & { error?: string } }) => {
-      if (params.error) return;
+  if (!device) return;
 
-      const consumerTransport = device!.createRecvTransport(params);
-      consumerTransport.on('connect', ({ dtlsParameters }, callback) => {
-        socket.emit('transport-recv-connect', {
-          dtlsParameters,
-          serverConsumerTransportId: params.id,
-        });
-        callback();
-      });
-
-      connectRecvTransport(
-        consumerTransport,
-        remoteProducerId,
-        params.id,
-        device!,
-        addConsumer,
-      );
-    },
+  const activeConsumerTransport = await ensureConsumerTransport(
+    device,
+    consumerTransport,
+    setConsumerTransport,
   );
+
+  connectRecvTransport(
+    activeConsumerTransport,
+    remoteProducerId,
+    activeConsumerTransport.id,
+    device,
+    addConsumer,
+  );
+};
+
+const ensureConsumerTransport = async (
+  device: Device,
+  consumerTransport: Transport | null,
+  setConsumerTransport: React.Dispatch<React.SetStateAction<Transport | null>>,
+): Promise<Transport> => {
+  if (consumerTransport && !consumerTransport.closed) return consumerTransport;
+
+  if (consumerTransportPromise) {
+    const pendingTransport = await consumerTransportPromise;
+
+    if (!pendingTransport.closed) return pendingTransport;
+  }
+
+  consumerTransportPromise = new Promise((resolve, reject) => {
+    socket.emit(
+      'createWebRtcTransport',
+      { consumer: true },
+      async ({ params }: { params: TransportOptions & { error?: string } }) => {
+        if (params.error) {
+          reject(params.error);
+
+          return;
+        }
+
+        const newConsumerTransport = device.createRecvTransport(params);
+        newConsumerTransport.on('connect', ({ dtlsParameters }, callback) => {
+          socket.emit('transport-recv-connect', {
+            dtlsParameters,
+            serverConsumerTransportId: params.id,
+          });
+          callback();
+        });
+
+        setConsumerTransport(newConsumerTransport);
+        resolve(newConsumerTransport);
+      },
+    );
+  });
+
+  return consumerTransportPromise;
 };
 
 const connectRecvTransport = async (
