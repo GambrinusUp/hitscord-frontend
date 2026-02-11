@@ -48,12 +48,12 @@ export const UserItem = ({
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>
       <Menu.Target>
         <Group
-          style={{ cursor: 'pointer', overflow: 'hidden', width: '100%',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    wordBreak: 'break-all',
-    maxWidth: '100%',
-           }}
+          style={{
+            cursor: 'pointer',
+            overflow: 'hidden',
+            width: '100%',
+            minWidth: 0,
+          }}
           wrap="nowrap"
         >
           <User
@@ -70,16 +70,16 @@ export const UserItem = ({
           <Text
             style={{
               flex: 1,
+              overflow: 'hidden',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              wordBreak: 'break-word',
               lineHeight: '1.2em',
               maxHeight: '2.4em',
-              wordBreak: 'break-all',
+              minWidth: 0,
             }}
+            title={userName}
           >
             {userName}
           </Text>

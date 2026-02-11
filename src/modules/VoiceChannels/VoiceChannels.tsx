@@ -231,7 +231,7 @@ export const VoiceChannels = () => {
                   }
                   channelType={ChannelType.VOICE_CHANNEL}
                 />
-                <Stack gap="xs">
+                <Stack gap="xs" style={{ width: '100%', minWidth: 0 }}>
                   {rooms
                     .filter((room) => room.roomName === channelId)
                     .flatMap((room) =>
