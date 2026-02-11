@@ -14,16 +14,68 @@ export const resetConsumerTransportState = () => {
   consumerTransportPromise = null;
 };
 
-export const getLocalAudioStream = async () => {
+export type MicSettings = {
+  volume: number;
+  gainDb: number;
+  noiseSuppression: boolean;
+  echoCancellation: boolean;
+  autoGainControl: boolean;
+};
+
+export type MicAudioState = {
+  rawTrack: MediaStreamTrack;
+  processedTrack: MediaStreamTrack;
+  audioContext: AudioContext;
+  gainNode: GainNode;
+};
+
+export const getDefaultMicSettings = (): MicSettings => ({
+  volume: 80,
+  gainDb: 0,
+  noiseSuppression: true,
+  echoCancellation: true,
+  autoGainControl: false,
+});
+
+export const calculateMicGain = (settings: MicSettings) => {
+  const volume = Math.max(0, Math.min(100, settings.volume));
+  const gainDb = Math.max(-10, Math.min(20, settings.gainDb));
+  const dbGain = Math.pow(10, gainDb / 20);
+
+  return (volume / 100) * dbGain;
+};
+
+export const getLocalAudioStream = async (
+  settings?: MicSettings,
+): Promise<MicAudioState> => {
+  const micSettings = settings ?? getDefaultMicSettings();
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
-      noiseSuppression: true,
-      echoCancellation: false,
-      autoGainControl: false,
+      noiseSuppression: micSettings.noiseSuppression,
+      echoCancellation: micSettings.echoCancellation,
+      autoGainControl: micSettings.autoGainControl,
     },
   });
 
-  return stream.getAudioTracks()[0];
+  const rawTrack = stream.getAudioTracks()[0];
+  const audioContext = new AudioContext();
+  const source = audioContext.createMediaStreamSource(stream);
+  const gainNode = audioContext.createGain();
+  const destination = audioContext.createMediaStreamDestination();
+
+  gainNode.gain.value = calculateMicGain(micSettings);
+  source.connect(gainNode).connect(destination);
+
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+
+  return {
+    rawTrack,
+    processedTrack: destination.stream.getAudioTracks()[0],
+    audioContext,
+    gainNode,
+  };
 };
 
 export const joinRoom = async (

@@ -16,6 +16,7 @@ export const useDisconnect = () => {
     setVideoAudioProducer,
     consumerTransport,
     setConsumerTransport,
+    clearMicAudioState,
   } = useMediaContext();
   const [play] = useSound(sound, { volume: 0.35 });
 
@@ -37,6 +38,7 @@ export const useDisconnect = () => {
     consumerTransport?.close();
     setConsumerTransport(null);
     resetConsumerTransportState();
+    clearMicAudioState();
 
     play();
   };

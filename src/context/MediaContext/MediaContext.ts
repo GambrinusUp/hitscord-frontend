@@ -5,6 +5,7 @@ import { Transport } from 'mediasoup-client/lib/Transport';
 import { AppData } from 'mediasoup-client/lib/types';
 import React, { createContext } from 'react';
 
+import { MicAudioState, MicSettings } from '~/context/utils';
 import { Room } from '~/shared/types';
 
 export const MediaContext = createContext<{
@@ -39,4 +40,8 @@ export const MediaContext = createContext<{
   setVideoAudioProducer: React.Dispatch<React.SetStateAction<Producer | null>>;
   isUserMute: boolean;
   setIsUserMute: React.Dispatch<React.SetStateAction<boolean>>;
+  micSettings: MicSettings;
+  setMicSettings: React.Dispatch<React.SetStateAction<MicSettings>>;
+  setMicAudioState: (state: MicAudioState | null) => void;
+  clearMicAudioState: () => void;
 } | null>(null);
