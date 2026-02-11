@@ -18,6 +18,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
   //проверить стрим экрана при включении и отключении микрофона, при подключении новых пользователей
   const [isConnected, setIsConnected] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isUserMute, setIsUserMute] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [consumers, setConsumers] = useState<Consumer[]>([]);
@@ -29,6 +30,9 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
     null,
   );
   const [producerTransport, setProducerTransport] = useState<Transport | null>(
+    null,
+  );
+  const [consumerTransport, setConsumerTransport] = useState<Transport | null>(
     null,
   );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -88,12 +92,17 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
 
     socket.on('new-producer', ({ producerId }: { producerId: string }) => {
       if (device) {
-        signalNewConsumerTransport(producerId, device, addConsumer);
+        signalNewConsumerTransport(
+          producerId,
+          device,
+          addConsumer,
+          consumerTransport,
+          setConsumerTransport,
+        );
       }
     });
 
     socket.on('updateUsersList', ({ rooms }) => {
-      console.log(rooms);
       setUsers(rooms);
     });
 
@@ -113,7 +122,7 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
       socket.off('new-producer');
       socket.off('updateUsersList');
     };
-  }, [device]);
+  }, [device, consumerTransport]);
 
   return (
     <MediaContext.Provider
@@ -134,6 +143,8 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
         setDevice,
         producerTransport,
         setProducerTransport,
+        consumerTransport,
+        setConsumerTransport,
         consumers,
         users,
         addConsumer,
@@ -145,6 +156,8 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
         togglePreview,
         videoAudioProducer,
         setVideoAudioProducer,
+        isUserMute,
+        setIsUserMute,
       }}
     >
       {props.children}

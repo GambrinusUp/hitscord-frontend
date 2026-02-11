@@ -9,11 +9,11 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { IconMailOpened } from '@tabler/icons-react';
 import {
   Bell,
   BookUser,
   ChevronDown,
-  Copy,
   DoorOpen,
   ListChecks,
   Settings,
@@ -32,7 +32,7 @@ import { SideBarProps } from './SideBarProps.types';
 import { useMediaContext } from '~/context';
 import { ServerTypeEnum } from '~/entities/servers';
 import { ManagePresetsModal } from '~/features/presets';
-import { ChangeNotificationSetting } from '~/features/server';
+import { ChangeNotificationSetting, CreateInvitation } from '~/features/server';
 import { useAppDispatch, useAppSelector, useDisconnect } from '~/hooks';
 import { TextChannels } from '~/modules/TextChannels';
 import { VoiceChannels } from '~/modules/VoiceChannels';
@@ -81,6 +81,10 @@ export const SideBar = ({ onClose }: SideBarProps) => {
       close: closeChangeNotificationSettingModal,
     },
   ] = useDisclosure(false);
+  const [
+    createInvitationModalOpened,
+    { open: openCreateInvitationModal, close: closeCreateInvitationModal },
+  ] = useDisclosure(false);
   const { serverData, isLoading, currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
   );
@@ -88,12 +92,9 @@ export const SideBar = ({ onClose }: SideBarProps) => {
   const canChangeRole = serverData.permissions.canChangeRole;
   const canDeleteUsers = serverData.permissions.canDeleteUsers;
   const canCreateRole = serverData.permissions.canCreateRoles;
+  const canCreateInvitation = serverData.permissions.canUseInvitations;
   const isCreator = serverData.isCreator;
   const isTeacherServer = serverData.serverType === ServerTypeEnum.Teacher;
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
 
   const handleUnsubscribe = async () => {
     disconnect(accessToken, currentVoiceChannelId!);
@@ -120,6 +121,7 @@ export const SideBar = ({ onClose }: SideBarProps) => {
         p={`10px 10px ${isConnected ? 130 : 85}px 10px`}
         //w={{ base: 150, lg: 250 }}
         miw={250}
+        maw={250}
         h="100%"
         visibleFrom="sm"
       >
@@ -186,12 +188,14 @@ export const SideBar = ({ onClose }: SideBarProps) => {
             >
               Настройка уведомлений
             </Menu.Item>
-            <Menu.Item
-              onClick={() => copyToClipboard(serverData.serverId)}
-              leftSection={<Copy size={16} />}
-            >
-              Копировать ID сервера
-            </Menu.Item>
+            {canCreateInvitation && (
+              <Menu.Item
+                onClick={openCreateInvitationModal}
+                leftSection={<IconMailOpened size={16} />}
+              >
+                Создать приглашение
+              </Menu.Item>
+            )}
             {!isCreator && (
               <Menu.Item
                 onClick={handleUnsubscribe}
@@ -238,6 +242,10 @@ export const SideBar = ({ onClose }: SideBarProps) => {
       <ChangeNotificationSetting
         opened={changeNotificationSettingOpened}
         onClose={closeChangeNotificationSettingModal}
+      />
+      <CreateInvitation
+        opened={createInvitationModalOpened}
+        onClose={closeCreateInvitationModal}
       />
     </>
   );

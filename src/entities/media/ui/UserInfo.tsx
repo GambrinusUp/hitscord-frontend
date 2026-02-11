@@ -1,15 +1,6 @@
-import { Badge, Box, Group, MantineStyleProp, Text } from '@mantine/core';
+import { Badge, Box, Group, Text } from '@mantine/core';
 
-const stylesUserInfo = {
-  name: (): MantineStyleProp => ({
-    display: '-webkit-box',
-    WebkitLineClamp: 1,
-    WebkitBoxOrient: 'vertical',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    transition: 'color 0.2s ease',
-  }),
-};
+import { stylesUserInfo } from './UserInfo.style';
 
 interface UserInfoProps {
   isSpeaking: boolean;

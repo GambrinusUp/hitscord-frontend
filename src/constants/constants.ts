@@ -13,4 +13,5 @@ export const SETTINGS_NAMES = {
   canCreateRoles: 'Может создавать роли',
   canCreateLessons: 'Может создавать уроки',
   canCheckAttendance: 'Может проверять посещаемость',
+  canUseInvitations: 'Может использовать приглашения',
 };

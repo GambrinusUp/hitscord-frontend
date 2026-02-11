@@ -1,9 +1,9 @@
-import { Card, Stack, Text, Group, Box, Badge } from '@mantine/core';
-import { IconCameraPlus } from '@tabler/icons-react';
+import { Card, Stack, Text, Group, Box } from '@mantine/core';
 import { AppData, Consumer } from 'mediasoup-client/lib/types';
 import { useState, useMemo, memo } from 'react';
 
 import { Buttons } from './Buttons';
+import { CameraPreview } from './CameraPreview';
 import { CompatButtons } from './CompatButtons';
 import { MicrophoneIndicator } from './MicrophoneIndicator';
 import { StreamPreview } from './StreamPreview';
@@ -11,9 +11,10 @@ import { UserAvatar } from './UserAvatar';
 import { UserInfo } from './UserInfo';
 import { stylesVoiceUserCard } from './VoiceUserCard.style';
 
-import { useStream } from '~/shared/lib/hooks';
+import { areEqual } from '~/entities/media/lib/areEqual';
+import { useStream, useCamera } from '~/shared/lib/hooks';
 
-interface VoiceUserCardProps {
+export interface VoiceUserCardProps {
   socketId: string;
   userName: string;
   userId?: string;
@@ -47,8 +48,13 @@ const VoiceUserCardComponent = ({
   const [hovered, setHovered] = useState(false);
 
   const { videoRef } = useStream({
-    isStreaming: isStreaming && isPreviewActive,
+    isStreaming,
     isPreviewActive,
+    consumers,
+    userProducerIds,
+  });
+
+  const { videoRef: cameraVideoRef } = useCamera({
     consumers,
     userProducerIds,
   });
@@ -60,43 +66,20 @@ const VoiceUserCardComponent = ({
   };
 
   const mediaContent = useMemo(() => {
-    if (isCameraEnabled) {
+    if (isStreaming && isPreviewActive) {
+      return <StreamPreview key="stream" videoRef={videoRef} />;
+    }
+
+    if (isCameraEnabled && !isPreviewActive) {
       return (
-        <Box style={stylesVoiceUserCard.video()}>
-          <Stack align="center" gap="xs">
-            <IconCameraPlus
-              size={32}
-              style={{ color: 'rgba(88, 166, 255, 0.6)' }}
-            />
-            <Text size="sm" c="dimmed">
-              Камера включена
-            </Text>
-          </Stack>
-          <Badge
-            size="sm"
-            variant="light"
-            color="green"
-            style={stylesVoiceUserCard.badge()}
-          >
-            LIVE
-          </Badge>
+        <Box key="camera" style={stylesVoiceUserCard.video()}>
+          <CameraPreview videoRef={cameraVideoRef} />
         </Box>
       );
     }
 
-    if (isStreaming && isPreviewActive) {
-      return <StreamPreview videoRef={videoRef} />;
-    }
-
-    return <UserAvatar userName={userName} userId={userId!} />;
-  }, [
-    isCameraEnabled,
-    isStreaming,
-    isPreviewActive,
-    videoRef,
-    userName,
-    userId,
-  ]);
+    return <UserAvatar key="avatar" userName={userName} userId={userId!} />;
+  }, [isCameraEnabled, isStreaming, isPreviewActive, userName, userId]);
 
   return (
     <Card
@@ -130,7 +113,7 @@ const VoiceUserCardComponent = ({
       <Box style={stylesVoiceUserCard.previewContainer(isCompact)}>
         {isMuted && <MicrophoneIndicator />}
         {mediaContent}
-        {isCompact && isStreaming && (
+        {isCompact && isStreaming && !isCameraEnabled && (
           <CompatButtons
             hovered={hovered}
             isPreviewActive={isPreviewActive}
@@ -170,47 +153,6 @@ const VoiceUserCardComponent = ({
         </Box>
       )}
     </Card>
-  );
-};
-
-const areEqual = (
-  prevProps: VoiceUserCardProps,
-  nextProps: VoiceUserCardProps,
-) => {
-  const mediaPropsEqual =
-    prevProps.isCameraEnabled === nextProps.isCameraEnabled &&
-    prevProps.isStreaming === nextProps.isStreaming &&
-    prevProps.isPreviewActive === nextProps.isPreviewActive &&
-    prevProps.userName === nextProps.userName &&
-    prevProps.userId === nextProps.userId &&
-    prevProps.socketId === nextProps.socketId &&
-    prevProps.isCompact === nextProps.isCompact;
-
-  const prevConsumers = prevProps.consumers ?? [];
-  const nextConsumers = nextProps.consumers ?? [];
-  const consumersEqual =
-    prevConsumers.length === nextConsumers.length &&
-    prevConsumers.every(
-      (consumer, index) =>
-        consumer.id === nextConsumers[index]?.id &&
-        consumer.producerId === nextConsumers[index]?.producerId,
-    );
-
-  const prevProducerIds = prevProps.userProducerIds ?? [];
-  const nextProducerIds = nextProps.userProducerIds ?? [];
-  const producerIdsEqual =
-    prevProducerIds.length === nextProducerIds.length &&
-    prevProducerIds.every((id, index) => id === nextProducerIds[index]);
-
-  if (!mediaPropsEqual || !consumersEqual || !producerIdsEqual) {
-    return false;
-  }
-
-  return (
-    prevProps.isMuted === nextProps.isMuted &&
-    prevProps.isSpeaking === nextProps.isSpeaking &&
-    prevProps.onOpenStream === nextProps.onOpenStream &&
-    prevProps.onPreviewStream === nextProps.onPreviewStream
   );
 };
 

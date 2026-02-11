@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { socket } from '~/api';
 import { useAppSelector } from '~/hooks';
+import { MuteStatus } from '~/store/ServerStore';
 
 export interface ActiveUser {
   producerId: string;
@@ -30,7 +31,14 @@ export const useSpeaking = () => {
   };
 
   const getIsMuted = (userId?: string) => {
-    return users?.find((user) => user.userId === userId)?.isMuted;
+    const user = users?.find((user) => user.userId === userId);
+
+    if (!user) return false;
+
+    return (
+      user.muteStatus === MuteStatus.Muted ||
+      user.muteStatus === MuteStatus.SelfMuted
+    );
   };
 
   useEffect(() => {

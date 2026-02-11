@@ -42,4 +42,15 @@ export const stylesVoiceUserCard = {
     top: 8,
     right: 8,
   }),
+  compactCamera: (): MantineStyleProp => ({
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: '40%',
+    height: '40%',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  }),
 };

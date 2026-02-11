@@ -73,11 +73,11 @@ export const removeRole = async (
 };
 
 export const subscribeToServer = async (
-  serverId: string,
+  invitationToken: string,
   userName: string,
 ): Promise<void> => {
   await api.post('/server/subscribe', {
-    serverId,
+    invitationToken,
     userName,
   });
 };
@@ -193,4 +193,18 @@ export const changeNotifiable = async (serverId: string): Promise<void> => {
   await api.put('/server/settings/nonnotifiable', {
     id: serverId,
   });
+};
+
+export const createInvitation = async (
+  serverId: string,
+  expiredAt: string,
+): Promise<{
+  invitationString: string;
+}> => {
+  const { data } = await api.post('/server/invitation/create', {
+    serverId,
+    expiredAt,
+  });
+
+  return data;
 };

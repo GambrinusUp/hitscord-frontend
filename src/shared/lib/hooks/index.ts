@@ -6,3 +6,4 @@ export { useIcon } from './useIcon';
 export { useSubChatData } from './useSubChatMessagesData';
 export { useSpeaking } from './useSpeaking';
 export { useStream } from './useStream';
+export { useCamera } from './useCamera';

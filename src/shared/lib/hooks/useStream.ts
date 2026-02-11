@@ -6,6 +6,7 @@ interface UseStreamParams {
   consumers: Consumer<AppData>[];
   userProducerIds: string[];
   isPreviewActive?: boolean;
+  volume?: number;
 }
 
 export const useStream = ({
@@ -13,42 +14,37 @@ export const useStream = ({
   consumers,
   userProducerIds,
   isPreviewActive = true,
+  volume = 1,
 }: UseStreamParams) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const previewStreamRef = useRef<MediaStream | null>(null);
-  const previousTracksRef = useRef<Set<MediaStreamTrack>>(new Set());
+  const previousTracksRef = useRef<string>('');
 
   useEffect(() => {
-    if (!isStreaming || consumers.length === 0) {
-      if (videoRef.current && videoRef.current.srcObject) {
+    if (videoRef.current) {
+      videoRef.current.volume = Math.max(0, Math.min(1, volume));
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    if (
+      !isStreaming ||
+      consumers.length === 0 ||
+      userProducerIds.length === 0
+    ) {
+      if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
-
-      if (previewStreamRef.current) {
-        previewStreamRef.current.getTracks().forEach((track) => {
-          track.stop();
-        });
-        previewStreamRef.current = null;
-      }
-
-      previousTracksRef.current.clear();
+      previousTracksRef.current = '';
 
       return;
     }
 
     if (!isPreviewActive) {
-      if (videoRef.current && videoRef.current.srcObject) {
+      if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
-
-      if (previewStreamRef.current) {
-        previewStreamRef.current.getTracks().forEach((track) => {
-          track.stop();
-        });
-        previewStreamRef.current = null;
-      }
-
-      previousTracksRef.current.clear();
+      previousTracksRef.current = '';
 
       return;
     }
@@ -56,6 +52,7 @@ export const useStream = ({
     const videoConsumer = consumers.find(
       (consumer) =>
         consumer.kind === 'video' &&
+        consumer.appData?.source === 'screen-video' &&
         userProducerIds.includes(consumer.producerId),
     );
 
@@ -73,53 +70,28 @@ export const useStream = ({
     if (audioConsumer?.track) tracks.push(audioConsumer.track);
 
     if (tracks.length > 0) {
-      const currentTracksSet = new Set(tracks);
-      const previousTracksSet = previousTracksRef.current;
+      const tracksKey = tracks.map((t) => t.id).join(',');
 
-      const tracksChanged =
-        currentTracksSet.size !== previousTracksSet.size ||
-        tracks.some((track) => !previousTracksSet.has(track));
+      if (previousTracksRef.current !== tracksKey) {
+        previousTracksRef.current = tracksKey;
 
-      if (
-        !tracksChanged &&
-        previewStreamRef.current &&
-        videoRef.current?.srcObject === previewStreamRef.current
-      ) {
-        return;
-      }
+        const newStream = new MediaStream(tracks);
+        previewStreamRef.current = newStream;
 
-      previousTracksRef.current = currentTracksSet;
-
-      if (previewStreamRef.current) {
-        previewStreamRef.current.getTracks().forEach((track) => {
-          if (!tracks.includes(track)) {
-            track.stop();
-          }
-        });
-      }
-
-      const newStream = new MediaStream(tracks);
-      previewStreamRef.current = newStream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = newStream;
-        videoRef.current
-          .play()
-          .catch((err) => console.error('Ошибка воспроизведения потока:', err));
+        if (videoRef.current) {
+          videoRef.current.srcObject = newStream;
+          videoRef.current
+            .play()
+            .catch((err) =>
+              console.error('Ошибка воспроизведения потока:', err),
+            );
+        }
       }
     } else {
-      if (previewStreamRef.current) {
-        previewStreamRef.current.getTracks().forEach((track) => {
-          track.stop();
-        });
-        previewStreamRef.current = null;
-      }
-
       if (videoRef.current) {
         videoRef.current.srcObject = null;
       }
-
-      previousTracksRef.current.clear();
+      previousTracksRef.current = '';
     }
   }, [isStreaming, isPreviewActive, consumers, userProducerIds]);
 

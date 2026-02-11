@@ -24,6 +24,8 @@ export const MediaContext = createContext<{
   setDevice: React.Dispatch<React.SetStateAction<Device | null>>;
   producerTransport: Transport | null;
   setProducerTransport: React.Dispatch<React.SetStateAction<Transport | null>>;
+  consumerTransport: Transport | null;
+  setConsumerTransport: React.Dispatch<React.SetStateAction<Transport | null>>;
   consumers: Consumer[];
   users: Room[];
   addConsumer: (consumer: Consumer) => void;
@@ -35,4 +37,6 @@ export const MediaContext = createContext<{
   togglePreview: (socketId: string) => void;
   videoAudioProducer: Producer | null;
   setVideoAudioProducer: React.Dispatch<React.SetStateAction<Producer | null>>;
+  isUserMute: boolean;
+  setIsUserMute: React.Dispatch<React.SetStateAction<boolean>>;
 } | null>(null);

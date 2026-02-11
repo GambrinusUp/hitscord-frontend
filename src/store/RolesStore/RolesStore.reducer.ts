@@ -71,6 +71,7 @@ export const RolesSlice = createSlice({
               canCreateRoles: false,
               canCreateLessons: false,
               canCheckAttendance: false,
+              canUseInvitations: false,
             },
           } as Role;
           state.rolesList.push(newRole);
@@ -117,6 +118,9 @@ export const RolesSlice = createSlice({
             case Setting.CanCheckAttendance:
               updatedSettings.canCheckAttendance = add;
               break;
+            case Setting.CanUseInvitations:
+              updatedSettings.canUseInvitations = add;
+              break;
             default:
               console.warn('Unknown setting:', setting);
               break;
@@ -155,6 +159,9 @@ export const RolesSlice = createSlice({
               break;
             case Setting.CanCheckAttendance:
               updatedSettings.canCheckAttendance = add;
+              break;
+            case Setting.CanUseInvitations:
+              updatedSettings.canUseInvitations = add;
               break;
             default:
               console.warn('Unknown setting:', setting);

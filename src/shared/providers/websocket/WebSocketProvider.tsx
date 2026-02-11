@@ -5,6 +5,7 @@ import { useSound } from 'use-sound';
 
 import { WebSocketContext } from './WebSocketContext';
 
+import { useMediaContext } from '~/context';
 import {
   addChat,
   addChatMessage,
@@ -68,6 +69,8 @@ import {
   UserRoleOnServer,
   updateServerIcon,
   changeUserMuteStatusWs,
+  addRoleToUserWs,
+  removeRoleFromUserWs,
 } from '~/store/ServerStore';
 
 export const WebSocketProvider = (props: React.PropsWithChildren) => {
@@ -85,6 +88,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
   } = useAppSelector((state) => state.testServerStore);
   const { activeChat } = useAppSelector((state) => state.chatsStore);
   const wsRef = useRef<WebSocket | null>(null);
+  const { setIsUserMute } = useMediaContext();
 
   const serverIdRef = useRef<string | null>(null);
   const userIdRef = useRef<string | undefined>(undefined);
@@ -280,6 +284,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
               addUserOnVoiceChannel({
                 channelId: data.Payload.ChannelId,
                 userId: data.Payload.UserId,
+                muteStatus: data.Payload.MuteStatus,
               }),
             );
           }
@@ -574,18 +579,34 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
         }
 
         if (data.MessageType === 'Role added to user') {
-          const { ServerId, UserId } = data.Payload;
+          const { ServerId, UserId, RoleId } = data.Payload;
 
           if (UserId === userIdValue) {
             dispatch(getServerData({ serverId: ServerId }));
+          } else {
+            dispatch(
+              addRoleToUserWs({
+                serverId: ServerId,
+                userId: UserId,
+                roleId: RoleId,
+              }),
+            );
           }
         }
 
         if (data.MessageType === 'Role removed from user') {
-          const { ServerId, UserId } = data.Payload;
+          const { ServerId, UserId, RoleId } = data.Payload;
 
           if (UserId === userIdValue) {
             dispatch(getServerData({ serverId: ServerId }));
+          } else {
+            dispatch(
+              removeRoleFromUserWs({
+                serverId: ServerId,
+                userId: UserId,
+                roleId: RoleId,
+              }),
+            );
           }
         }
 
@@ -724,6 +745,10 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
                 muteStatus: Number(MuteStatus),
               }),
             );
+
+            if (UserId === userIdValue) {
+              setIsUserMute(Number(MuteStatus) === 2);
+            }
           }
         }
       };

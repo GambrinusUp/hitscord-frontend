@@ -41,14 +41,19 @@ export const UserItem = ({
   )?.roleType;*/
   const currentUser = users?.find((user) => user.userId === userId);
 
-  const isMuted = currentUser?.isMuted && currentUser?.muteStatus === 1;
-  const isSelfMuted = currentUser?.isMuted && currentUser?.muteStatus === 2;
+  const isMuted = currentUser?.muteStatus === 1;
+  const isSelfMuted = currentUser?.muteStatus === 2;
 
   return (
     <Menu key={socketId} shadow="md" width={200} closeOnItemClick={true}>
       <Menu.Target>
         <Group
-          style={{ cursor: 'pointer', overflow: 'hidden', width: '100%' }}
+          style={{
+            cursor: 'pointer',
+            overflow: 'hidden',
+            width: '100%',
+            minWidth: 0,
+          }}
           wrap="nowrap"
         >
           <User
@@ -65,16 +70,16 @@ export const UserItem = ({
           <Text
             style={{
               flex: 1,
+              overflow: 'hidden',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'normal',
+              wordBreak: 'break-word',
               lineHeight: '1.2em',
               maxHeight: '2.4em',
-              wordBreak: 'break-word',
+              minWidth: 0,
             }}
+            title={userName}
           >
             {userName}
           </Text>

@@ -1,6 +1,6 @@
 import { Modal, Tabs, TextInput, Button, Group, Select } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { SystemRoleTypeEnum } from '~/entities/presets';
 import { ServerTypeEnum } from '~/entities/servers';
@@ -10,11 +10,7 @@ import {
   maxLength,
   minLength,
 } from '~/shared/lib/validators';
-import {
-  createServer,
-  getUserServers,
-  subscribeToServer,
-} from '~/store/ServerStore';
+import { createServer, getUserServers } from '~/store/ServerStore';
 
 interface CreateServerModalProps {
   opened: boolean;
@@ -49,18 +45,6 @@ export const CreateServerModal = ({
     },
   });
 
-  const connectForm = useForm({
-    initialValues: {
-      serverId: '',
-      userName: user.name,
-    },
-    validate: {
-      serverId: (value) =>
-        value.trim().length === 0 ? 'Введите ID сервера' : null,
-      userName: combineValidators(minLength(6, 'Имя'), maxLength(50, 'Имя')),
-    },
-  });
-
   const handleCreateSubmit = async (values: typeof form.values) => {
     const result = await dispatch(
       createServer({
@@ -75,25 +59,6 @@ export const CreateServerModal = ({
       onClose();
     }
   };
-
-  const handleConnectSubmit = async (values: typeof connectForm.values) => {
-    const result = await dispatch(
-      subscribeToServer({
-        serverId: values.serverId.trim(),
-        userName: values.userName,
-      }),
-    );
-
-    if (result.meta.requestStatus === 'fulfilled') {
-      dispatch(getUserServers());
-      form.reset();
-      onClose();
-    }
-  };
-
-  useEffect(() => {
-    connectForm.setFieldValue('userName', user.name);
-  }, [user.name]);
 
   return (
     <Modal
@@ -126,7 +91,6 @@ export const CreateServerModal = ({
       >
         <Tabs.List>
           <Tabs.Tab value="create">Создать сервер</Tabs.Tab>
-          <Tabs.Tab value="connect">Подключиться к серверу</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="create">
           <form onSubmit={form.onSubmit(handleCreateSubmit)}>
@@ -157,26 +121,6 @@ export const CreateServerModal = ({
                 Отмена
               </Button>
               <Button type="submit">Создать</Button>
-            </Group>
-          </form>
-        </Tabs.Panel>
-        <Tabs.Panel value="connect">
-          <form onSubmit={connectForm.onSubmit(handleConnectSubmit)}>
-            <TextInput
-              label="ID сервера"
-              placeholder="Введите ID сервера"
-              {...connectForm.getInputProps('serverId')}
-            />
-            <TextInput
-              label="Имя на сервере"
-              placeholder="Введите имя на сервере"
-              {...connectForm.getInputProps('userName')}
-            />
-            <Group justify="flex-end" mt="md">
-              <Button variant="outline" onClick={onClose}>
-                Отмена
-              </Button>
-              <Button type="submit">Подключиться</Button>
             </Group>
           </form>
         </Tabs.Panel>

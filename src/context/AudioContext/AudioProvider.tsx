@@ -3,32 +3,31 @@ import { useEffect, useRef, useState } from 'react';
 import { AudioContext } from './AudioContext';
 
 import { useMediaContext } from '~/context/MediaContext';
+import { getStoredVolume } from '~/shared/lib/utils/getStoredVolume';
+import { saveVolumeToStorage } from '~/shared/lib/utils/saveVolumeToStorage';
 
 export const AudioProvider = (props: React.PropsWithChildren) => {
   const { consumers } = useMediaContext();
   const audioRefs = useRef(new Map());
   const [userVolumes, setUserVolumes] = useState<Record<string, number>>({});
+  const producerToUserMap = useRef(new Map<string, string>());
 
   useEffect(() => {
     consumers.forEach(({ producerId, track, kind, appData }) => {
       const source = appData?.source;
-
-      /*console.log(
-        kind,
-        source,
-        appData.source,
-        audioRefs.current.has(producerId),
-      );*/
 
       if (
         kind === 'audio' &&
         source !== 'screen-audio' &&
         !audioRefs.current.has(producerId)
       ) {
+        const userId = producerToUserMap.current.get(producerId);
+        const savedVolume = userId ? getStoredVolume(userId) : 1;
+
         const audio = document.createElement('audio');
         audio.srcObject = new MediaStream([track]);
         audio.autoplay = true;
-        audio.volume = userVolumes[producerId] ?? 1;
+        audio.volume = userVolumes[userId || producerId] ?? savedVolume;
         audioRefs.current.set(producerId, audio);
         document.body.appendChild(audio);
       }
@@ -50,16 +49,42 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
       });
       audioRefs.current.clear();
     };
-  }, [consumers, userVolumes]);
+  }, [consumers]);
 
-  const setVolume = (producerId: string, volume: number) => {
-    setUserVolumes((prev) => ({ ...prev, [producerId]: volume / 100 }));
+  useEffect(() => {
+    audioRefs.current.forEach((audio, producerId) => {
+      const userId = producerToUserMap.current.get(producerId);
+
+      if (userId && userVolumes[userId] !== undefined) {
+        audio.volume = userVolumes[userId];
+      }
+    });
+  }, [userVolumes]);
+
+  const setVolume = (userId: string, volume: number) => {
+    setUserVolumes((prev) => ({ ...prev, [userId]: volume / 100 }));
+    saveVolumeToStorage(userId, volume / 100);
+  };
+
+  const registerProducerUser = (producerId: string, userId: string) => {
+    producerToUserMap.current.set(producerId, userId);
+
+    setUserVolumes((prev) => {
+      if (prev[userId] === undefined) {
+        const storedVolume = getStoredVolume(userId);
+
+        return { ...prev, [userId]: storedVolume };
+      }
+
+      return prev;
+    });
   };
 
   return (
     <AudioContext.Provider
       value={{
         setVolume,
+        registerProducerUser,
         userVolumes,
       }}
     >

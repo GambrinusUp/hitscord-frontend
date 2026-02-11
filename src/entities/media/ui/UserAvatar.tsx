@@ -29,3 +29,5 @@ export const UserAvatar = memo(({ userName, userId }: UserAvatarProps) => {
     </Avatar>
   );
 });
+
+UserAvatar.displayName = 'UserAvatar';

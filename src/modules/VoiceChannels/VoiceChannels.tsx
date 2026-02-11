@@ -18,6 +18,7 @@ import {
   useConnect,
   useDisconnect,
 } from '~/hooks';
+import { getStoredVolume } from '~/shared/lib/utils/getStoredVolume';
 import { setUserStreamView, toggleUserStreamView } from '~/store/AppStore';
 import {
   ChannelType,
@@ -39,7 +40,7 @@ export const VoiceChannels = () => {
   const [opened, { toggle }] = useDisclosure(true);
 
   const activeUsers = useActiveUsers();
-  const { setVolume, userVolumes } = useAudioContext();
+  const { setVolume, registerProducerUser, userVolumes } = useAudioContext();
   const rooms = getUserGroups(users);
   const canWorkChannels = serverData.permissions.canWorkChannels;
   const canIgnoreMaxCount = serverData.permissions.canIgnoreMaxCount;
@@ -91,16 +92,21 @@ export const VoiceChannels = () => {
 
     if (!user) return;
 
-    const audioProducerId = user.producerIds.find((producerId) => {
-      const consumer = consumers.find(
-        (c) => c.producerId === producerId && c.kind === 'audio',
-      );
+    const audioProducerId = user.producers
+      .map((producer) => producer.producerId)
+      .find((producerId) => {
+        const consumer = consumers.find(
+          (c) =>
+            c.producerId === producerId &&
+            c.kind === 'audio' &&
+            c.appData?.source !== 'screen-audio',
+        );
 
-      return !!consumer;
-    });
+        return !!consumer;
+      });
 
-    if (audioProducerId) {
-      setVolume(audioProducerId, value);
+    if (audioProducerId && user.userId) {
+      setVolume(user.userId, value);
     }
   };
 
@@ -119,12 +125,12 @@ export const VoiceChannels = () => {
     );
   };
 
-  const calculateSliderValue = (producerIds: string[]) => {
-    const audioProducerId = producerIds.find((id) =>
-      consumers.some((c) => c.producerId === id && c.kind === 'audio'),
-    );
+  const calculateSliderValue = (userId: string) => {
+    const currentVolume = userVolumes[userId];
+    const storedVolume = getStoredVolume(userId);
+    const volume = currentVolume !== undefined ? currentVolume : storedVolume;
 
-    return (userVolumes[audioProducerId || ''] || 1) * 100;
+    return volume * 100;
   };
 
   const calculateIsSpeaking = (producerIds: string[], channelId: string) => {
@@ -225,18 +231,42 @@ export const VoiceChannels = () => {
                   }
                   channelType={ChannelType.VOICE_CHANNEL}
                 />
-                <Stack gap="xs">
+                <Stack gap="xs" style={{ width: '100%', minWidth: 0 }}>
                   {rooms
                     .filter((room) => room.roomName === channelId)
                     .flatMap((room) =>
                       Object.entries(room.users).map(
-                        ([socketId, { producerIds, userName, userId }]) => {
+                        ([socketId, { producers, userName, userId }]) => {
+                          const producerIds = producers.map(
+                            (producer) => producer.producerId,
+                          );
+
+                          if (userId) {
+                            producers.forEach((producer) => {
+                              const isAudio = consumers.some(
+                                (c) =>
+                                  c.producerId === producer.producerId &&
+                                  c.kind === 'audio' &&
+                                  c.appData?.source !== 'screen-audio',
+                              );
+
+                              if (isAudio) {
+                                registerProducerUser(
+                                  producer.producerId,
+                                  userId,
+                                );
+                              }
+                            });
+                          }
+
                           const isSpeaking = calculateIsSpeaking(
                             producerIds,
                             channelId,
                           );
 
-                          const userVolume = calculateSliderValue(producerIds);
+                          const userVolume = userId
+                            ? calculateSliderValue(userId)
+                            : 100;
 
                           return (
                             <UserItem

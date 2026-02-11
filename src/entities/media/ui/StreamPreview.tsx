@@ -1,24 +1,7 @@
-import { Badge, Box, CSSProperties, MantineStyleProp } from '@mantine/core';
+import { Badge, Box } from '@mantine/core';
 import { memo } from 'react';
 
-const stylesStreamPreview = {
-  container: (): MantineStyleProp => ({
-    width: '100%',
-    height: '100%',
-    position: 'relative',
-    overflow: 'hidden',
-  }),
-  video: (): CSSProperties => ({
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  }),
-  badge: (): MantineStyleProp => ({
-    position: 'absolute',
-    top: 8,
-    right: 8,
-  }),
-};
+import { stylesStreamPreview } from './StreamPreview.style';
 
 interface StreamPreviewProps {
   videoRef: React.MutableRefObject<HTMLVideoElement | null>;
@@ -30,6 +13,7 @@ export const StreamPreview = memo(({ videoRef }: StreamPreviewProps) => {
       <video
         ref={videoRef}
         autoPlay
+        muted
         playsInline
         style={stylesStreamPreview.video()}
       />
@@ -44,3 +28,5 @@ export const StreamPreview = memo(({ videoRef }: StreamPreviewProps) => {
     </Box>
   );
 });
+
+StreamPreview.displayName = 'StreamPreview';

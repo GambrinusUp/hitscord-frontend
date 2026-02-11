@@ -1,35 +1,17 @@
-import { Box, Button, CSSProperties, MantineStyleProp } from '@mantine/core';
-import { X } from 'lucide-react';
+import { Box, Button, Slider, Stack } from '@mantine/core';
+import { X, Volume2 } from 'lucide-react';
+
+import { stylesStream } from './Stream.style';
 
 import { useMediaContext } from '~/context';
 
-const stylesStream = {
-  container: (): MantineStyleProp => ({
-    flex: 1,
-    position: 'relative',
-    overflow: 'hidden',
-    borderRadius: '8px',
-    marginBottom: '10px',
-  }),
-  video: (): CSSProperties => ({
-    width: '100%',
-    height: '100%',
-    objectFit: 'contain',
-    backgroundColor: '#000',
-  }),
-  button: (): MantineStyleProp => ({
-    position: 'absolute',
-    top: '10px',
-    right: '10px',
-    zIndex: 10,
-  }),
-};
-
 interface StreamProps {
   videoRef: React.MutableRefObject<HTMLVideoElement | null>;
+  volume: number;
+  onVolumeChange: (volume: number) => void;
 }
 
-export const Stream = ({ videoRef }: StreamProps) => {
+export const Stream = ({ videoRef, volume, onVolumeChange }: StreamProps) => {
   const { setSelectedUserId } = useMediaContext();
 
   const handleCloseStream = () => {
@@ -40,17 +22,39 @@ export const Stream = ({ videoRef }: StreamProps) => {
     }
   };
 
+  const handleVolumeChange = (newVolume: number) => {
+    onVolumeChange(newVolume);
+
+    if (videoRef.current) {
+      videoRef.current.volume = newVolume;
+    }
+  };
+
   return (
     <Box style={stylesStream.container()}>
       <video ref={videoRef} autoPlay playsInline style={stylesStream.video()} />
-      <Button
-        variant="filled"
-        color="red"
-        onClick={handleCloseStream}
-        style={stylesStream.button()}
-      >
-        <X size={20} /> Закрыть
-      </Button>
+      <Stack style={stylesStream.controls()}>
+        <Box style={stylesStream.volumeControl()}>
+          <Volume2 size={18} style={{ color: '#fff' }} />
+          <Slider
+            value={volume}
+            onChange={handleVolumeChange}
+            min={0}
+            max={1}
+            step={0.01}
+            style={stylesStream.volumeSlider()}
+            label={(value) => `${Math.round(value * 100)}%`}
+          />
+        </Box>
+        <Button
+          variant="filled"
+          color="red"
+          onClick={handleCloseStream}
+          style={stylesStream.button()}
+        >
+          <X size={20} /> Закрыть
+        </Button>
+      </Stack>
     </Box>
   );
 };

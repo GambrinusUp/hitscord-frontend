@@ -1,7 +1,13 @@
+interface ProducerData {
+  producerId: string;
+  source?: string;
+}
+
 export interface UserGroup {
   userName: string;
   userId?: string;
-  producerIds: string[];
+  //producerIds: string[];
+  producers: ProducerData[];
 }
 
 export interface RoomGroup {

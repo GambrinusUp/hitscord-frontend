@@ -19,6 +19,7 @@ export enum Setting {
   CanCreateRole,
   CanCreateLessons,
   CanCheckAttendance,
+  CanUseInvitations,
 }
 
 export interface Settings {
@@ -31,6 +32,7 @@ export interface Settings {
   canCreateRoles: boolean;
   canCreateLessons: boolean;
   canCheckAttendance: boolean;
+  canUseInvitations: boolean;
 }
 
 export interface Role {

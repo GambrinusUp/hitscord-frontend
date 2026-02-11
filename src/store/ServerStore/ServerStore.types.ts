@@ -144,7 +144,6 @@ export enum MuteStatus {
 export interface UserInVoiceChannel {
   userId: string;
   muteStatus: MuteStatus;
-  isMuted: boolean;
 }
 
 export interface VoiceChannel {
@@ -197,6 +196,7 @@ export interface ServerData {
     canDeleteOthersMessages: boolean;
     canIgnoreMaxCount: boolean;
     canCreateRoles: boolean;
+    canUseInvitations: boolean;
   };
   isNotifiable: boolean;
   users: UserOnServer[];
@@ -205,6 +205,7 @@ export interface ServerData {
     voiceChannels: VoiceChannel[];
     notificationChannels: NotificationChannel[];
   };
+  invitationString: string | null;
 }
 
 export interface ServerItem {
