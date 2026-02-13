@@ -4,10 +4,16 @@ import { useState } from 'react';
 
 import { ChatMessage } from '~/entities/chat';
 import { MessageType } from '~/entities/message';
+import { EditConfiguration } from '~/features/settings';
 import { useAppSelector } from '~/hooks';
 
 interface ProfileContentProps {
-  activeLink: 'friends' | 'settings' | 'chats' | 'serverApplications';
+  activeLink:
+    | 'friends'
+    | 'profileSettings'
+    | 'settings'
+    | 'chats'
+    | 'serverApplications';
   ChatSection: React.ComponentType<{
     MessagesList: React.ComponentType<{
       scrollRef: React.RefObject<HTMLDivElement>;
@@ -70,7 +76,8 @@ export const ProfileContent = ({
             )}
           </>
         )}
-        {activeLink === 'settings' && <Settings />}
+        {activeLink === 'profileSettings' && <Settings />}
+        {activeLink === 'settings' && <EditConfiguration />}
         {activeLink === 'friends' && (
           <Stack gap="xs" w="100%" h="100%" p={10}>
             <Group justify="space-between" mb="md">
