@@ -10,11 +10,12 @@ import {
 } from '@mantine/core';
 
 import { useMediaContext } from '~/context';
-import { useAudioSettings } from '~/shared/lib/hooks';
+import { useAudioSettings, useImagePreloadSetting } from '~/shared/lib/hooks';
 
 export const EditConfiguration = () => {
   const { micSettings, setMicSettings } = useMediaContext();
   const { volume, volumePercent, setNotificationVolume } = useAudioSettings();
+  const { preloadImages, setPreloadImages } = useImagePreloadSetting();
 
   return (
     <Stack
@@ -197,6 +198,33 @@ export const EditConfiguration = () => {
               }}
             />
           </Stack>
+        </Stack>
+      </Paper>
+      <Paper
+        p="lg"
+        radius="lg"
+        withBorder
+        style={{
+          background: 'var(--color-surface-2)',
+          borderColor: 'var(--border-primary-soft)',
+        }}
+      >
+        <Stack gap="lg">
+          <Title order={3} c="var(--color-white)">
+            Настройки сообщений
+          </Title>
+          <Switch
+            label="Предзагрузка картинок"
+            checked={preloadImages}
+            onChange={(event) => setPreloadImages(event.currentTarget.checked)}
+            styles={{
+              track: {
+                backgroundColor: preloadImages
+                  ? 'var(--color-primary)'
+                  : 'var(--color-white-05)',
+              },
+            }}
+          />
         </Stack>
       </Paper>
     </Stack>
