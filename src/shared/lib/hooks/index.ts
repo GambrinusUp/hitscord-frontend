@@ -7,3 +7,5 @@ export { useSubChatData } from './useSubChatMessagesData';
 export { useSpeaking } from './useSpeaking';
 export { useStream } from './useStream';
 export { useCamera } from './useCamera';
+export { useAudioSettings } from './useAudioSettings';
+export { useImagePreloadSetting } from './useImagePreloadSetting';

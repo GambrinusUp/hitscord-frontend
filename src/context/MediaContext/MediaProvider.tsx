@@ -4,12 +4,18 @@ import {
   Producer,
   Transport,
 } from 'mediasoup-client/lib/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { MediaContext } from './MediaContext';
 
 import { socket } from '~/api/socket';
-import { signalNewConsumerTransport } from '~/context/utils';
+import {
+  calculateMicGain,
+  getDefaultMicSettings,
+  MicAudioState,
+  MicSettings,
+  signalNewConsumerTransport,
+} from '~/context/utils';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { Room } from '~/shared/types';
 import { selfMute } from '~/store/ServerStore';
@@ -37,6 +43,27 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
   );
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [previewUserIds, setPreviewUserIds] = useState<Set<string>>(new Set());
+  const [micSettings, setMicSettings] = useState<MicSettings>(() => {
+    const fallback = getDefaultMicSettings();
+
+    if (typeof localStorage === 'undefined') return fallback;
+
+    try {
+      const stored = localStorage.getItem('micSettings');
+
+      if (!stored) return fallback;
+
+      const parsed = JSON.parse(stored) as Partial<MicSettings>;
+
+      return {
+        ...fallback,
+        ...parsed,
+      };
+    } catch {
+      return fallback;
+    }
+  });
+  const micAudioStateRef = useRef<MicAudioState | null>(null);
   const dispatch = useAppDispatch();
   const { currentVoiceChannelId } = useAppSelector(
     (state) => state.testServerStore,
@@ -71,6 +98,27 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
       dispatch(selfMute());
       setIsMuted(!isMuted);
     }
+  };
+
+  const stopMicAudioState = (state: MicAudioState) => {
+    state.processedTrack.stop();
+    state.rawTrack.stop();
+    state.audioContext.close().catch(() => undefined);
+  };
+
+  const setMicAudioState = (state: MicAudioState | null) => {
+    if (micAudioStateRef.current) {
+      stopMicAudioState(micAudioStateRef.current);
+    }
+
+    micAudioStateRef.current = state;
+  };
+
+  const clearMicAudioState = () => {
+    if (!micAudioStateRef.current) return;
+
+    stopMicAudioState(micAudioStateRef.current);
+    micAudioStateRef.current = null;
   };
 
   useEffect(() => {
@@ -124,6 +172,27 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
     };
   }, [device, consumerTransport]);
 
+  useEffect(() => {
+    if (typeof localStorage === 'undefined') return;
+
+    localStorage.setItem('micSettings', JSON.stringify(micSettings));
+  }, [micSettings]);
+
+  useEffect(() => {
+    const micAudioState = micAudioStateRef.current;
+
+    if (!micAudioState) return;
+
+    micAudioState.gainNode.gain.value = calculateMicGain(micSettings);
+    micAudioState.rawTrack
+      .applyConstraints({
+        noiseSuppression: micSettings.noiseSuppression,
+        echoCancellation: micSettings.echoCancellation,
+        autoGainControl: micSettings.autoGainControl,
+      })
+      .catch(() => undefined);
+  }, [micSettings]);
+
   return (
     <MediaContext.Provider
       value={{
@@ -158,6 +227,10 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
         setVideoAudioProducer,
         isUserMute,
         setIsUserMute,
+        micSettings,
+        setMicSettings,
+        setMicAudioState,
+        clearMicAudioState,
       }}
     >
       {props.children}

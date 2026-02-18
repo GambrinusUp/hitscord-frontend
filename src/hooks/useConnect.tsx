@@ -7,7 +7,9 @@ import {
   createSendTransport,
   getLocalAudioStream,
   joinRoom,
+  type MicAudioState,
 } from '~/context';
+import { useAudioSettings } from '~/shared/lib/hooks';
 import sound from '~/shared/static/zapsplat_multimedia_alert_prompt_mallet_marimba_success_104792.mp3';
 import { MuteStatus } from '~/store/ServerStore';
 
@@ -22,8 +24,11 @@ export const useConnect = () => {
     addConsumer,
     setIsMuted,
     setIsUserMute,
+    micSettings,
+    setMicAudioState,
   } = useMediaContext();
-  const [play] = useSound(sound, { volume: 0.35 });
+  const { volume } = useAudioSettings();
+  const [play] = useSound(sound, { volume });
 
   const connect = async (
     roomName: string,
@@ -32,12 +37,15 @@ export const useConnect = () => {
     serverId: string,
     accessToken: string,
   ) => {
+    let micAudioState: MicAudioState | null = null;
+
     try {
       if (!socket.connected) {
         throw new Error('Socket is not connected');
       }
 
-      const audioTrack = await getLocalAudioStream();
+      micAudioState = await getLocalAudioStream(micSettings);
+      const audioTrack = micAudioState.processedTrack;
 
       const { rtpCapabilities, muteStatus } = await joinRoom(
         roomName,
@@ -51,13 +59,7 @@ export const useConnect = () => {
         muteStatus === MuteStatus.SelfMuted || muteStatus === MuteStatus.Muted;
 
       if (isMuted) {
-        if (audioTrack instanceof MediaStream) {
-          audioTrack.getTracks().forEach((track) => {
-            track.enabled = false;
-          });
-        } else {
-          (audioTrack as MediaStreamTrack).enabled = false;
-        }
+        audioTrack.enabled = false;
       }
 
       const device = await createDevice(rtpCapabilities);
@@ -75,12 +77,20 @@ export const useConnect = () => {
       setProducerTransport(producerTransport);
       setIsMuted(isMuted);
       setIsUserMute(muteStatus === MuteStatus.Muted);
+      setMicAudioState(micAudioState);
 
       setIsConnected(true);
       play();
     } catch (error) {
       console.error('Error connecting:', error);
       setIsConnected(false);
+
+      if (micAudioState) {
+        micAudioState.processedTrack.stop();
+        micAudioState.rawTrack.stop();
+        micAudioState.audioContext.close().catch(() => undefined);
+      }
+      setMicAudioState(null);
     }
   };
 
