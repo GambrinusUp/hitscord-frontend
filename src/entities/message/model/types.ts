@@ -24,6 +24,7 @@ export interface MessageItemProps {
     editedContent: string;
     setEditedContent: (value: React.SetStateAction<string>) => void;
     setIsEditing: (value: boolean) => void;
+    originalContent: string;
   }>;
   MessageActions?: React.FC<{
     setIsEditing: (value: boolean) => void;

@@ -1,5 +1,6 @@
-import { ActionIcon, Group, Stack, Textarea } from '@mantine/core';
+import { ActionIcon, Group, Stack, Textarea, Tooltip } from '@mantine/core';
 import { Check, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 import { editMessageStyles } from './EditMessage.style';
 
@@ -11,6 +12,7 @@ interface EditMessageProps {
   editedContent: string;
   setEditedContent: (value: React.SetStateAction<string>) => void;
   setIsEditing: (value: boolean) => void;
+  originalContent: string;
   messageId: number;
   type: MessageType;
 }
@@ -19,9 +21,11 @@ export const EditMessage = ({
   editedContent,
   setEditedContent,
   setIsEditing,
+  originalContent,
   messageId,
   type,
 }: EditMessageProps) => {
+  const [isFocused, setIsFocused] = useState(false);
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentChannelId, currentNotificationChannelId } = useAppSelector(
     (state) => state.testServerStore,
@@ -32,8 +36,15 @@ export const EditMessage = ({
 
   const activeChannelId = currentChannelId ?? currentNotificationChannelId;
 
+  const trimmedText = useMemo(() => editedContent.trim(), [editedContent]);
+  const trimmedOriginalText = useMemo(
+    () => originalContent.trim(),
+    [originalContent],
+  );
+  const canSave = trimmedText.length > 0 && trimmedText !== trimmedOriginalText;
+
   const handleEdit = () => {
-    if (!editedContent.trim()) {
+    if (!canSave) {
       return;
     }
 
@@ -43,7 +54,7 @@ export const EditMessage = ({
           Token: accessToken,
           ChannelId: activeChannelId!,
           MessageId: messageId,
-          Text: editedContent.trim(),
+          Text: trimmedText,
         });
         break;
       case MessageType.CHAT:
@@ -51,7 +62,7 @@ export const EditMessage = ({
           Token: accessToken,
           ChannelId: activeChat!,
           MessageId: messageId,
-          Text: editedContent.trim(),
+          Text: trimmedText,
         });
         break;
       case MessageType.SUBCHAT:
@@ -59,7 +70,7 @@ export const EditMessage = ({
           Token: accessToken,
           ChannelId: currentSubChatId!,
           MessageId: messageId,
-          Text: editedContent.trim(),
+          Text: trimmedText,
         });
         break;
     }
@@ -68,6 +79,7 @@ export const EditMessage = ({
   };
 
   const handleCancelEdit = () => {
+    setEditedContent(originalContent);
     setIsEditing(false);
   };
 
@@ -78,22 +90,68 @@ export const EditMessage = ({
   };
 
   return (
-    <Stack gap="xs">
+    <Stack gap="xs" style={editMessageStyles.container(isFocused)}>
       <Textarea
         radius="md"
         value={editedContent}
         onChange={handleChangeMessage}
         autosize
         minRows={1}
-        style={editMessageStyles.textarea()}
+        maxRows={10}
+        placeholder="Редактировать сообщение..."
+        style={editMessageStyles.textareaRoot()}
+        styles={{ input: editMessageStyles.textareaInput(isFocused) }}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            handleCancelEdit();
+
+            return;
+          }
+
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            handleEdit();
+          }
+        }}
       />
-      <Group gap="xs" justify="flex-end">
-        <ActionIcon variant="filled" color="green" onClick={handleEdit}>
-          <Check size={12} />
-        </ActionIcon>
-        <ActionIcon variant="filled" color="red" onClick={handleCancelEdit}>
-          <X size={12} />
-        </ActionIcon>
+      <Group
+        gap="xs"
+        justify="flex-end"
+        style={editMessageStyles.buttonGroup()}
+      >
+        <Tooltip
+          label={canSave ? 'Сохранить (Ctrl+Enter)' : 'Нет изменений'}
+          withArrow
+        >
+          <span style={{ display: 'inline-flex' }}>
+            <ActionIcon
+              variant="light"
+              color="green"
+              onClick={handleEdit}
+              size="lg"
+              disabled={!canSave}
+              style={editMessageStyles.actionIcon()}
+              aria-label="Сохранить изменения"
+            >
+              <Check size={16} />
+            </ActionIcon>
+          </span>
+        </Tooltip>
+        <Tooltip label="Отмена (Esc)" withArrow>
+          <ActionIcon
+            variant="light"
+            color="red"
+            onClick={handleCancelEdit}
+            size="lg"
+            style={editMessageStyles.actionIcon()}
+            aria-label="Отменить редактирование"
+          >
+            <X size={16} />
+          </ActionIcon>
+        </Tooltip>
       </Group>
     </Stack>
   );
