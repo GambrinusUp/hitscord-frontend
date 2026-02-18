@@ -1,7 +1,7 @@
 import { Carousel } from '@mantine/carousel';
 import { Box, Flex, Group, Image, Modal, Text } from '@mantine/core';
 import saveAs from 'file-saver';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { messageFilesStyles } from './MessageFiles.style';
 
@@ -16,47 +16,91 @@ interface MessageFilesProps {
   channelId: string;
 }
 
+type LoadedImage = { fileId: string; name: string; src: string };
+
+const imageCache = new Map<string, LoadedImage>();
+const imageLoading = new Map<string, Promise<LoadedImage | null>>();
+
+const getCacheKey = (channelId: string, fileId: string) =>
+  `${channelId}:${fileId}`;
+
 export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
   const { showError } = useNotification();
 
   const [opened, setOpened] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
 
-  const [loadedImages, setLoadedImages] = useState<
-    Array<{ fileId: string; name: string; src: string }>
-  >([]);
+  const [loadedImages, setLoadedImages] = useState<LoadedImage[]>([]);
 
-  const images = files.filter((f) => f.fileType.startsWith('image/'));
-  const otherFiles = files.filter((f) => !f.fileType.startsWith('image/'));
+  const images = useMemo(
+    () => files.filter((f) => f.fileType.startsWith('image/')),
+    [files],
+  );
+  const otherFiles = useMemo(
+    () => files.filter((f) => !f.fileType.startsWith('image/')),
+    [files],
+  );
+  const imagesKey = useMemo(
+    () => images.map((img) => img.fileId).join('|'),
+    [images],
+  );
 
   useEffect(() => {
     if (images.length === 0) return;
+    let isActive = true;
 
     const loadAll = async () => {
       try {
         const results = await Promise.all(
           images.map(async (img) => {
-            const resp = await getFile(channelId, img.fileId);
+            const cacheKey = getCacheKey(channelId, img.fileId);
+            const cached = imageCache.get(cacheKey);
 
-            if (!resp.base64File) return null;
+            if (cached) return cached;
 
-            return {
-              fileId: img.fileId,
-              name: img.fileName,
-              src: `data:${img.fileType};base64,${resp.base64File}`,
-            };
+            let pending = imageLoading.get(cacheKey);
+
+            if (!pending) {
+              pending = getFile(channelId, img.fileId)
+                .then((resp) => {
+                  if (!resp.base64File) return null;
+
+                  const loaded = {
+                    fileId: img.fileId,
+                    name: img.fileName,
+                    src: `data:${img.fileType};base64,${resp.base64File}`,
+                  };
+
+                  imageCache.set(cacheKey, loaded);
+
+                  return loaded;
+                })
+                .finally(() => {
+                  imageLoading.delete(cacheKey);
+                });
+              imageLoading.set(cacheKey, pending);
+            }
+
+            return pending;
           }),
         );
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setLoadedImages(results.filter(Boolean) as any);
+        if (!isActive) return;
+
+        setLoadedImages(results.filter(Boolean) as LoadedImage[]);
       } catch {
+        if (!isActive) return;
+
         showError('Ошибка загрузки изображений');
       }
     };
 
     loadAll();
-  }, [channelId, images]);
+
+    return () => {
+      isActive = false;
+    };
+  }, [channelId, imagesKey]);
 
   const openPreview = (clickedId: string) => {
     const index = loadedImages.findIndex((img) => img.fileId === clickedId);

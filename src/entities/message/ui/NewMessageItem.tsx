@@ -12,8 +12,8 @@ import {
 import { EllipsisVertical, Reply } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { MessageFiles } from './MessageFiles';
 import { messageItemStyles } from './MessageItem.style';
+import { MessageFiles } from './NewMessageFiles';
 
 import { formatMessage } from '~/entities/message/lib/formatMessage';
 import { useMessageAuthor } from '~/entities/message/lib/useMessageAuthor';
