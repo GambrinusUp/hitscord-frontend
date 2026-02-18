@@ -57,7 +57,7 @@ export const ProfileContent = ({
     <Box
       style={{
         flex: 1,
-        padding: '10px',
+
         display: 'flex',
         flexDirection: 'column',
         backgroundColor: '#2C2E33',
