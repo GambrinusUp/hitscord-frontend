@@ -48,18 +48,26 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
 
   useFileUploadNotification(loading === LoadingState.PENDING);
 
-  const { getUsername } = useMessageAuthor(MessageType.SUBCHAT);
-  const { scrollRef, isAtBottom, showButton, handleScroll, scrollToBottom } =
-    useScrollToBottom({
-      messagesStatus,
-      dependencies: [messages],
-      type: 'channel',
-    });
-
   const [newMessage, setNewMessage] = useState('');
   const [replyMessage, setReplyMessage] = useState<
     ChatMessage | ChannelMessage | null
   >(null);
+
+  const { getUsername } = useMessageAuthor(MessageType.SUBCHAT);
+  const {
+    scrollRef,
+    isAtBottom,
+    showButton,
+    handleScroll,
+    scrollToBottom,
+    buttonOffset,
+  } = useScrollToBottom({
+    messagesStatus,
+    dependencies: [messages],
+    type: 'channel',
+    hasReplyMessage: !!replyMessage,
+    hasAttachedFiles: uploadedFiles.length > 0,
+  });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -143,37 +151,48 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
               height: '80vh',
             }}
           >
-            <ScrollArea
-              viewportRef={scrollRef}
-              style={{ flex: 1, padding: 10 }}
-              onScrollPositionChange={handleScroll}
-              p="md"
+            <Box
+              style={{
+                flex: 1,
+                position: 'relative',
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+              }}
             >
-              <MessagesList
-                scrollRef={scrollRef}
-                type={MessageType.SUBCHAT}
-                replyToMessage={(message) => setReplyMessage(message)}
-              />
-            </ScrollArea>
-
-            {!isAtBottom && showButton && (
-              <Box
-                style={{
-                  position: 'absolute',
-                  bottom: 60,
-                  right: 320,
-                  zIndex: 10,
-                }}
+              <ScrollArea
+                viewportRef={scrollRef}
+                style={{ flex: 1, padding: 10 }}
+                onScrollPositionChange={handleScroll}
+                p="md"
               >
-                <ActionIcon
-                  size="lg"
-                  variant="filled"
-                  onClick={() => scrollToBottom()}
+                <MessagesList
+                  scrollRef={scrollRef}
+                  type={MessageType.SUBCHAT}
+                  replyToMessage={(message) => setReplyMessage(message)}
+                />
+              </ScrollArea>
+
+              {!isAtBottom && showButton && (
+                <Box
+                  style={{
+                    position: 'absolute',
+                    bottom: buttonOffset,
+                    right: 10,
+                    zIndex: 10,
+                  }}
                 >
-                  <ArrowDown size={20} />
-                </ActionIcon>
-              </Box>
-            )}
+                  <ActionIcon
+                    size="lg"
+                    variant="filled"
+                    onClick={() => scrollToBottom()}
+                  >
+                    <ArrowDown size={20} />
+                  </ActionIcon>
+                </Box>
+              )}
+            </Box>
 
             <Box pos="relative">
               <AttachedFilesList />

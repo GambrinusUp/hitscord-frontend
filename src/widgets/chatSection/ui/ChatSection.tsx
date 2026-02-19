@@ -61,12 +61,23 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
   const { uploadedFiles, loading } = useAppSelector(
     (state) => state.filesStore,
   );
-  const { scrollRef, isAtBottom, showButton, handleScroll, scrollToBottom } =
-    useScrollToBottom({ messagesStatus, dependencies: [messages] });
-  const { getUsername } = useMessageAuthor(MessageType.CHAT);
   const [replyMessage, setReplyMessage] = useState<
     ChatMessage | ChannelMessage | null
   >(null);
+  const {
+    scrollRef,
+    isAtBottom,
+    showButton,
+    handleScroll,
+    scrollToBottom,
+    buttonOffset,
+  } = useScrollToBottom({
+    messagesStatus,
+    dependencies: [messages],
+    hasReplyMessage: !!replyMessage,
+    hasAttachedFiles: uploadedFiles.length > 0,
+  });
+  const { getUsername } = useMessageAuthor(MessageType.CHAT);
 
   const isNotifiable = chat.nonNotifiable;
 
@@ -100,7 +111,11 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
   });
 
   const handleSendMessage = () => {
-    if (message.trim() && chat.chatId && ((message.trim()).length > 0 || uploadedFiles.length > 0)) {
+    if (
+      message.trim() &&
+      chat.chatId &&
+      (message.trim().length > 0 || uploadedFiles.length > 0)
+    ) {
       sendChatMessage({
         Token: accessToken,
         ChannelId: chat.chatId,
@@ -167,7 +182,7 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
     dispatch(setActiveChat(null));
   };
 
-  const disabled = (message.trim()).length > 0 || uploadedFiles.length > 0;
+  const disabled = message.trim().length > 0 || uploadedFiles.length > 0;
 
   return (
     <>
@@ -209,35 +224,46 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
           </Group>
         </Group>
         <Divider my="md" />
-        <ScrollArea
-          viewportRef={scrollRef}
-          style={{ flex: 1, padding: 10 }}
-          onScrollPositionChange={handleScroll}
+        <Box
+          style={{
+            flex: 1,
+            position: 'relative',
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
         >
-          <MessagesList
-            scrollRef={scrollRef}
-            type={MessageType.CHAT}
-            replyToMessage={(message) => setReplyMessage(message)}
-          />
-        </ScrollArea>
-        {!isAtBottom && showButton && (
-          <Box
-            style={{
-              position: 'absolute',
-              bottom: 60,
-              right: 320,
-              zIndex: 10,
-            }}
+          <ScrollArea
+            viewportRef={scrollRef}
+            style={{ flex: 1, padding: 10 }}
+            onScrollPositionChange={handleScroll}
           >
-            <ActionIcon
-              size="lg"
-              variant="filled"
-              onClick={() => scrollToBottom()}
+            <MessagesList
+              scrollRef={scrollRef}
+              type={MessageType.CHAT}
+              replyToMessage={(message) => setReplyMessage(message)}
+            />
+          </ScrollArea>
+          {!isAtBottom && showButton && (
+            <Box
+              style={{
+                position: 'absolute',
+                bottom: buttonOffset,
+                right: 10,
+                zIndex: 10,
+              }}
             >
-              <ArrowDown size={20} />
-            </ActionIcon>
-          </Box>
-        )}
+              <ActionIcon
+                size="lg"
+                variant="filled"
+                onClick={() => scrollToBottom()}
+              >
+                <ArrowDown size={20} />
+              </ActionIcon>
+            </Box>
+          )}
+        </Box>
         <Box pos="relative">
           <AttachedFilesList />
           {replyMessage && (

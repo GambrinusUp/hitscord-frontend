@@ -65,23 +65,30 @@ export const ChatSection = ({
   const users = serverData.users;
   const roles = serverData.roles;
   const { getUsername } = useMessageAuthor(MessageType.CHANNEL);
-  const { scrollRef, isAtBottom, showButton, handleScroll, scrollToBottom } =
-    useScrollToBottom({
-      messagesStatus,
-      dependencies: [messages],
-      type: 'channel',
-    });
+  const [newMessage, setNewMessage] = useState('');
+  const [replyMessage, setReplyMessage] = useState<
+    ChatMessage | ChannelMessage | null
+  >(null);
+  const {
+    scrollRef,
+    isAtBottom,
+    showButton,
+    handleScroll,
+    scrollToBottom,
+    buttonOffset,
+  } = useScrollToBottom({
+    messagesStatus,
+    dependencies: [messages],
+    type: 'channel',
+    hasReplyMessage: !!replyMessage,
+    hasAttachedFiles: uploadedFiles.length > 0,
+  });
   const [opened, { open, close }] = useDisclosure(false);
   const { canWrite, canWriteSub, nonReadedCount, nonReadedTaggedCount } =
     useChannelSettings();
   useFileUploadNotification(loading === LoadingState.PENDING);
 
   const activeChannelId = currentChannelId ?? currentNotificationChannelId;
-
-  const [newMessage, setNewMessage] = useState('');
-  const [replyMessage, setReplyMessage] = useState<
-    ChatMessage | ChannelMessage | null
-  >(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -106,10 +113,14 @@ export const ChatSection = ({
     setNewMessage,
   });
 
-  const disabled = (newMessage.trim()).length > 0 || uploadedFiles.length > 0;
+  const disabled = newMessage.trim().length > 0 || uploadedFiles.length > 0;
 
   const handleSendMessage = (nestedChannel: boolean) => {
-    if (currentServerId && activeChannelId && ((newMessage.trim()).length > 0 || uploadedFiles.length > 0)) {
+    if (
+      currentServerId &&
+      activeChannelId &&
+      (newMessage.trim().length > 0 || uploadedFiles.length > 0)
+    ) {
       sendMessage({
         Token: accessToken,
         ChannelId: activeChannelId,
@@ -212,43 +223,54 @@ export const ChatSection = ({
           </ActionIcon>
         </Group>
         <Divider my="md" />
-        <ScrollArea
-          viewportRef={scrollRef}
-          style={{ flex: 1, padding: 10 }}
-          onScrollPositionChange={handleScroll}
+        <Box
+          style={{
+            flex: 1,
+            position: 'relative',
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
         >
-          <MessagesList
-            scrollRef={scrollRef}
-            type={MessageType.CHANNEL}
-            replyToMessage={(message) => setReplyMessage(message)}
-          />
-        </ScrollArea>
-
-        {!isAtBottom && showButton && (
-          <Box
-            style={{
-              position: 'absolute',
-              bottom: 60,
-              right: 320,
-              zIndex: 10,
-            }}
+          <ScrollArea
+            viewportRef={scrollRef}
+            style={{ flex: 1, padding: 10 }}
+            onScrollPositionChange={handleScroll}
           >
-            <Indicator
-              size={14}
-              disabled={nonReadedCount! <= 0 && nonReadedTaggedCount! <= 0}
-              color={nonReadedTaggedCount! > 0 ? 'red' : 'blue'}
-              withBorder
+            <MessagesList
+              scrollRef={scrollRef}
+              type={MessageType.CHANNEL}
+              replyToMessage={(message) => setReplyMessage(message)}
+            />
+          </ScrollArea>
+
+          {!isAtBottom && showButton && (
+            <Box
+              style={{
+                position: 'absolute',
+                bottom: buttonOffset,
+                right: 10,
+                zIndex: 10,
+              }}
             >
-              <ActionIcon
-                size="lg"
-                variant="filled"
-                onClick={() => scrollToBottom()}
+              <Indicator
+                size={14}
+                disabled={nonReadedCount! <= 0 && nonReadedTaggedCount! <= 0}
+                color={nonReadedTaggedCount! > 0 ? 'red' : 'blue'}
+                withBorder
               >
-                <ArrowDown size={20} />
-              </ActionIcon>
-            </Indicator>
-          </Box>
-        )}
+                <ActionIcon
+                  size="lg"
+                  variant="filled"
+                  onClick={() => scrollToBottom()}
+                >
+                  <ArrowDown size={20} />
+                </ActionIcon>
+              </Indicator>
+            </Box>
+          )}
+        </Box>
 
         <Box pos="relative">
           <AttachedFilesList />
@@ -356,7 +378,9 @@ export const ChatSection = ({
                 size="xl"
                 variant="transparent"
                 disabled={!disabled}
-                onClick={() => {handleSendMessage(false)}}
+                onClick={() => {
+                  handleSendMessage(false);
+                }}
               >
                 <Send size={20} />
               </ActionIcon>
