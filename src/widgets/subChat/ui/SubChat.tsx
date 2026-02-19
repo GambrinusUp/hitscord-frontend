@@ -21,7 +21,7 @@ import { EditSettings } from '~/features/subChat';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { formatTagMessage } from '~/modules/ChatSection/ChatSection.utils';
 import { LoadingState } from '~/shared';
-import { useScrollToBottom } from '~/shared/lib/hooks';
+import { useScrollToBottom, useScrollToMessage } from '~/shared/lib/hooks';
 import { useFileUploadNotification } from '~/shared/lib/hooks/useFileUploadNotification';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { ChannelMessage, ServerMessageType } from '~/store/ServerStore';
@@ -32,6 +32,7 @@ interface SubChatProps {
     scrollRef: React.RefObject<HTMLDivElement>;
     type: MessageType;
     replyToMessage: (message: ChannelMessage) => void;
+    onScrollToReplyMessage?: (replyMessageId: number) => void;
   }>;
 }
 
@@ -67,6 +68,10 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
     type: 'channel',
     hasReplyMessage: !!replyMessage,
     hasAttachedFiles: uploadedFiles.length > 0,
+  });
+  const { scrollToMessage } = useScrollToMessage({
+    scrollRef,
+    type: MessageType.SUBCHAT,
   });
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -171,6 +176,7 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
                   scrollRef={scrollRef}
                   type={MessageType.SUBCHAT}
                   replyToMessage={(message) => setReplyMessage(message)}
+                  onScrollToReplyMessage={scrollToMessage}
                 />
               </ScrollArea>
 

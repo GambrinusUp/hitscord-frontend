@@ -36,7 +36,7 @@ import { AttachedFilesList } from '~/features/attachedFilesList';
 import { CreatePoll } from '~/features/polls';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
-import { useScrollToBottom } from '~/shared/lib/hooks';
+import { useScrollToBottom, useScrollToMessage } from '~/shared/lib/hooks';
 import { useFileUploadNotification } from '~/shared/lib/hooks/useFileUploadNotification';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { ChannelMessage, ServerMessageType } from '~/store/ServerStore';
@@ -82,6 +82,10 @@ export const ChatSection = ({
     type: 'channel',
     hasReplyMessage: !!replyMessage,
     hasAttachedFiles: uploadedFiles.length > 0,
+  });
+  const { scrollToMessage } = useScrollToMessage({
+    scrollRef,
+    type: MessageType.CHANNEL,
   });
   const [opened, { open, close }] = useDisclosure(false);
   const { canWrite, canWriteSub, nonReadedCount, nonReadedTaggedCount } =
@@ -242,6 +246,7 @@ export const ChatSection = ({
               scrollRef={scrollRef}
               type={MessageType.CHANNEL}
               replyToMessage={(message) => setReplyMessage(message)}
+              onScrollToReplyMessage={scrollToMessage}
             />
           </ScrollArea>
 

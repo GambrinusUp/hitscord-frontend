@@ -20,6 +20,7 @@ export interface MessageItemProps {
   files: MessageFile[] | null | undefined;
   nestedChannel: NestedChannel | null | undefined;
   onReplyMessage: () => void;
+  onReplyPreviewClick?: (replyMessageId: number) => void;
   EditMessage?: React.FC<{
     editedContent: string;
     setEditedContent: (value: React.SetStateAction<string>) => void;

@@ -35,6 +35,7 @@ export const MessageItem = ({
   channelId,
   files,
   onReplyMessage,
+  onReplyPreviewClick,
   EditMessage,
   MessageActions,
   nestedChannel,
@@ -238,11 +239,13 @@ export const MessageItem = ({
                   </Group>
                 }
                 withCloseButton={false}
+                onClick={() => onReplyPreviewClick?.(replyMessage.id)}
                 style={{
                   backgroundColor: 'var(--color-white-05)',
                   border: '1px solid var(--border-primary-soft)',
                   borderRadius: '6px',
                   marginBottom: '8px',
+                  cursor: onReplyPreviewClick ? 'pointer' : 'default',
                 }}
               >
                 <Text size="sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>

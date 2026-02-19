@@ -38,7 +38,7 @@ import { UpdateIcon } from '~/features/settings/updateIcon';
 import { useAppDispatch, useAppSelector } from '~/hooks';
 import { formatTagMessage, useMentionSuggestions } from '~/modules/ChatSection';
 import { LoadingState } from '~/shared';
-import { useScrollToBottom } from '~/shared/lib/hooks';
+import { useScrollToBottom, useScrollToMessage } from '~/shared/lib/hooks';
 import { useFileUploadNotification } from '~/shared/lib/hooks/useFileUploadNotification';
 import { useWebSocket } from '~/shared/lib/websocket';
 import { ChannelMessage, ServerMessageType } from '~/store/ServerStore';
@@ -48,6 +48,7 @@ interface ChatSectionProps {
     scrollRef: React.RefObject<HTMLDivElement>;
     type: MessageType;
     replyToMessage: (message: ChatMessage) => void;
+    onScrollToReplyMessage?: (replyMessageId: number) => void;
   }>;
 }
 
@@ -76,6 +77,10 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
     dependencies: [messages],
     hasReplyMessage: !!replyMessage,
     hasAttachedFiles: uploadedFiles.length > 0,
+  });
+  const { scrollToMessage } = useScrollToMessage({
+    scrollRef,
+    type: MessageType.CHAT,
   });
   const { getUsername } = useMessageAuthor(MessageType.CHAT);
 
@@ -243,6 +248,7 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
               scrollRef={scrollRef}
               type={MessageType.CHAT}
               replyToMessage={(message) => setReplyMessage(message)}
+              onScrollToReplyMessage={scrollToMessage}
             />
           </ScrollArea>
           {!isAtBottom && showButton && (

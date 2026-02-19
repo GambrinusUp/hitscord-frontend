@@ -19,12 +19,14 @@ interface ProfileContentProps {
       scrollRef: React.RefObject<HTMLDivElement>;
       type: MessageType;
       replyToMessage: (message: ChatMessage) => void;
+      onScrollToReplyMessage?: (replyMessageId: number) => void;
     }>;
   }>;
   MessagesList: React.ComponentType<{
     scrollRef: React.RefObject<HTMLDivElement>;
     type: MessageType;
     replyToMessage: (message: ChatMessage) => void;
+    onScrollToReplyMessage?: (replyMessageId: number) => void;
   }>;
   Settings: React.ComponentType;
   FriendshipList: React.ComponentType;

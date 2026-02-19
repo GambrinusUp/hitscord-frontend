@@ -16,12 +16,14 @@ interface MessagesListProps {
   scrollRef: React.RefObject<HTMLDivElement>;
   type: MessageType;
   replyToMessage: (message: ChatMessage | ChannelMessage) => void;
+  onScrollToReplyMessage?: (replyMessageId: number) => void;
 }
 
 export const MessagesList = ({
   scrollRef,
   type,
   replyToMessage,
+  onScrollToReplyMessage,
 }: MessagesListProps) => {
   const { user } = useAppSelector((state) => state.userStore);
 
@@ -78,6 +80,7 @@ export const MessagesList = ({
                 )}
                 type={type}
                 onReplyMessage={() => replyToMessage(message)}
+                onReplyPreviewClick={onScrollToReplyMessage}
               />
             ) : (
               <PollItem

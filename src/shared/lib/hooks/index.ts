@@ -9,3 +9,4 @@ export { useStream } from './useStream';
 export { useCamera } from './useCamera';
 export { useAudioSettings } from './useAudioSettings';
 export { useImagePreloadSetting } from './useImagePreloadSetting';
+export { useScrollToMessage } from './useScrollToMessage';
