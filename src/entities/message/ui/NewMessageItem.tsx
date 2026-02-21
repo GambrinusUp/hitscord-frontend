@@ -35,7 +35,8 @@ export const MessageItem = ({
   channelId,
   files,
   onReplyMessage,
-  EditMessage,
+  onEditMessage,
+  onReplyPreviewClick,
   MessageActions,
   nestedChannel,
   isTagged,
@@ -50,8 +51,6 @@ export const MessageItem = ({
     isOwnMessage || (activeChannelId && canDeleteOthersMessages);
 
   const [isHovered, setIsHovered] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedContent, setEditedContent] = useState(content);
   const { getUsername, getUserIcon } = useMessageAuthor(type);
   const { canWrite } = useChannelPermissions();
 
@@ -106,7 +105,7 @@ export const MessageItem = ({
         gap="xs"
         justify={isOwnMessage ? 'flex-start' : 'flex-end'}
         style={{
-          opacity: isHovered || isEditing ? 1 : 0,
+          opacity: isHovered ? 1 : 0,
           transition: 'opacity 0.2s ease',
         }}
       >
@@ -149,9 +148,7 @@ export const MessageItem = ({
             <Menu.Dropdown>
               {MessageActions && (
                 <MessageActions
-                  setIsEditing={setIsEditing}
-                  setEditedContent={setEditedContent}
-                  messageContent={content}
+                  onEdit={() => onEditMessage?.()}
                   isOwnMessage={isOwnMessage}
                 />
               )}
@@ -207,9 +204,9 @@ export const MessageItem = ({
             )}
           </Group>
           <Box
-            style={messageItemStyles.box(isOwnMessage, isEditing, isTagged)}
+            style={messageItemStyles.box(isOwnMessage, false, isTagged)}
             onMouseEnter={(e) => {
-              if (!isTagged && !isEditing) {
+              if (!isTagged) {
                 if (isOwnMessage) {
                   e.currentTarget.style.boxShadow =
                     '0 4px 12px var(--color-primary-20), 0 2px 4px rgba(0, 0, 0, 0.15)';
@@ -219,7 +216,7 @@ export const MessageItem = ({
               }
             }}
             onMouseLeave={(e) => {
-              if (!isTagged && !isEditing) {
+              if (!isTagged) {
                 const baseShadow = isOwnMessage
                   ? '0 2px 8px var(--color-primary-20), 0 1px 2px rgba(0, 0, 0, 0.1)'
                   : '0 2px 4px rgba(0, 0, 0, 0.15)';
@@ -238,11 +235,13 @@ export const MessageItem = ({
                   </Group>
                 }
                 withCloseButton={false}
+                onClick={() => onReplyPreviewClick?.(replyMessage.id)}
                 style={{
                   backgroundColor: 'var(--color-white-05)',
                   border: '1px solid var(--border-primary-soft)',
                   borderRadius: '6px',
                   marginBottom: '8px',
+                  cursor: onReplyPreviewClick ? 'pointer' : 'default',
                 }}
               >
                 <Text size="sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
@@ -250,21 +249,12 @@ export const MessageItem = ({
                 </Text>
               </Notification>
             )}
-            {isEditing && EditMessage ? (
-              <EditMessage
-                editedContent={editedContent}
-                setEditedContent={setEditedContent}
-                setIsEditing={setIsEditing}
-                originalContent={content}
-              />
-            ) : (
-              <Text
-                style={messageItemStyles.breakText()}
-                dangerouslySetInnerHTML={{
-                  __html: content ? formatMessage(content) : '',
-                }}
-              />
-            )}
+            <Text
+              style={messageItemStyles.breakText()}
+              dangerouslySetInnerHTML={{
+                __html: content ? formatMessage(content) : '',
+              }}
+            />
             {files && files.length > 0 && (
               <MessageFiles files={files} channelId={channelId} />
             )}
