@@ -31,14 +31,15 @@ interface SubChatProps {
   MessagesList: React.ComponentType<{
     scrollRef: React.RefObject<HTMLDivElement>;
     type: MessageType;
-    replyToMessage: (message: ChannelMessage) => void;
+    replyToMessage: (message: ChatMessage | ChannelMessage) => void;
+    onEditMessage?: (message: ChatMessage | ChannelMessage) => void;
     onScrollToReplyMessage?: (replyMessageId: number) => void;
   }>;
 }
 
 export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
   const dispatch = useAppDispatch();
-  const { sendMessage } = useWebSocket();
+  const { sendMessage, editMessage } = useWebSocket();
   const { accessToken } = useAppSelector((state) => state.userStore);
   const { currentSubChatId, messagesStatus, messages } = useAppSelector(
     (state) => state.subChatStore,
@@ -50,6 +51,10 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
   useFileUploadNotification(loading === LoadingState.PENDING);
 
   const [newMessage, setNewMessage] = useState('');
+  const [editingMessage, setEditingMessage] = useState<{
+    id: number;
+    originalText: string;
+  } | null>(null);
   const [replyMessage, setReplyMessage] = useState<
     ChatMessage | ChannelMessage | null
   >(null);
@@ -77,16 +82,32 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSendMessage = (nestedChannel: boolean) => {
+    const trimmedText = newMessage.trim();
+
+    if (editingMessage && currentSubChatId && trimmedText.length > 0) {
+      if (trimmedText === editingMessage.originalText.trim()) return;
+
+      editMessage({
+        Token: accessToken,
+        ChannelId: currentSubChatId,
+        MessageId: editingMessage.id,
+        Text: formatTagMessage(trimmedText),
+      });
+      setNewMessage('');
+      setEditingMessage(null);
+
+      return;
+    }
+
     if (
-      newMessage.trim() &&
       currentSubChatId &&
-      (newMessage.trim().length > 0 || uploadedFiles.length > 0)
+      (trimmedText.length > 0 || uploadedFiles.length > 0)
     ) {
       sendMessage({
         Token: accessToken,
         ChannelId: currentSubChatId,
         Classic: {
-          Text: formatTagMessage(newMessage.trim()),
+          Text: formatTagMessage(trimmedText),
           NestedChannel: nestedChannel,
           Files: uploadedFiles.map((file) => file.fileId),
         },
@@ -123,7 +144,24 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
     dispatch(setSubChatInfo(null));
   };
 
-  const disabled = newMessage.trim().length > 0 || uploadedFiles.length > 0;
+  const handleStartEdit = (messageToEdit: ChatMessage | ChannelMessage) => {
+    const textToEdit = messageToEdit.text ?? '';
+    setReplyMessage(null);
+    setEditingMessage({ id: messageToEdit.id, originalText: textToEdit });
+    setNewMessage(textToEdit);
+    dispatch(clearFiles());
+    textareaRef.current?.focus();
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setNewMessage('');
+  };
+
+  const disabled = editingMessage
+    ? newMessage.trim().length > 0 &&
+      newMessage.trim() !== editingMessage.originalText.trim()
+    : newMessage.trim().length > 0 || uploadedFiles.length > 0;
 
   return (
     <Modal.Root
@@ -176,6 +214,7 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
                   scrollRef={scrollRef}
                   type={MessageType.SUBCHAT}
                   replyToMessage={(message) => setReplyMessage(message)}
+                  onEditMessage={handleStartEdit}
                   onScrollToReplyMessage={scrollToMessage}
                 />
               </ScrollArea>
@@ -214,22 +253,38 @@ export const SubChat = ({ opened, MessagesList }: SubChatProps) => {
                   </Notification>
                 </Box>
               )}
+              {editingMessage && (
+                <Box p={6}>
+                  <Notification
+                    title="Редактирование сообщения"
+                    onClose={handleCancelEdit}
+                  >
+                    <Text lineClamp={2}>{editingMessage.originalText}</Text>
+                  </Notification>
+                </Box>
+              )}
               <Group mt="auto" align="center" wrap="nowrap" gap={0}>
                 <ActionIcon
                   component="label"
                   size="xl"
                   variant="transparent"
-                  disabled={loading === LoadingState.PENDING}
+                  disabled={
+                    loading === LoadingState.PENDING || !!editingMessage
+                  }
                 >
                   <Paperclip size={20} />
                   <input
                     type="file"
                     hidden
                     multiple
+                    disabled={!!editingMessage}
                     onChange={handleFileChange}
                   />
                 </ActionIcon>
-                <CreatePoll type={MessageType.SUBCHAT} />
+                <CreatePoll
+                  type={MessageType.SUBCHAT}
+                  disabled={!!editingMessage}
+                />
                 <Textarea
                   ref={textareaRef}
                   w="100%"

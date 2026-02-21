@@ -3,7 +3,7 @@ import { Flex, Loader, Stack } from '@mantine/core';
 import { ChatMessage } from '~/entities/chat';
 import { MessageItem, MessageType } from '~/entities/message';
 import { PollItem } from '~/entities/vote';
-import { MessageActions, EditMessage } from '~/features/message';
+import { MessageActions } from '~/features/message';
 import { useAppSelector } from '~/hooks';
 import { LoadingState } from '~/shared';
 import {
@@ -16,6 +16,7 @@ interface MessagesListProps {
   scrollRef: React.RefObject<HTMLDivElement>;
   type: MessageType;
   replyToMessage: (message: ChatMessage | ChannelMessage) => void;
+  onEditMessage?: (message: ChatMessage | ChannelMessage) => void;
   onScrollToReplyMessage?: (replyMessageId: number) => void;
 }
 
@@ -23,6 +24,7 @@ export const MessagesList = ({
   scrollRef,
   type,
   replyToMessage,
+  onEditMessage,
   onScrollToReplyMessage,
 }: MessagesListProps) => {
   const { user } = useAppSelector((state) => state.userStore);
@@ -68,9 +70,6 @@ export const MessagesList = ({
                 isTagged={message.isTagged}
                 files={message.files}
                 nestedChannel={message.nestedChannel}
-                EditMessage={(props) => (
-                  <EditMessage {...props} type={type} messageId={message.id} />
-                )}
                 MessageActions={(props) => (
                   <MessageActions
                     {...props}
@@ -80,6 +79,7 @@ export const MessagesList = ({
                 )}
                 type={type}
                 onReplyMessage={() => replyToMessage(message)}
+                onEditMessage={() => onEditMessage?.(message)}
                 onReplyPreviewClick={onScrollToReplyMessage}
               />
             ) : (

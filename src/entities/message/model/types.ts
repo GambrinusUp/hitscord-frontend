@@ -20,17 +20,10 @@ export interface MessageItemProps {
   files: MessageFile[] | null | undefined;
   nestedChannel: NestedChannel | null | undefined;
   onReplyMessage: () => void;
+  onEditMessage?: () => void;
   onReplyPreviewClick?: (replyMessageId: number) => void;
-  EditMessage?: React.FC<{
-    editedContent: string;
-    setEditedContent: (value: React.SetStateAction<string>) => void;
-    setIsEditing: (value: boolean) => void;
-    originalContent: string;
-  }>;
   MessageActions?: React.FC<{
-    setIsEditing: (value: boolean) => void;
-    setEditedContent: (value: React.SetStateAction<string>) => void;
-    messageContent: string;
+    onEdit: () => void;
     isOwnMessage: boolean;
   }>;
 }

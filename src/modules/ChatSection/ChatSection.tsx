@@ -48,7 +48,7 @@ export const ChatSection = ({
   openDetailsPanel,
 }: ChatSectionProps) => {
   const dispatch = useAppDispatch();
-  const { sendMessage } = useWebSocket();
+  const { sendMessage, editMessage } = useWebSocket();
   const { accessToken } = useAppSelector((state) => state.userStore);
   const {
     currentServerId,
@@ -66,6 +66,10 @@ export const ChatSection = ({
   const roles = serverData.roles;
   const { getUsername } = useMessageAuthor(MessageType.CHANNEL);
   const [newMessage, setNewMessage] = useState('');
+  const [editingMessage, setEditingMessage] = useState<{
+    id: number;
+    originalText: string;
+  } | null>(null);
   const [replyMessage, setReplyMessage] = useState<
     ChatMessage | ChannelMessage | null
   >(null);
@@ -117,19 +121,40 @@ export const ChatSection = ({
     setNewMessage,
   });
 
-  const disabled = newMessage.trim().length > 0 || uploadedFiles.length > 0;
+  const disabled = editingMessage
+    ? newMessage.trim().length > 0 &&
+      newMessage.trim() !== editingMessage.originalText.trim()
+    : newMessage.trim().length > 0 || uploadedFiles.length > 0;
 
   const handleSendMessage = (nestedChannel: boolean) => {
+    const trimmedText = newMessage.trim();
+
+    if (editingMessage && activeChannelId && trimmedText.length > 0) {
+      if (trimmedText === editingMessage.originalText.trim()) return;
+
+      editMessage({
+        Token: accessToken,
+        ChannelId: activeChannelId,
+        MessageId: editingMessage.id,
+        Text: formatTagMessage(trimmedText),
+      });
+      setNewMessage('');
+      setEditingMessage(null);
+      clearSuggestions();
+
+      return;
+    }
+
     if (
       currentServerId &&
       activeChannelId &&
-      (newMessage.trim().length > 0 || uploadedFiles.length > 0)
+      (trimmedText.length > 0 || uploadedFiles.length > 0)
     ) {
       sendMessage({
         Token: accessToken,
         ChannelId: activeChannelId,
         Classic: {
-          Text: formatTagMessage(newMessage.trim()),
+          Text: formatTagMessage(trimmedText),
           NestedChannel: nestedChannel,
           Files: uploadedFiles.map((file) => file.fileId),
         },
@@ -189,6 +214,22 @@ export const ChatSection = ({
     e.target.value = '';
   };
 
+  const handleStartEdit = (messageToEdit: ChatMessage | ChannelMessage) => {
+    const textToEdit = messageToEdit.text ?? '';
+    setReplyMessage(null);
+    clearSuggestions();
+    setEditingMessage({ id: messageToEdit.id, originalText: textToEdit });
+    setNewMessage(textToEdit);
+    dispatch(clearFiles());
+    textareaRef.current?.focus();
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setNewMessage('');
+    clearSuggestions();
+  };
+
   useEffect(() => {
     if (currentSubChatId) {
       open();
@@ -246,6 +287,7 @@ export const ChatSection = ({
               scrollRef={scrollRef}
               type={MessageType.CHANNEL}
               replyToMessage={(message) => setReplyMessage(message)}
+              onEditMessage={handleStartEdit}
               onScrollToReplyMessage={scrollToMessage}
             />
           </ScrollArea>
@@ -288,6 +330,16 @@ export const ChatSection = ({
                 <Text lineClamp={2}>
                   {replyMessage.text || replyMessage.title}
                 </Text>
+              </Notification>
+            </Box>
+          )}
+          {editingMessage && (
+            <Box p={6}>
+              <Notification
+                title="Редактирование сообщения"
+                onClose={handleCancelEdit}
+              >
+                <Text lineClamp={2}>{editingMessage.originalText}</Text>
               </Notification>
             </Box>
           )}
@@ -344,23 +396,29 @@ export const ChatSection = ({
                 component="label"
                 size="xl"
                 variant="transparent"
-                disabled={loading === LoadingState.PENDING}
+                disabled={loading === LoadingState.PENDING || !!editingMessage}
               >
                 <Paperclip size={20} />
                 <input
                   type="file"
                   hidden
                   multiple
+                  disabled={!!editingMessage}
                   onChange={handleFileChange}
                 />
               </ActionIcon>
             )}
-            {canWrite && <CreatePoll type={MessageType.CHANNEL} />}
+            {canWrite && (
+              <CreatePoll
+                type={MessageType.CHANNEL}
+                disabled={!!editingMessage}
+              />
+            )}
             {canWrite && canWriteSub && (
               <ActionIcon
                 size="xl"
                 variant="transparent"
-                disabled={!disabled}
+                disabled={!disabled || !!editingMessage}
                 onClick={() => handleSendMessage(true)}
               >
                 <MessageSquarePlus size={20} />

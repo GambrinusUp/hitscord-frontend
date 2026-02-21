@@ -47,7 +47,8 @@ interface ChatSectionProps {
   MessagesList: React.ComponentType<{
     scrollRef: React.RefObject<HTMLDivElement>;
     type: MessageType;
-    replyToMessage: (message: ChatMessage) => void;
+    replyToMessage: (message: ChatMessage | ChannelMessage) => void;
+    onEditMessage?: (message: ChatMessage | ChannelMessage) => void;
     onScrollToReplyMessage?: (replyMessageId: number) => void;
   }>;
 }
@@ -86,11 +87,15 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
 
   const isNotifiable = chat.nonNotifiable;
 
-  const { sendChatMessage } = useWebSocket();
+  const { sendChatMessage, editChatMessage } = useWebSocket();
 
   useFileUploadNotification(loading === LoadingState.PENDING);
 
   const [message, setMessage] = useState('');
+  const [editingMessage, setEditingMessage] = useState<{
+    id: number;
+    originalText: string;
+  } | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -116,16 +121,30 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
   });
 
   const handleSendMessage = () => {
-    if (
-      message.trim() &&
-      chat.chatId &&
-      (message.trim().length > 0 || uploadedFiles.length > 0)
-    ) {
+    const trimmedText = message.trim();
+
+    if (editingMessage && chat.chatId && trimmedText.length > 0) {
+      if (trimmedText === editingMessage.originalText.trim()) return;
+
+      editChatMessage({
+        Token: accessToken,
+        ChannelId: chat.chatId,
+        MessageId: editingMessage.id,
+        Text: formatTagMessage(trimmedText),
+      });
+      setMessage('');
+      setEditingMessage(null);
+      clearSuggestions();
+
+      return;
+    }
+
+    if (chat.chatId && (trimmedText.length > 0 || uploadedFiles.length > 0)) {
       sendChatMessage({
         Token: accessToken,
         ChannelId: chat.chatId,
         Classic: {
-          Text: formatTagMessage(message.trim()),
+          Text: formatTagMessage(trimmedText),
           Files: uploadedFiles.map((file) => file.fileId),
           NestedChannel: false,
         },
@@ -187,7 +206,26 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
     dispatch(setActiveChat(null));
   };
 
-  const disabled = message.trim().length > 0 || uploadedFiles.length > 0;
+  const handleStartEdit = (messageToEdit: ChatMessage | ChannelMessage) => {
+    const textToEdit = messageToEdit.text ?? '';
+    setReplyMessage(null);
+    clearSuggestions();
+    setEditingMessage({ id: messageToEdit.id, originalText: textToEdit });
+    setMessage(textToEdit);
+    dispatch(clearFiles());
+    textareaRef.current?.focus();
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
+    setMessage('');
+    clearSuggestions();
+  };
+
+  const disabled = editingMessage
+    ? message.trim().length > 0 &&
+      message.trim() !== editingMessage.originalText.trim()
+    : message.trim().length > 0 || uploadedFiles.length > 0;
 
   return (
     <>
@@ -248,6 +286,7 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
               scrollRef={scrollRef}
               type={MessageType.CHAT}
               replyToMessage={(message) => setReplyMessage(message)}
+              onEditMessage={handleStartEdit}
               onScrollToReplyMessage={scrollToMessage}
             />
           </ScrollArea>
@@ -281,6 +320,16 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
                 <Text lineClamp={2}>
                   {replyMessage.text || replyMessage.title}
                 </Text>
+              </Notification>
+            </Box>
+          )}
+          {editingMessage && (
+            <Box p={6}>
+              <Notification
+                title="Редактирование сообщения"
+                onClose={handleCancelEdit}
+              >
+                <Text lineClamp={2}>{editingMessage.originalText}</Text>
               </Notification>
             </Box>
           )}
@@ -335,12 +384,18 @@ export const ChatSection = ({ MessagesList }: ChatSectionProps) => {
               component="label"
               size="xl"
               variant="transparent"
-              disabled={loading === LoadingState.PENDING}
+              disabled={loading === LoadingState.PENDING || !!editingMessage}
             >
               <Paperclip size={20} />
-              <input type="file" hidden multiple onChange={handleFileChange} />
+              <input
+                type="file"
+                hidden
+                multiple
+                disabled={!!editingMessage}
+                onChange={handleFileChange}
+              />
             </ActionIcon>
-            <CreatePoll type={MessageType.CHAT} />
+            <CreatePoll type={MessageType.CHAT} disabled={!!editingMessage} />
             <Textarea
               w="100%"
               ref={textareaRef}

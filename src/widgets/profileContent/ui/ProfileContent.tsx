@@ -6,6 +6,7 @@ import { ChatMessage } from '~/entities/chat';
 import { MessageType } from '~/entities/message';
 import { EditConfiguration } from '~/features/settings';
 import { useAppSelector } from '~/hooks';
+import { ChannelMessage } from '~/store/ServerStore';
 
 interface ProfileContentProps {
   activeLink:
@@ -18,14 +19,16 @@ interface ProfileContentProps {
     MessagesList: React.ComponentType<{
       scrollRef: React.RefObject<HTMLDivElement>;
       type: MessageType;
-      replyToMessage: (message: ChatMessage) => void;
+      replyToMessage: (message: ChatMessage | ChannelMessage) => void;
+      onEditMessage?: (message: ChatMessage | ChannelMessage) => void;
       onScrollToReplyMessage?: (replyMessageId: number) => void;
     }>;
   }>;
   MessagesList: React.ComponentType<{
     scrollRef: React.RefObject<HTMLDivElement>;
     type: MessageType;
-    replyToMessage: (message: ChatMessage) => void;
+    replyToMessage: (message: ChatMessage | ChannelMessage) => void;
+    onEditMessage?: (message: ChatMessage | ChannelMessage) => void;
     onScrollToReplyMessage?: (replyMessageId: number) => void;
   }>;
   Settings: React.ComponentType;
