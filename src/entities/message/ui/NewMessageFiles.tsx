@@ -42,10 +42,11 @@ export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
     () => files.filter((f) => f.fileType.startsWith('image/')),
     [files],
   );
-  const otherFiles = useMemo(
-    () => files.filter((f) => !f.fileType.startsWith('image/')),
-    [files],
-  );
+  const otherFiles = useMemo(() => {
+    if (!preloadImages) return files;
+
+    return files.filter((f) => !f.fileType.startsWith('image/'));
+  }, [files, preloadImages]);
   const imagesKey = useMemo(
     () => images.map((img) => img.fileId).join('|'),
     [images],
@@ -186,7 +187,7 @@ export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
   return (
     <>
       <Flex direction="column" gap={8} mt={8}>
-        {images.length > 0 && (
+        {preloadImages && images.length > 0 && (
           <Flex wrap="wrap" gap={8}>
             {images.map((img) => {
               const loaded = loadedById.get(img.fileId);
@@ -244,7 +245,15 @@ export const MessageFiles = ({ files, channelId }: MessageFilesProps) => {
               }}
               onClick={() => downloadFile(file)}
             >
-              {isLoading ? <Loader size="xs" /> : getFileIcon(file.fileType)}
+              {isLoading ? (
+                <Loader size="xs" />
+              ) : (
+                getFileIcon(
+                  !preloadImages && file.fileType.startsWith('image/')
+                    ? 'application/octet-stream'
+                    : file.fileType,
+                )
+              )}
               <Text size="sm" style={{ wordBreak: 'break-word' }}>
                 {file.fileName}
               </Text>
