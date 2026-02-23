@@ -82,7 +82,7 @@ export const CreateInvitation = ({
               title="Приглашение создано!"
             >
               <CopyButton
-                value={`https://gambrinusup.github.io/hitscord-frontend/#/invite/${invitationString}`}
+                value={`https://hitscord.site/#/invite/${invitationString}`}
               >
                 {({ copied, copy }) => (
                   <Button radius="md" variant="light" onClick={copy}>
