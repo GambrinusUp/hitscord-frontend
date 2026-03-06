@@ -317,20 +317,6 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
           }
         }
 
-        if (data.MessageType === 'Voice channel settings edited') {
-          const { ServerId, RoleId } = data.Payload;
-
-          const containsRole = userRolesIdsValue.find(
-            (role) => role.roleId === RoleId,
-          );
-
-          if (containsRole) {
-            if (currentServerIdValue === ServerId) {
-              dispatch(getServerData({ serverId: ServerId }));
-            }
-          }
-        }
-
         if (data.MessageType === 'New role') {
           const { ServerId } = data.Payload;
 
