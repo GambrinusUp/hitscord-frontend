@@ -185,33 +185,36 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
     }
   }, []);
 
-  const switchInputDevice = useCallback(async (deviceId: string | null) => {
-    const nextSettings = {
-      ...micSettings,
-      inputDeviceId: deviceId,
-    };
-    setMicSettings(nextSettings);
+  const switchInputDevice = useCallback(
+    async (deviceId: string | null) => {
+      const nextSettings = {
+        ...micSettings,
+        inputDeviceId: deviceId,
+      };
+      setMicSettings(nextSettings);
 
-    if (!isConnected || !audioProducer) return;
+      if (!isConnected || !audioProducer) return;
 
-    let nextMicAudioState: MicAudioState | null = null;
+      let nextMicAudioState: MicAudioState | null = null;
 
-    try {
-      nextMicAudioState = await getLocalAudioStream(nextSettings);
+      try {
+        nextMicAudioState = await getLocalAudioStream(nextSettings);
 
-      await audioProducer.replaceTrack({
-        track: nextMicAudioState.processedTrack,
-      });
+        await audioProducer.replaceTrack({
+          track: nextMicAudioState?.processedTrack ?? null,
+        });
 
-      setMicAudioState(nextMicAudioState);
-    } catch (error) {
-      console.error('Failed to switch input device:', error);
+        setMicAudioState(nextMicAudioState);
+      } catch (error) {
+        console.error('Failed to switch input device:', error);
 
-      if (nextMicAudioState) {
-        stopMicAudioState(nextMicAudioState);
+        if (nextMicAudioState) {
+          stopMicAudioState(nextMicAudioState);
+        }
       }
-    }
-  }, [audioProducer, isConnected, micSettings, setMicAudioState]);
+    },
+    [audioProducer, isConnected, micSettings, setMicAudioState],
+  );
 
   useEffect(() => {
     if (!socket) return;
@@ -262,7 +265,13 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
       socket.off('new-producer');
       socket.off('updateUsersList');
     };
-  }, [accessToken, addConsumer, consumerTransport, currentVoiceChannelId, device]);
+  }, [
+    accessToken,
+    addConsumer,
+    consumerTransport,
+    currentVoiceChannelId,
+    device,
+  ]);
 
   useEffect(() => {
     if (typeof localStorage === 'undefined') return;
@@ -302,7 +311,10 @@ export const MediaProvider = (props: React.PropsWithChildren) => {
 
     if (!navigator.mediaDevices?.addEventListener) return;
 
-    navigator.mediaDevices.addEventListener('devicechange', refreshAudioDevices);
+    navigator.mediaDevices.addEventListener(
+      'devicechange',
+      refreshAudioDevices,
+    );
 
     return () => {
       navigator.mediaDevices.removeEventListener(

@@ -10,7 +10,14 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
   const { consumers, selectedOutputDeviceId } = useMediaContext();
   const audioCtxRef = useRef<AudioContext | null>(null);
   const nodesRef = useRef(
-    new Map<string, { source: MediaStreamAudioSourceNode; gain: GainNode }>(),
+    new Map<
+      string,
+      {
+        source: MediaStreamAudioSourceNode;
+        gain: GainNode;
+        track: MediaStreamTrack;
+      }
+    >(),
   );
   const [userVolumes, setUserVolumes] = useState<Record<string, number>>({});
   const producerToUserMap = useRef(new Map<string, string>());
@@ -59,17 +66,8 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
 
       audioCtxRef.current = new audioContextCtor();
 
-      console.log(
-        'AudioContext created with sampleRate:',
-        audioCtxRef.current.sampleRate,
-      );
-
       audioCtxRef.current.addEventListener('statechange', () => {
         setAudioState(audioCtxRef.current?.state || 'closed');
-        console.log(
-          'AudioContext state changed to:',
-          audioCtxRef.current?.state,
-        );
       });
       destRef.current = audioCtxRef.current.createMediaStreamDestination();
     }
@@ -96,10 +94,6 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
     if (audioCtxRef.current.state === 'suspended') {
       try {
         await audioCtxRef.current.resume();
-        console.log(
-          'AudioContext resumed successfully. Current state:',
-          audioCtxRef.current.state,
-        );
 
         if (mainAudioRef.current) {
           mainAudioRef.current
@@ -124,10 +118,6 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
       audioCtxRef.current.state !== 'running' ||
       !destRef.current
     ) {
-      console.log(
-        'Skipping audio setup: AudioContext not running or dest not ready',
-      );
-
       return;
     }
 
@@ -147,15 +137,6 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
       const sourceType = appData?.source;
 
       if (kind === 'audio' && sourceType !== 'screen-audio') {
-        console.log(
-          'Processing audio track for producer:',
-          producerId,
-          'Track readyState:',
-          track.readyState,
-          'AudioContext sampleRate:',
-          audioCtx.sampleRate,
-        );
-
         track.contentHint = 'speech';
 
         allRemoteStream.addTrack(track);
@@ -186,9 +167,8 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
         nodesRef.current.set(producerId, {
           source: sourceNode,
           gain: gainNode,
+          track,
         });
-
-        console.log('Audio node added for producer:', producerId);
       }
     });
 
@@ -209,37 +189,38 @@ export const AudioProvider = (props: React.PropsWithChildren) => {
         pendingTrackRemovals.current.add(producerId);
 
         const nodes = nodesRef.current.get(producerId);
-        const producer = consumers.find((c) => c.producerId === producerId);
 
-        if (nodes && producer) {
-          const fadeOutDuration = 0.2;
-          const currentTime = audioCtx.currentTime;
-          nodes.gain.gain.setValueAtTime(nodes.gain.gain.value, currentTime);
-          nodes.gain.gain.linearRampToValueAtTime(
-            0,
-            currentTime + fadeOutDuration,
-          );
+        if (!nodes) {
+          pendingTrackRemovals.current.delete(producerId);
 
-          setTimeout(
-            () => {
-              nodes.gain.disconnect();
-              nodes.source.disconnect();
-              nodesRef.current.delete(producerId);
-              pendingTrackRemovals.current.delete(producerId);
-
-              allRemoteStream.removeTrack(producer.track);
-
-              if (mutedAudioRef.current) {
-                mutedAudioRef.current.srcObject = new MediaStream(
-                  allRemoteStream.getTracks(),
-                );
-              }
-
-              console.log('Audio node removed for producer:', producerId);
-            },
-            fadeOutDuration * 1000 + 10,
-          );
+          return;
         }
+
+        const fadeOutDuration = 0.2;
+        const currentTime = audioCtx.currentTime;
+        nodes.gain.gain.setValueAtTime(nodes.gain.gain.value, currentTime);
+        nodes.gain.gain.linearRampToValueAtTime(
+          0,
+          currentTime + fadeOutDuration,
+        );
+
+        setTimeout(
+          () => {
+            nodes.gain.disconnect();
+            nodes.source.disconnect();
+            nodesRef.current.delete(producerId);
+            pendingTrackRemovals.current.delete(producerId);
+
+            allRemoteStream.removeTrack(nodes.track);
+
+            if (mutedAudioRef.current) {
+              mutedAudioRef.current.srcObject = new MediaStream(
+                allRemoteStream.getTracks(),
+              );
+            }
+          },
+          fadeOutDuration * 1000 + 10,
+        );
       });
     }
 
