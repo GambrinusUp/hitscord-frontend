@@ -149,7 +149,7 @@ export const WebSocketProvider = (props: React.PropsWithChildren) => {
   useEffect(() => {
     if (accessToken) {
       const ws = new WebSocket(
-        `wss://166664.msk.web.highserver.ru/api/wss?accessToken=${accessToken}`,
+        `ws://localhost:5000/wss?accessToken=${accessToken}`,
       );
 
       ws.onopen = () => {
