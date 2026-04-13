@@ -1,5 +1,5 @@
 import { ActionIcon, Divider, Flex, ScrollArea, Stack } from '@mantine/core';
-import { Home, LogOut } from 'lucide-react';
+import { BotIcon, Home, LogOut } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,6 +25,10 @@ export const ServerPanel = () => {
     if (result.meta.requestStatus === 'fulfilled') {
       navigate('/');
     }
+  };
+
+  const handleOpenBots = () => {
+    navigate('/bots');
   };
 
   useEffect(() => {
@@ -70,9 +74,14 @@ export const ServerPanel = () => {
         <Divider my="sm" />
         <CreateServer />
       </Flex>
-      <ActionIcon size="lg" variant="transparent" onClick={handleLogout}>
-        <LogOut size={28} color="#fff" />
-      </ActionIcon>
+      <Stack gap="xs" align="center">
+        <ActionIcon size="lg" variant="transparent" onClick={handleOpenBots}>
+          <BotIcon size={28} color="#fff" />
+        </ActionIcon>
+        <ActionIcon size="lg" variant="transparent" onClick={handleLogout}>
+          <LogOut size={28} color="#fff" />
+        </ActionIcon>
+      </Stack>
     </Flex>
   );
 };

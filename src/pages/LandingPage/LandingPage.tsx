@@ -36,6 +36,11 @@ export const LandingPage = () => {
             Зарегистрироваться
           </Button>
         </Link>
+        <Link to="/bots">
+          <Button variant="light" radius="md">
+            Выбрать бота
+          </Button>
+        </Link>
       </Group>
     </Flex>
   );

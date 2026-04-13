@@ -13,6 +13,11 @@ export const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+export const botApi = axios.create({
+  baseURL: import.meta.env.VITE_BOT_API_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
 /*api.interceptors.request.use((config) => {
   const url = config.url || '';
 
